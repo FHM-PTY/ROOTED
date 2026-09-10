@@ -1,6 +1,5 @@
 # Le Benkeleng™
 
-[![Deploy to GitHub Pages](https://github.com/FHM-PTY/LeBenkeleng/actions/workflows/deploy.yml/badge.svg)](https://github.com/FHM-PTY/LeBenkeleng/actions/workflows/deploy.yml)
 [![Live Site](https://img.shields.io/badge/Live%20Site-fhm--pty.github.io%2FLeBenkeleng-black?style=flat&logo=github)](https://fhm-pty.github.io/LeBenkeleng/)
 [![React 19](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![Vite 8](https://img.shields.io/badge/Vite-8.0-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
@@ -65,9 +64,6 @@ Every independent streetwear label has its own shareable, standalone storefront 
 
 ```
 LeBenkeleng/
-├── .github/
-│   └── workflows/
-│       └── deploy.yml           # Automated GitHub Pages CI/CD workflow
 ├── public/
 │   └── favicon.svg              # SVG brand favicon
 ├── src/
@@ -124,15 +120,84 @@ LeBenkeleng/
 
 ---
 
-## 🚢 Continuous Deployment (GitHub Pages)
+## 🚢 Hosting & Deployment (GitHub Pages)
 
-The repository includes an automated GitHub Actions workflow (`.github/workflows/deploy.yml`) that builds and deploys the site to GitHub Pages on every push to `main`.
+The application is pre-configured with a Vite base URL for **GitHub Pages** (`https://fhm-pty.github.io/LeBenkeleng/`) or any custom static host.
 
-### Enabling GitHub Pages on the Repository:
-1. Go to repository **Settings** → **Pages**.
-2. Under **Build and deployment** → **Source**, select **GitHub Actions**.
-3. Any push to `main` (or manual trigger from the **Actions** tab) will automatically publish the site to:  
-   **[https://fhm-pty.github.io/LeBenkeleng/](https://fhm-pty.github.io/LeBenkeleng/)**
+### Live Production URL:
+🔗 **[https://fhm-pty.github.io/LeBenkeleng/](https://fhm-pty.github.io/LeBenkeleng/)**
+
+### Automated Deployment with GitHub Actions (Optional)
+To deploy via GitHub Actions:
+1. Ensure the repository has GitHub Pages enabled (**Settings** → **Pages** → Source: **GitHub Actions**).
+2. Create `.github/workflows/deploy.yml` with the following workflow:
+
+```yaml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Website
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build site
+        env:
+          BASE_PATH: /LeBenkeleng/
+        run: pnpm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
 
 ---
 

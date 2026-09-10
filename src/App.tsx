@@ -514,11 +514,12 @@ export default function App() {
             </button>
             <a
               href="#/vendor"
-              className={`hover:text-[#C88A35] transition-colors flex items-center gap-1 font-bold ${
+              className={`hover:text-[#C88A35] transition-colors flex items-center gap-1 text-xs font-semibold ${
                 currentRoute.type === "vendor-portal" ? "text-[#C88A35]" : ""
               }`}
+              title="Merchant & Designer Atelier Portal"
             >
-              <span>🏪</span> Vendor Portal
+              <span>🔒</span> Atelier Studio
             </a>
             <div className="flex items-center gap-1 bg-[#1F2937] px-2 py-0.5 rounded text-[10px] font-mono">
               {(["ZAR", "USD", "EUR"] as const).map((curr) => (
@@ -797,16 +798,6 @@ export default function App() {
               className="hover:text-[#111827] transition-colors text-[#6B7280]"
             >
               Locker Stations
-            </a>
-            <a
-              href="#/vendor"
-              className={`hover:text-[#111827] transition-colors flex items-center gap-1 ${
-                currentRoute.type === "vendor-portal"
-                  ? "text-[#111827] font-bold"
-                  : "text-[#C88A35]"
-              }`}
-            >
-              <span>🏪</span> Vendor Portal
             </a>
           </div>
         </nav>
@@ -1647,6 +1638,12 @@ export default function App() {
               >
                 Sell With Us (13% Commission)
               </button>
+              <a
+                href="#/vendor"
+                className="block text-[#6B7280] hover:text-[#C88A35] transition-colors"
+              >
+                🔒 Atelier Studio Login
+              </a>
               <span className="block text-[#6B7280]">
                 Dispatch SLA: 48 Hours
               </span>
@@ -1743,10 +1740,15 @@ export default function App() {
 
         <a
           href="#/vendor"
-          className="flex flex-col items-center gap-1 hover:text-[#111827]"
+          className={`flex flex-col items-center gap-1 ${
+            currentRoute.type === "vendor-portal"
+              ? "text-[#C88A35] font-bold"
+              : "hover:text-[#111827]"
+          }`}
+          title="Merchant Studio"
         >
-          <span className="text-base">🏪</span>
-          <span className="text-[10px]">Portal</span>
+          <span className="text-base">🔒</span>
+          <span className="text-[10px]">Studio</span>
         </a>
 
         <button

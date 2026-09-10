@@ -1,26 +1,23 @@
-import React, { useState, useMemo } from "react"
-import { Vendor, Product, VendorOrder, Category, Gender } from "../types"
-import { streetwearImagePresets } from "../data/marketplaceData"
+import React, { useState, useMemo, useEffect } from "react";
+import { Vendor, Product, VendorOrder, Category, Gender } from "../types";
+import { streetwearImagePresets } from "../data/marketplaceData";
 
 interface VendorDashboardProps {
-  currentVendor: Vendor
-  allVendors: Vendor[]
-  allProducts: Product[]
-  allOrders: VendorOrder[]
-  onSelectVendor: (vendor: Vendor) => void
-  onAddProduct: (product: Product) => void
-  onUpdateProduct: (product: Product) => void
-  onDeleteProduct: (productId: number) => void
-  onUpdateStock: (productId: number, size: string, newQty: number) => void
-  onUpdateVendorProfile: (vendor: Vendor) => void
-  onUpdateOrderStatus: (
-    orderId: string,
-    newStatus: VendorOrder["status"],
-  ) => void
-  onResetDemoData: () => void
-  onNavigateHome: () => void
-  onNavigateBrand: (slug: string) => void
-  formatPrice: (amount: number) => string
+  currentVendor: Vendor;
+  allVendors: Vendor[];
+  allProducts: Product[];
+  allOrders: VendorOrder[];
+  onSelectVendor: (vendor: Vendor) => void;
+  onAddProduct: (product: Product) => void;
+  onUpdateProduct: (product: Product) => void;
+  onDeleteProduct: (productId: number) => void;
+  onUpdateStock: (productId: number, size: string, newQty: number) => void;
+  onUpdateVendorProfile: (vendor: Vendor) => void;
+  onUpdateOrderStatus: (orderId: string, newStatus: VendorOrder["status"]) => void;
+  onResetDemoData: () => void;
+  onNavigateHome: () => void;
+  onNavigateBrand: (slug: string) => void;
+  formatPrice: (amount: number) => string;
 }
 
 export default function VendorDashboard({
@@ -40,66 +37,131 @@ export default function VendorDashboard({
   onNavigateBrand,
   formatPrice,
 }: VendorDashboardProps) {
-  // Tabs: overview, inventory, storefront, orders
-  const [activeTab, setActiveTab] =
-    useState<"overview" | "inventory" | "storefront" | "orders">("inventory")
+  // ---------------------------------------------------------------------------
+  // 1. PRIVACY & AUTHENTICATION STATE (STRICT TENANT ISOLATION)
+  // ---------------------------------------------------------------------------
+  const [authenticatedVendor, setAuthenticatedVendor] = useState<Vendor | null>(() => {
+    const savedSlug = sessionStorage.getItem("lebenkeleng_auth_vendor_slug");
+    if (savedSlug) {
+      const found = allVendors.find((v) => v.slug === savedSlug);
+      if (found) return found;
+    }
+    // Default to null to enforce login gate (or current vendor if already active in session)
+    return null;
+  });
 
-  // Filter & Search in Inventory
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filterCategory, setFilterCategory] = useState<string>("all")
-  const [stockStatusFilter, setStockStatusFilter] =
-    useState<"all" | "low" | "out">("all")
+  // Login Form State
+  const [loginIdentifier, setLoginIdentifier] = useState("");
+  const [loginPin, setLoginPin] = useState("");
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Privacy Shield (Discreet / Hide Amounts Mode)
+  const [privacyShield, setPrivacyShield] = useState<boolean>(() => {
+    return localStorage.getItem("lebenkeleng_privacy_shield") === "true";
+  });
+
+  // Role: Founder (full financial access) vs Atelier Staff (packing & inventory only)
+  const [staffRole, setStaffRole] = useState<"founder" | "staff">("founder");
+
+  // Toggle privacy shield and persist
+  const togglePrivacyShield = () => {
+    setPrivacyShield((prev) => {
+      const next = !prev;
+      localStorage.setItem("lebenkeleng_privacy_shield", String(next));
+      return next;
+    });
+  };
+
+  // Login Handler
+  const handleLogin = (e?: React.FormEvent, directVendor?: Vendor) => {
+    if (e) e.preventDefault();
+
+    const targetVendor = directVendor || allVendors.find(
+      (v) =>
+        v.slug.toLowerCase() === loginIdentifier.trim().toLowerCase() ||
+        v.name.toLowerCase() === loginIdentifier.trim().toLowerCase() ||
+        `${v.slug}@lebenkeleng.co.za`.toLowerCase() === loginIdentifier.trim().toLowerCase()
+    );
+
+    if (targetVendor) {
+      setAuthenticatedVendor(targetVendor);
+      onSelectVendor(targetVendor);
+      sessionStorage.setItem("lebenkeleng_auth_vendor_slug", targetVendor.slug);
+      setLoginError(null);
+      showToast(`Welcome back to ${targetVendor.name} Atelier Studio 🔒`);
+    } else {
+      setLoginError("Brand credentials not recognized. Select a verified label from Quick Passkeys below.");
+    }
+  };
+
+  // Sign Out Handler (Locks session and destroys tenant access)
+  const handleSignOut = () => {
+    sessionStorage.removeItem("lebenkeleng_auth_vendor_slug");
+    setAuthenticatedVendor(null);
+    setLoginIdentifier("");
+    setLoginPin("");
+    showToast("Atelier Studio locked. Session destroyed.");
+  };
+
+  // Helper for masking currency values when privacy shield is active
+  const maskAmount = (amount: number) => {
+    if (privacyShield) return "R ••••••";
+    return formatPrice(amount);
+  };
+
+  // POPIA Helper: Mask customer name (e.g. "Thabo Molefe" -> "Thabo M.")
+  const maskCustomerName = (fullName: string) => {
+    const parts = fullName.trim().split(" ");
+    if (parts.length === 1) return parts[0];
+    return `${parts[0]} ${parts[1][0]}.`;
+  };
+
+  // Active vendor is strictly the authenticated vendor
+  const activeVendor = authenticatedVendor || currentVendor;
+
+  // ---------------------------------------------------------------------------
+  // 2. DASHBOARD TABS & FILTER STATE
+  // ---------------------------------------------------------------------------
+  const [activeTab, setActiveTab] = useState<"inventory" | "overview" | "orders" | "storefront">("inventory");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [stockStatusFilter, setStockStatusFilter] = useState<"all" | "low" | "out">("all");
 
   // Modals
-  const [isProductModalOpen, setIsProductModalOpen] = useState(false)
-  const [isSwitchVendorOpen, setIsSwitchVendorOpen] = useState(false)
-  const [productToEdit, setProductToEdit] = useState<Product | null>(null)
-
-  // Notification Toast
-  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
-    setToastMessage(msg)
-    setTimeout(() => setToastMessage(null), 3500)
-  }
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
-  // Products belonging to this vendor
+  // Products belonging strictly to this authenticated vendor (Tenant Isolation)
   const vendorProducts = useMemo(() => {
     return allProducts.filter(
-      (p) =>
-        p.brandSlug === currentVendor.slug || p.brand === currentVendor.name,
-    )
-  }, [allProducts, currentVendor])
+      (p) => p.brandSlug === activeVendor.slug || p.brand === activeVendor.name
+    );
+  }, [allProducts, activeVendor]);
 
-  // Orders for this vendor
+  // Orders for strictly this authenticated vendor
   const vendorOrders = useMemo(() => {
-    return allOrders.filter((o) => o.brandSlug === currentVendor.slug)
-  }, [allOrders, currentVendor])
+    return allOrders.filter((o) => o.brandSlug === activeVendor.slug);
+  }, [allOrders, activeVendor]);
 
-  // Financial calculations
+  // Financial analytics
   const analytics = useMemo(() => {
-    const totalGmv = vendorOrders.reduce((sum, o) => sum + o.totalAmount, 0)
-    const totalCommission = vendorOrders.reduce(
-      (sum, o) => sum + o.commissionAmount,
-      0,
-    )
-    const netPayout = vendorOrders.reduce((sum, o) => sum + o.payoutAmount, 0)
+    const totalGmv = vendorOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+    const totalCommission = vendorOrders.reduce((sum, o) => sum + o.commissionAmount, 0);
+    const netPayout = vendorOrders.reduce((sum, o) => sum + o.payoutAmount, 0);
     const lowStockCount = vendorProducts.filter((p) => {
-      const total =
-        p.stock ??
-        (p.stockPerSize
-          ? Object.values(p.stockPerSize).reduce((a, b) => a + b, 0)
-          : 0)
-      return total > 0 && total <= 4
-    }).length
+      const total = p.stock ?? (p.stockPerSize ? Object.values(p.stockPerSize).reduce((a, b) => a + b, 0) : 0);
+      return total > 0 && total <= 4;
+    }).length;
     const outOfStockCount = vendorProducts.filter((p) => {
-      const total =
-        p.stock ??
-        (p.stockPerSize
-          ? Object.values(p.stockPerSize).reduce((a, b) => a + b, 0)
-          : 0)
-      return total === 0
-    }).length
+      const total = p.stock ?? (p.stockPerSize ? Object.values(p.stockPerSize).reduce((a, b) => a + b, 0) : 0);
+      return total === 0;
+    }).length;
 
     return {
       totalGmv,
@@ -108,207 +170,150 @@ export default function VendorDashboard({
       totalProducts: vendorProducts.length,
       lowStockCount,
       outOfStockCount,
-      activeOrdersCount: vendorOrders.filter((o) => o.status !== "collected")
-        .length,
-    }
-  }, [vendorOrders, vendorProducts])
+      activeOrdersCount: vendorOrders.filter((o) => o.status !== "collected").length,
+    };
+  }, [vendorOrders, vendorProducts]);
 
   // Filtered inventory list
   const filteredInventory = useMemo(() => {
     return vendorProducts.filter((p) => {
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase()
-        const matchesTitle = p.title.toLowerCase().includes(q)
-        const matchesCategory = p.category.toLowerCase().includes(q)
-        const matchesFabric = p.fabric.toLowerCase().includes(q)
-        if (!matchesTitle && !matchesCategory && !matchesFabric) return false
+        const q = searchQuery.toLowerCase();
+        const matchesTitle = p.title.toLowerCase().includes(q);
+        const matchesCategory = p.category.toLowerCase().includes(q);
+        const matchesFabric = p.fabric.toLowerCase().includes(q);
+        if (!matchesTitle && !matchesCategory && !matchesFabric) return false;
       }
 
       if (filterCategory !== "all" && p.category !== filterCategory) {
-        return false
+        return false;
       }
 
-      const totalStock =
-        p.stock ??
-        (p.stockPerSize
-          ? Object.values(p.stockPerSize).reduce((a, b) => a + b, 0)
-          : 0)
-      if (stockStatusFilter === "low" && (totalStock > 4 || totalStock === 0))
-        return false
-      if (stockStatusFilter === "out" && totalStock > 0) return false
+      const totalStock = p.stock ?? (p.stockPerSize ? Object.values(p.stockPerSize).reduce((a, b) => a + b, 0) : 0);
+      if (stockStatusFilter === "low" && (totalStock > 4 || totalStock === 0)) return false;
+      if (stockStatusFilter === "out" && totalStock > 0) return false;
 
-      return true
-    })
-  }, [vendorProducts, searchQuery, filterCategory, stockStatusFilter])
+      return true;
+    });
+  }, [vendorProducts, searchQuery, filterCategory, stockStatusFilter]);
 
-  // Product Form State (for both Add and Edit)
-  const [formTitle, setFormTitle] = useState("")
-  const [formCategory, setFormCategory] = useState<Category>("outerwear")
-  const [formGender, setFormGender] = useState<Gender[]>(["UNISEX"])
-  const [formPrice, setFormPrice] = useState<number>(850)
-  const [formOriginalPrice, setFormOriginalPrice] = useState<number | "">("")
-  const [formFabric, setFormFabric] = useState(
-    "460 GSM Heavyweight French Terry Cotton",
-  )
-  const [formDescription, setFormDescription] = useState("")
-  const [formBadge, setFormBadge] = useState("NEW DROP")
-  const [formImage, setFormImage] = useState("")
-  const [formSecondaryImage, setFormSecondaryImage] = useState("")
-  const [formImageMode, setFormImageMode] = useState<"custom" | "preset">(
-    "preset",
-  )
-  const [formSizesInput, setFormSizesInput] = useState<string>("S, M, L, XL")
-  const [formStockPerSize, setFormStockPerSize] =
-    useState<Record<string, number>>({
-      S: 5,
-      M: 8,
-      L: 6,
-      XL: 3,
-    })
-  // Thrift-specific
-  const [formIsThrift, setFormIsThrift] = useState<boolean>(
-    currentVendor.isThrift || false,
-  )
-  const [formCondition, setFormCondition] = useState("★ Grade A+ Mint Vintage")
-  const [formMeasurements, setFormMeasurements] = useState(
-    "Pit-to-Pit: 58cm | Length: 70cm",
-  )
+  // Product Form State
+  const [formTitle, setFormTitle] = useState("");
+  const [formCategory, setFormCategory] = useState<Category>("outerwear");
+  const [formGender, setFormGender] = useState<Gender[]>(["UNISEX"]);
+  const [formPrice, setFormPrice] = useState<number>(850);
+  const [formOriginalPrice, setFormOriginalPrice] = useState<number | "">("");
+  const [formFabric, setFormFabric] = useState("460 GSM Heavy French Terry Cotton");
+  const [formDescription, setFormDescription] = useState("");
+  const [formBadge, setFormBadge] = useState("NEW DROP");
+  const [formImage, setFormImage] = useState("");
+  const [formSecondaryImage, setFormSecondaryImage] = useState("");
+  const [formImageMode, setFormImageMode] = useState<"custom" | "preset">("preset");
+  const [formSizesInput, setFormSizesInput] = useState<string>("S, M, L, XL");
+  const [formStockPerSize, setFormStockPerSize] = useState<Record<string, number>>({
+    S: 5,
+    M: 8,
+    L: 6,
+    XL: 3,
+  });
+  const [formIsThrift, setFormIsThrift] = useState<boolean>(activeVendor.isThrift || false);
+  const [formCondition, setFormCondition] = useState("★ Grade A+ Mint Vintage");
+  const [formMeasurements, setFormMeasurements] = useState("Pit-to-Pit: 58cm | Length: 70cm");
 
   // Storefront Profile Form State
-  const [profileTagline, setProfileTagline] = useState(currentVendor.tagline)
-  const [profileStory, setProfileStory] = useState(currentVendor.aboutStory)
-  const [profileHub, setProfileHub] = useState(currentVendor.dispatchHub)
-  const [profileCover, setProfileCover] = useState(currentVendor.coverImage)
-  const [profilePhone, setProfilePhone] = useState(
-    currentVendor.contactPhone || "+27 72 849 2011",
-  )
-  const [profileInstagram, setProfileInstagram] = useState(
-    currentVendor.instagram || "@" + currentVendor.slug.replace("-", ""),
-  )
-  const [profileColor, setProfileColor] = useState(currentVendor.color)
+  const [profileTagline, setProfileTagline] = useState(activeVendor.tagline);
+  const [profileStory, setProfileStory] = useState(activeVendor.aboutStory);
+  const [profileHub, setProfileHub] = useState(activeVendor.dispatchHub);
+  const [profileCover, setProfileCover] = useState(activeVendor.coverImage);
+  const [profilePhone, setProfilePhone] = useState(activeVendor.contactPhone || "+27 72 849 2011");
+  const [profileInstagram, setProfileInstagram] = useState(activeVendor.instagram || "@" + activeVendor.slug.replace("-", ""));
+  const [profileColor, setProfileColor] = useState(activeVendor.color);
 
-  // Sync profile form when switching current vendor
-  React.useEffect(() => {
-    setProfileTagline(currentVendor.tagline)
-    setProfileStory(currentVendor.aboutStory)
-    setProfileHub(currentVendor.dispatchHub)
-    setProfileCover(currentVendor.coverImage)
-    setProfilePhone(currentVendor.contactPhone || "+27 72 849 2011")
-    setProfileInstagram(
-      currentVendor.instagram || "@" + currentVendor.slug.replace("-", ""),
-    )
-    setProfileColor(currentVendor.color)
-    setFormIsThrift(currentVendor.isThrift || false)
-  }, [currentVendor])
+  useEffect(() => {
+    setProfileTagline(activeVendor.tagline);
+    setProfileStory(activeVendor.aboutStory);
+    setProfileHub(activeVendor.dispatchHub);
+    setProfileCover(activeVendor.coverImage);
+    setProfilePhone(activeVendor.contactPhone || "+27 72 849 2011");
+    setProfileInstagram(activeVendor.instagram || "@" + activeVendor.slug.replace("-", ""));
+    setProfileColor(activeVendor.color);
+    setFormIsThrift(activeVendor.isThrift || false);
+  }, [activeVendor]);
 
-  // Open modal to create new product
   const handleOpenAddModal = () => {
-    setProductToEdit(null)
-    setFormTitle("")
-    setFormCategory(currentVendor.isThrift ? "thrift" : "outerwear")
-    setFormGender(["UNISEX"])
-    setFormPrice(currentVendor.isThrift ? 450 : 850)
-    setFormOriginalPrice("")
-    setFormFabric(
-      currentVendor.isThrift
-        ? "100% Vintage Washed Cotton"
-        : "380 GSM Heavyweight Cotton Fleece",
-    )
-    setFormDescription(
-      "Architecturally tailored for Gauteng urban lifestyle. Detailed finish and reinforced seams.",
-    )
-    setFormBadge(currentVendor.isThrift ? "1-OF-1 VINTAGE" : "NEW DROP")
-    setFormImage(streetwearImagePresets[0].image)
-    setFormSecondaryImage(streetwearImagePresets[0].secondaryImage)
-    setFormImageMode("preset")
+    setProductToEdit(null);
+    setFormTitle("");
+    setFormCategory(activeVendor.isThrift ? "thrift" : "outerwear");
+    setFormGender(["UNISEX"]);
+    setFormPrice(activeVendor.isThrift ? 450 : 850);
+    setFormOriginalPrice("");
+    setFormFabric(activeVendor.isThrift ? "100% Vintage Washed Cotton" : "380 GSM Heavyweight Cotton Fleece");
+    setFormDescription("Architecturally tailored for Gauteng urban lifestyle. Detailed finish and reinforced seams.");
+    setFormBadge(activeVendor.isThrift ? "1-OF-1 VINTAGE" : "NEW DROP");
+    setFormImage(streetwearImagePresets[0].image);
+    setFormSecondaryImage(streetwearImagePresets[0].secondaryImage);
+    setFormImageMode("preset");
 
-    const defaultSizes = currentVendor.isThrift
-      ? ["L (Boxy 90s Fit)"]
-      : ["S", "M", "L", "XL"]
-    setFormSizesInput(defaultSizes.join(", "))
-    const initialStocks: Record<string, number> = {}
+    const defaultSizes = activeVendor.isThrift ? ["L (Boxy 90s Fit)"] : ["S", "M", "L", "XL"];
+    setFormSizesInput(defaultSizes.join(", "));
+    const initialStocks: Record<string, number> = {};
     defaultSizes.forEach((s) => {
-      initialStocks[s] = currentVendor.isThrift ? 1 : 5
-    })
-    setFormStockPerSize(initialStocks)
-    setIsProductModalOpen(true)
-  }
+      initialStocks[s] = activeVendor.isThrift ? 1 : 5;
+    });
+    setFormStockPerSize(initialStocks);
+    setIsProductModalOpen(true);
+  };
 
-  // Open modal to edit existing product
   const handleOpenEditModal = (product: Product) => {
-    setProductToEdit(product)
-    setFormTitle(product.title)
-    setFormCategory(product.category)
-    setFormGender(product.gender)
-    setFormPrice(product.price)
-    setFormOriginalPrice(product.originalPrice ?? "")
-    setFormFabric(product.fabric)
-    setFormDescription(product.description)
-    setFormBadge(product.badge)
-    setFormImage(product.image)
-    setFormSecondaryImage(product.secondaryImage)
-    setFormImageMode("custom")
-    setFormSizesInput(product.sizes.join(", "))
+    setProductToEdit(product);
+    setFormTitle(product.title);
+    setFormCategory(product.category);
+    setFormGender(product.gender);
+    setFormPrice(product.price);
+    setFormOriginalPrice(product.originalPrice ?? "");
+    setFormFabric(product.fabric);
+    setFormDescription(product.description);
+    setFormBadge(product.badge);
+    setFormImage(product.image);
+    setFormSecondaryImage(product.secondaryImage);
+    setFormImageMode("custom");
+    setFormSizesInput(product.sizes.join(", "));
 
-    // Parse stock
     if (product.stockPerSize && Object.keys(product.stockPerSize).length > 0) {
-      setFormStockPerSize(product.stockPerSize)
+      setFormStockPerSize(product.stockPerSize);
     } else {
-      const derived: Record<string, number> = {}
-      const avg = Math.max(
-        1,
-        Math.floor((product.stock || 8) / product.sizes.length),
-      )
-      product.sizes.forEach((s) => (derived[s] = avg))
-      setFormStockPerSize(derived)
+      const derived: Record<string, number> = {};
+      const avg = Math.max(1, Math.floor((product.stock || 8) / product.sizes.length));
+      product.sizes.forEach((s) => (derived[s] = avg));
+      setFormStockPerSize(derived);
     }
 
-    setFormIsThrift(product.isThrift || false)
-    setFormCondition(product.condition || "★ Grade A+ Mint Vintage")
-    setFormMeasurements(
-      product.measurements || "Pit-to-Pit: 58cm | Length: 70cm",
-    )
-    setIsProductModalOpen(true)
-  }
+    setFormIsThrift(product.isThrift || false);
+    setFormCondition(product.condition || "★ Grade A+ Mint Vintage");
+    setFormMeasurements(product.measurements || "Pit-to-Pit: 58cm | Length: 70cm");
+    setIsProductModalOpen(true);
+  };
 
-  // Image Upload handler for custom file
-  const handleFileUpload = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    isSecondary: boolean = false,
-  ) => {
-    const file = e.target.files?.[0]
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, isSecondary: boolean = false) => {
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = () => {
-        if (isSecondary) {
-          setFormSecondaryImage(reader.result as string)
-        } else {
-          setFormImage(reader.result as string)
-        }
-      }
-      reader.readAsDataURL(file)
+        if (isSecondary) setFormSecondaryImage(reader.result as string);
+        else setFormImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
-  // Save product (Add or Edit)
   const handleSaveProduct = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!formTitle.trim()) return
+    e.preventDefault();
+    if (!formTitle.trim()) return;
 
-    // Parse sizes
-    const parsedSizes = formSizesInput
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean)
-
-    // Calculate total stock
-    const totalStock = Object.values(formStockPerSize).reduce(
-      (a, b) => a + Number(b || 0),
-      0,
-    )
+    const parsedSizes = formSizesInput.split(",").map((s) => s.trim()).filter(Boolean);
+    const totalStock = Object.values(formStockPerSize).reduce((a, b) => a + Number(b || 0), 0);
 
     if (productToEdit) {
-      // Update
       const updated: Product = {
         ...productToEdit,
         title: formTitle,
@@ -320,10 +325,7 @@ export default function VendorDashboard({
         description: formDescription,
         badge: formBadge,
         image: formImage || streetwearImagePresets[0].image,
-        secondaryImage:
-          formSecondaryImage ||
-          formImage ||
-          streetwearImagePresets[0].secondaryImage,
+        secondaryImage: formSecondaryImage || formImage || streetwearImagePresets[0].secondaryImage,
         sizes: parsedSizes.length > 0 ? parsedSizes : ["One Size"],
         stockPerSize: formStockPerSize,
         stock: totalStock,
@@ -331,54 +333,47 @@ export default function VendorDashboard({
         isThrift: formIsThrift,
         condition: formIsThrift ? formCondition : undefined,
         measurements: formIsThrift ? formMeasurements : undefined,
-      }
-      onUpdateProduct(updated)
-      showToast(`Updated "${updated.title}" successfully. Live site updated!`)
+      };
+      onUpdateProduct(updated);
+      showToast(`Updated "${updated.title}" successfully.`);
     } else {
-      // Add new
       const newProduct: Product = {
         id: Date.now(),
         title: formTitle,
-        brand: currentVendor.name,
-        brandSlug: currentVendor.slug,
+        brand: activeVendor.name,
+        brandSlug: activeVendor.slug,
         category: formCategory,
-        city: currentVendor.city,
+        city: activeVendor.city,
         gender: formGender,
         price: Number(formPrice),
         originalPrice: formOriginalPrice ? Number(formOriginalPrice) : null,
         fabric: formFabric,
         description: formDescription,
         badge: formBadge,
-        origin: currentVendor.origin,
+        origin: activeVendor.origin,
         image: formImage || streetwearImagePresets[0].image,
-        secondaryImage:
-          formSecondaryImage ||
-          formImage ||
-          streetwearImagePresets[0].secondaryImage,
+        secondaryImage: formSecondaryImage || formImage || streetwearImagePresets[0].secondaryImage,
         sizes: parsedSizes.length > 0 ? parsedSizes : ["One Size"],
         stockPerSize: formStockPerSize,
         stock: totalStock,
         status: totalStock === 0 ? "sold_out" : "active",
         isNew: true,
         isThrift: formIsThrift,
-        isPretoria: currentVendor.city === "Pretoria",
+        isPretoria: activeVendor.city === "Pretoria",
         condition: formIsThrift ? formCondition : undefined,
         measurements: formIsThrift ? formMeasurements : undefined,
-      }
-      onAddProduct(newProduct)
-      showToast(
-        `Added "${newProduct.title}" to catalog! Visible on homepage & brand page.`,
-      )
+      };
+      onAddProduct(newProduct);
+      showToast(`Added "${newProduct.title}" to your brand catalog.`);
     }
 
-    setIsProductModalOpen(false)
-  }
+    setIsProductModalOpen(false);
+  };
 
-  // Save brand storefront profile
   const handleSaveStorefront = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     const updatedVendor: Vendor = {
-      ...currentVendor,
+      ...activeVendor,
       tagline: profileTagline,
       aboutStory: profileStory,
       dispatchHub: profileHub,
@@ -386,81 +381,213 @@ export default function VendorDashboard({
       contactPhone: profilePhone,
       instagram: profileInstagram,
       color: profileColor,
-    }
-    onUpdateVendorProfile(updatedVendor)
-    showToast(
-      `Saved brand settings for ${updatedVendor.name}! Public storefront updated.`,
-    )
+    };
+    onUpdateVendorProfile(updatedVendor);
+    showToast(`Saved brand settings for ${updatedVendor.name}!`);
+  };
+
+  // ---------------------------------------------------------------------------
+  // 3. IF NOT AUTHENTICATED: RENDER SECURE STUDIO LOGIN GATEWAY
+  // ---------------------------------------------------------------------------
+  if (!authenticatedVendor) {
+    return (
+      <div className="min-h-screen bg-[#0E121B] text-white flex flex-col justify-between p-4 sm:p-8">
+        {/* Top Minimal Bar */}
+        <div className="max-w-6xl mx-auto w-full flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-black uppercase font-display tracking-tight text-white">
+              LE BENKELENG
+            </span>
+            <span className="bg-[#C88A35]/20 text-[#C88A35] text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase border border-[#C88A35]/40">
+              Merchant Studio 🔒
+            </span>
+          </div>
+
+          <button
+            onClick={onNavigateHome}
+            className="text-xs text-gray-400 hover:text-white flex items-center gap-1.5 transition-colors"
+          >
+            <span>←</span> Back to Public Storefront
+          </button>
+        </div>
+
+        {/* Center Card */}
+        <div className="max-w-md w-full mx-auto my-8 bg-[#161B26] border border-gray-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative">
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 bg-[#1F2937] border border-gray-700 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-inner">
+              🔒
+            </div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Atelier Studio Login</h2>
+            <p className="text-xs text-gray-400 max-w-xs mx-auto">
+              Secure partner portal for Pretoria & Gauteng independent streetwear labels. POPIA encrypted.
+            </p>
+          </div>
+
+          {loginError && (
+            <div className="mt-4 bg-red-950/60 border border-red-800 text-red-300 text-xs p-3 rounded-xl flex items-center gap-2">
+              <span>⚠️</span>
+              <span>{loginError}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="mt-6 space-y-4 text-xs">
+            <div>
+              <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase mb-1.5">
+                Brand Identifier / Handle
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. lesupa-atelier or Mokasi"
+                value={loginIdentifier}
+                onChange={(e) => setLoginIdentifier(e.target.value)}
+                className="w-full bg-[#0E121B] border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:border-[#C88A35] transition-colors"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase mb-1.5">
+                Atelier Security PIN / Passcode
+              </label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={loginPin}
+                onChange={(e) => setLoginPin(e.target.value)}
+                className="w-full bg-[#0E121B] border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:border-[#C88A35] transition-colors tracking-widest"
+                required
+              />
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] text-gray-400">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" defaultChecked className="rounded border-gray-700 bg-gray-900 accent-[#C88A35]" />
+                <span>Remember this Atelier device</span>
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-[#C88A35] hover:bg-[#B37827] text-white font-bold py-3 rounded-xl transition-all shadow-lg text-xs"
+            >
+              Sign In to Atelier Studio →
+            </button>
+          </form>
+
+          {/* Quick Demo Access Passkeys (For seamless verification without cross-brand leaks) */}
+          <div className="mt-6 pt-5 border-t border-gray-800">
+            <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider block text-center mb-2.5">
+              ⚡ Quick Demo Verification Passkeys:
+            </span>
+            <div className="grid grid-cols-2 gap-2">
+              {allVendors.slice(0, 4).map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => handleLogin(undefined, v)}
+                  className="bg-[#1F2937] hover:bg-gray-700 border border-gray-700 rounded-xl p-2 text-left flex items-center gap-2 transition-all group"
+                >
+                  <div
+                    className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+                    style={{ backgroundColor: v.color }}
+                  >
+                    {v.letter}
+                  </div>
+                  <div className="truncate">
+                    <span className="text-[11px] font-bold text-gray-200 group-hover:text-white block truncate">
+                      {v.name}
+                    </span>
+                    <span className="text-[9px] text-gray-500 block truncate">{v.city}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Security Footer */}
+        <div className="text-center text-[11px] text-gray-500 font-mono">
+          🛡️ POPIA Compliant · 256-Bit SSL Encrypted · Le Benkeleng™ Partner Shield
+        </div>
+      </div>
+    );
   }
 
+  // ---------------------------------------------------------------------------
+  // 4. AUTHENTICATED: ISOLATED VENDOR DASHBOARD VIEW
+  // ---------------------------------------------------------------------------
   return (
     <div className="min-h-screen bg-[#F9FAFB] text-[#111827] pb-16">
-      {/* 1. TOP PORTAL HEADER BAR */}
+      {/* 1. TOP SECURE STUDIO HEADER */}
       <header className="bg-[#111827] text-white border-b border-gray-800 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+          {/* Active Brand & Tenant Tag */}
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-base shadow-sm shrink-0"
-              style={{ backgroundColor: currentVendor.color }}
+              style={{ backgroundColor: activeVendor.color }}
             >
-              {currentVendor.letter}
+              {activeVendor.letter}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-base font-black tracking-tight">
-                  {currentVendor.name}
+                <span className="text-base font-black tracking-tight">{activeVendor.name}</span>
+                <span className="bg-emerald-500/20 text-emerald-400 text-[9px] font-mono font-bold px-2 py-0.5 rounded border border-emerald-500/30">
+                  🔒 Studio Active
                 </span>
-                <span className="bg-[#C88A35] text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded uppercase">
-                  Vendor Partner
-                </span>
+                {staffRole === "staff" && (
+                  <span className="bg-amber-500/20 text-amber-300 text-[9px] font-mono font-bold px-2 py-0.5 rounded">
+                    Staff Restricted Mode
+                  </span>
+                )}
               </div>
-              <span className="text-[11px] text-gray-400 block">
-                {currentVendor.origin} • 13% Marketplace Commission Model
+              <span className="text-[11px] text-gray-400 block font-mono">
+                {activeVendor.origin} • Isolated Session
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 text-xs">
-            {/* Switch Brand Demo Account */}
+          {/* Privacy & Control Tools */}
+          <div className="flex items-center gap-2 sm:gap-3 text-xs flex-wrap">
+            {/* Privacy Shield Toggle */}
             <button
-              onClick={() => setIsSwitchVendorOpen(true)}
-              className="bg-white/10 hover:bg-white/20 text-white font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+              onClick={togglePrivacyShield}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                privacyShield
+                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                  : "bg-white/10 hover:bg-white/20 text-gray-200"
+              }`}
+              title="Mask financial amounts from shoulder surfing"
             >
-              <span>⇄</span> Switch Brand
+              <span>{privacyShield ? "👁‍🗨 Discreet Mode: ON" : "👁 Discreet Mode"}</span>
             </button>
 
-            {/* View Live Storefront */}
-            <button
-              onClick={() => onNavigateBrand(currentVendor.slug)}
-              className="bg-[#C88A35] hover:bg-[#B37827] text-white font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
-            >
-              <span>View Public Storefront →</span>
-            </button>
-
-            {/* Return to Marketplace */}
-            <button
-              onClick={onNavigateHome}
-              className="bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition-colors"
-            >
-              ← Customer View
-            </button>
-
-            {/* Reset Data */}
+            {/* Role Switcher (Founder vs Staff) */}
             <button
               onClick={() => {
-                if (
-                  confirm(
-                    "Reset all products and vendors to demo seed data? Any custom additions will be cleared.",
-                  )
-                ) {
-                  onResetDemoData()
-                  showToast("Restored all marketplace data to default seed!")
-                }
+                const next = staffRole === "founder" ? "staff" : "founder";
+                setStaffRole(next);
+                showToast(`Switched to ${next === "founder" ? "Founder (Executive)" : "Atelier Staff"} mode.`);
               }}
-              title="Reset data to defaults"
-              className="text-gray-400 hover:text-red-400 px-2 py-1 transition-colors"
+              className="bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-mono text-[11px]"
+              title="Toggle Founder vs Packing Staff permissions"
             >
-              ↺ Reset Seed
+              <span>{staffRole === "founder" ? "👑 Founder" : "📦 Staff Mode"}</span>
+            </button>
+
+            {/* View Live Brand Page */}
+            <button
+              onClick={() => onNavigateBrand(activeVendor.slug)}
+              className="bg-[#C88A35] hover:bg-[#B37827] text-white font-bold px-3 py-1.5 rounded-lg transition-colors"
+            >
+              Public Storefront →
+            </button>
+
+            {/* Lock Studio & Sign Out */}
+            <button
+              onClick={handleSignOut}
+              className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+            >
+              <span>🔒 Lock Studio</span>
             </button>
           </div>
         </div>
@@ -481,19 +608,22 @@ export default function VendorDashboard({
             </span>
           </button>
 
-          <button
-            onClick={() => setActiveTab("overview")}
-            className={`py-3 border-b-2 transition-colors flex items-center gap-2 ${
-              activeTab === "overview"
-                ? "border-[#C88A35] text-[#C88A35]"
-                : "border-transparent text-gray-400 hover:text-white"
-            }`}
-          >
-            <span>📊 Sales & Payouts</span>
-            <span className="bg-[#C88A35]/20 text-[#C88A35] px-2 py-0.5 rounded-full text-[10px]">
-              {formatPrice(analytics.netPayout)}
-            </span>
-          </button>
+          {/* Only Founder can view Financial Sales & Commission */}
+          {staffRole === "founder" && (
+            <button
+              onClick={() => setActiveTab("overview")}
+              className={`py-3 border-b-2 transition-colors flex items-center gap-2 ${
+                activeTab === "overview"
+                  ? "border-[#C88A35] text-[#C88A35]"
+                  : "border-transparent text-gray-400 hover:text-white"
+              }`}
+            >
+              <span>📊 Sales & Payouts</span>
+              <span className="bg-[#C88A35]/20 text-[#C88A35] px-2 py-0.5 rounded-full text-[10px] font-mono">
+                {maskAmount(analytics.netPayout)}
+              </span>
+            </button>
+          )}
 
           <button
             onClick={() => setActiveTab("orders")}
@@ -511,20 +641,22 @@ export default function VendorDashboard({
             )}
           </button>
 
-          <button
-            onClick={() => setActiveTab("storefront")}
-            className={`py-3 border-b-2 transition-colors flex items-center gap-2 ${
-              activeTab === "storefront"
-                ? "border-[#C88A35] text-[#C88A35]"
-                : "border-transparent text-gray-400 hover:text-white"
-            }`}
-          >
-            <span>🏪 Storefront Brand Settings</span>
-          </button>
+          {staffRole === "founder" && (
+            <button
+              onClick={() => setActiveTab("storefront")}
+              className={`py-3 border-b-2 transition-colors flex items-center gap-2 ${
+                activeTab === "storefront"
+                  ? "border-[#C88A35] text-[#C88A35]"
+                  : "border-transparent text-gray-400 hover:text-white"
+              }`}
+            >
+              <span>🏪 Storefront Brand Settings</span>
+            </button>
+          )}
         </div>
       </header>
 
-      {/* TOAST MESSAGE */}
+      {/* TOAST NOTIFICATION */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-[#111827] text-white px-5 py-3 rounded-xl shadow-2xl border border-gray-700 flex items-center gap-3 animate-fade-in text-xs font-medium">
           <span className="text-emerald-400 text-base">✓</span>
@@ -535,19 +667,21 @@ export default function VendorDashboard({
       {/* 3. MAIN DASHBOARD CONTENT */}
       <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
         {/* ========================================================================= */}
-        {/* TAB 1: INVENTORY & CLOTHING CATALOG */}
+        {/* TAB 1: INVENTORY & CLOTHING STOCK */}
         {/* ========================================================================= */}
         {activeTab === "inventory" && (
           <div className="space-y-6">
-            {/* Top Bar: Action + Stats Pills */}
+            {/* Action Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E7EB]">
               <div>
-                <h1 className="text-xl font-bold text-[#111827]">
-                  Clothing Stock & Catalog
-                </h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-bold text-[#111827]">Clothing Stock & Catalog</h1>
+                  <span className="bg-gray-100 text-[#4B5563] text-[10px] font-mono font-bold px-2 py-0.5 rounded">
+                    {activeVendor.name} Catalog Only
+                  </span>
+                </div>
                 <p className="text-xs text-[#6B7280] mt-0.5">
-                  Input stock per size, update retail prices, and toggle styles.
-                  Changes reflect instantly on Le Benkeleng clothing cards.
+                  Update stock per size and retail prices. Changes reflect instantly on customer clothing cards.
                 </p>
               </div>
 
@@ -562,7 +696,7 @@ export default function VendorDashboard({
               </div>
             </div>
 
-            {/* Quick Alerts for Low / Out of Stock */}
+            {/* Low & Out of Stock Alerts */}
             {(analytics.lowStockCount > 0 || analytics.outOfStockCount > 0) && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {analytics.lowStockCount > 0 && (
@@ -570,17 +704,11 @@ export default function VendorDashboard({
                     <div className="flex items-center gap-2 text-amber-900 font-medium">
                       <span>⚠️</span>
                       <span>
-                        <strong>{analytics.lowStockCount} items</strong> have
-                        low stock (&lt;= 4 pieces left). Customers see "Low
-                        Stock" warning.
+                        <strong>{analytics.lowStockCount} items</strong> have low stock (≤ 4 units).
                       </span>
                     </div>
                     <button
-                      onClick={() =>
-                        setStockStatusFilter(
-                          stockStatusFilter === "low" ? "all" : "low",
-                        )
-                      }
+                      onClick={() => setStockStatusFilter(stockStatusFilter === "low" ? "all" : "low")}
                       className="text-amber-800 font-bold underline shrink-0 ml-2"
                     >
                       {stockStatusFilter === "low" ? "Show All" : "Filter Low"}
@@ -593,16 +721,11 @@ export default function VendorDashboard({
                     <div className="flex items-center gap-2 text-red-900 font-medium">
                       <span>🛑</span>
                       <span>
-                        <strong>{analytics.outOfStockCount} items</strong> are
-                        Sold Out. Storefront cards show "SOLD OUT" badge.
+                        <strong>{analytics.outOfStockCount} items</strong> are Sold Out.
                       </span>
                     </div>
                     <button
-                      onClick={() =>
-                        setStockStatusFilter(
-                          stockStatusFilter === "out" ? "all" : "out",
-                        )
-                      }
+                      onClick={() => setStockStatusFilter(stockStatusFilter === "out" ? "all" : "out")}
                       className="text-red-800 font-bold underline shrink-0 ml-2"
                     >
                       {stockStatusFilter === "out" ? "Show All" : "Filter Out"}
@@ -612,7 +735,7 @@ export default function VendorDashboard({
               </div>
             )}
 
-            {/* Search & Category Filter Strip */}
+            {/* Filters */}
             <div className="bg-white p-4 rounded-xl border border-[#E5E7EB] flex flex-wrap items-center justify-between gap-4 text-xs">
               <div className="flex items-center gap-3 flex-1 min-w-[240px]">
                 <span className="text-gray-400">🔍</span>
@@ -624,10 +747,7 @@ export default function VendorDashboard({
                   className="w-full focus:outline-none text-xs"
                 />
                 {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
+                  <button onClick={() => setSearchQuery("")} className="text-gray-400 hover:text-gray-600">
                     ✕
                   </button>
                 )}
@@ -660,19 +780,13 @@ export default function VendorDashboard({
               </div>
             </div>
 
-            {/* Inventory Table / Card Grid */}
+            {/* Inventory Table */}
             {filteredInventory.length === 0 ? (
               <div className="bg-white rounded-2xl border border-dashed border-[#E5E7EB] p-12 text-center space-y-3">
                 <span className="text-4xl block">👕</span>
-                <h3 className="text-base font-bold text-[#111827]">
-                  No clothing pieces found
-                </h3>
+                <h3 className="text-base font-bold text-[#111827]">No clothing pieces found</h3>
                 <p className="text-xs text-[#6B7280] max-w-sm mx-auto">
-                  {searchQuery ||
-                  filterCategory !== "all" ||
-                  stockStatusFilter !== "all"
-                    ? "Try adjusting your search query or filters."
-                    : "You haven't listed any clothing pieces under this label yet. Click below to add your first piece!"}
+                  No styles matching this query in {activeVendor.name}'s isolated catalog.
                 </p>
                 <button
                   onClick={handleOpenAddModal}
@@ -700,17 +814,11 @@ export default function VendorDashboard({
                         const totalStock =
                           product.stock ??
                           (product.stockPerSize
-                            ? Object.values(product.stockPerSize).reduce(
-                                (a, b) => a + b,
-                                0,
-                              )
-                            : 0)
+                            ? Object.values(product.stockPerSize).reduce((a, b) => a + b, 0)
+                            : 0);
 
                         return (
-                          <tr
-                            key={product.id}
-                            className="hover:bg-[#F9FAFB] transition-colors"
-                          >
+                          <tr key={product.id} className="hover:bg-[#F9FAFB] transition-colors">
                             {/* Product Info */}
                             <td className="py-3.5 px-4">
                               <div className="flex items-center gap-3">
@@ -726,11 +834,6 @@ export default function VendorDashboard({
                                   <div className="text-[10px] text-[#6B7280] font-mono">
                                     {product.badge} • {product.origin}
                                   </div>
-                                  {product.isThrift && (
-                                    <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-mono">
-                                      1-of-1 Vintage
-                                    </span>
-                                  )}
                                 </div>
                               </div>
                             </td>
@@ -740,28 +843,28 @@ export default function VendorDashboard({
                               {product.category}
                             </td>
 
-                            {/* Price */}
+                            {/* Price with Discreet Mode Support */}
                             <td className="py-3.5 px-4">
                               <div className="font-bold text-[#111827]">
-                                {formatPrice(product.price)}
+                                {maskAmount(product.price)}
                               </div>
                               {product.originalPrice && (
-                                <div className="text-[10px] text-[#9CA3AF] line-through">
-                                  {formatPrice(product.originalPrice)}
+                                <div className="text-[10px] text-[#9CA3AF] line-through font-mono">
+                                  {maskAmount(product.originalPrice)}
                                 </div>
                               )}
-                              <div className="text-[10px] text-emerald-700 font-mono">
-                                Net: {formatPrice(product.price * 0.87)}
-                              </div>
+                              {staffRole === "founder" && (
+                                <div className="text-[10px] text-emerald-700 font-mono">
+                                  Net: {maskAmount(product.price * 0.87)}
+                                </div>
+                              )}
                             </td>
 
-                            {/* Live Stock per Size with Inline Adjustment */}
+                            {/* Stock by size */}
                             <td className="py-3.5 px-4">
                               <div className="flex flex-wrap items-center gap-1.5">
                                 {product.sizes.map((size) => {
-                                  const sizeStock =
-                                    product.stockPerSize?.[size] ??
-                                    (product.isThrift ? 1 : 0)
+                                  const sizeStock = product.stockPerSize?.[size] ?? (product.isThrift ? 1 : 0);
                                   return (
                                     <div
                                       key={size}
@@ -769,28 +872,18 @@ export default function VendorDashboard({
                                         sizeStock === 0
                                           ? "border-red-200 bg-red-50 text-red-700"
                                           : sizeStock <= 2
-                                            ? "border-amber-200 bg-amber-50 text-amber-800"
-                                            : "border-[#E5E7EB] bg-white text-[#111827]"
+                                          ? "border-amber-200 bg-amber-50 text-amber-800"
+                                          : "border-[#E5E7EB] bg-white text-[#111827]"
                                       }`}
                                     >
-                                      <span className="font-bold font-mono">
-                                        {size}:
-                                      </span>
-                                      <span className="font-mono">
-                                        {sizeStock}
-                                      </span>
+                                      <span className="font-bold font-mono">{size}:</span>
+                                      <span className="font-mono">{sizeStock}</span>
                                       <div className="flex items-center gap-0.5 ml-1">
                                         <button
                                           onClick={() => {
                                             if (sizeStock > 0) {
-                                              onUpdateStock(
-                                                product.id,
-                                                size,
-                                                sizeStock - 1,
-                                              )
-                                              showToast(
-                                                `Reduced ${product.title} (${size}) stock to ${sizeStock - 1}`,
-                                              )
+                                              onUpdateStock(product.id, size, sizeStock - 1);
+                                              showToast(`Reduced ${product.title} (${size}) to ${sizeStock - 1}`);
                                             }
                                           }}
                                           className="w-4 h-4 rounded bg-gray-200 hover:bg-gray-300 text-black flex items-center justify-center font-bold text-[9px]"
@@ -800,14 +893,8 @@ export default function VendorDashboard({
                                         </button>
                                         <button
                                           onClick={() => {
-                                            onUpdateStock(
-                                              product.id,
-                                              size,
-                                              sizeStock + 1,
-                                            )
-                                            showToast(
-                                              `Restocked ${product.title} (${size}) to ${sizeStock + 1}`,
-                                            )
+                                            onUpdateStock(product.id, size, sizeStock + 1);
+                                            showToast(`Restocked ${product.title} (${size}) to ${sizeStock + 1}`);
                                           }}
                                           className="w-4 h-4 rounded bg-gray-200 hover:bg-gray-300 text-black flex items-center justify-center font-bold text-[9px]"
                                           title="Increase stock by 1"
@@ -816,14 +903,11 @@ export default function VendorDashboard({
                                         </button>
                                       </div>
                                     </div>
-                                  )
+                                  );
                                 })}
                               </div>
                               <div className="text-[10px] text-[#6B7280] font-mono mt-1">
-                                Total:{" "}
-                                <strong className="text-[#111827]">
-                                  {totalStock} in stock
-                                </strong>
+                                Total: <strong className="text-[#111827]">{totalStock} in stock</strong>
                               </div>
                             </td>
 
@@ -854,15 +938,9 @@ export default function VendorDashboard({
                               </button>
                               <button
                                 onClick={() => {
-                                  if (
-                                    confirm(
-                                      `Remove "${product.title}" from store? This will immediately remove it from all customer clothing cards.`,
-                                    )
-                                  ) {
-                                    onDeleteProduct(product.id)
-                                    showToast(
-                                      `Removed "${product.title}" from catalog.`,
-                                    )
+                                  if (confirm(`Remove "${product.title}" from store?`)) {
+                                    onDeleteProduct(product.id);
+                                    showToast(`Removed "${product.title}".`);
                                   }
                                 }}
                                 className="text-red-500 hover:text-red-700 px-2 py-1 text-[11px]"
@@ -871,7 +949,7 @@ export default function VendorDashboard({
                               </button>
                             </td>
                           </tr>
-                        )
+                        );
                       })}
                     </tbody>
                   </table>
@@ -882,32 +960,43 @@ export default function VendorDashboard({
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 2: OVERVIEW & FINANCIAL EARNINGS */}
+        {/* TAB 2: OVERVIEW & SENSITIVE FINANCIAL EARNINGS (FOUNDER ONLY) */}
         {/* ========================================================================= */}
-        {activeTab === "overview" && (
+        {activeTab === "overview" && staffRole === "founder" && (
           <div className="space-y-6">
-            <div className="bg-white p-5 rounded-2xl border border-[#E5E7EB]">
-              <h1 className="text-xl font-bold text-[#111827]">
-                Earnings & Commission Overview
-              </h1>
-              <p className="text-xs text-[#6B7280] mt-0.5">
-                Transparent 13% commission model per Kasi Drip business plan.
-                87% direct payout to your South African business account.
-              </p>
+            <div className="bg-white p-5 rounded-2xl border border-[#E5E7EB] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-bold text-[#111827]">Financial Revenue & Net Payouts</h1>
+                  {privacyShield && (
+                    <span className="bg-amber-100 text-amber-900 text-[10px] font-mono font-bold px-2 py-0.5 rounded">
+                      Discreet Shield Active 👁‍🗨
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-[#6B7280] mt-0.5">
+                  13% marketplace fee. 87% net payout disbursed weekly directly to your verified South African business account.
+                </p>
+              </div>
+
+              <button
+                onClick={togglePrivacyShield}
+                className="bg-[#F3F4F6] hover:bg-gray-200 text-[#111827] font-bold text-xs px-3.5 py-2 rounded-xl transition-colors shrink-0"
+              >
+                {privacyShield ? "👁 Reveal Financial Amounts" : "👁‍🗨 Hide Sensitive Amounts"}
+              </button>
             </div>
 
-            {/* 4 Metric Cards */}
+            {/* Metric Cards with Privacy Shield */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-white p-5 rounded-2xl border border-[#E5E7EB] space-y-1">
                 <span className="text-[10px] font-mono font-bold text-[#6B7280] uppercase">
                   Gross Merchandise Value (GMV)
                 </span>
                 <div className="text-2xl font-black text-[#111827] font-display">
-                  {formatPrice(analytics.totalGmv)}
+                  {maskAmount(analytics.totalGmv)}
                 </div>
-                <span className="text-[10px] text-[#6B7280] block">
-                  Customer checkout volume
-                </span>
+                <span className="text-[10px] text-[#6B7280] block">Customer checkout volume</span>
               </div>
 
               <div className="bg-white p-5 rounded-2xl border border-[#E5E7EB] space-y-1">
@@ -915,11 +1004,9 @@ export default function VendorDashboard({
                   Net Vendor Payout (87%)
                 </span>
                 <div className="text-2xl font-black text-emerald-700 font-display">
-                  {formatPrice(analytics.netPayout)}
+                  {maskAmount(analytics.netPayout)}
                 </div>
-                <span className="text-[10px] text-emerald-600 block">
-                  Ready for Instant EFT disbursement
-                </span>
+                <span className="text-[10px] text-emerald-600 block">Available for Instant EFT withdrawal</span>
               </div>
 
               <div className="bg-white p-5 rounded-2xl border border-[#E5E7EB] space-y-1">
@@ -927,35 +1014,29 @@ export default function VendorDashboard({
                   Platform Commission (13%)
                 </span>
                 <div className="text-2xl font-black text-[#6B7280] font-display">
-                  {formatPrice(analytics.totalCommission)}
+                  {maskAmount(analytics.totalCommission)}
                 </div>
-                <span className="text-[10px] text-[#6B7280] block">
-                  Covers payment gateways & Bob Go hub SLA
-                </span>
+                <span className="text-[10px] text-[#6B7280] block">Payment gateway fees & Bob Go logistics</span>
               </div>
 
               <div className="bg-white p-5 rounded-2xl border border-[#E5E7EB] space-y-1">
                 <span className="text-[10px] font-mono font-bold text-[#C88A35] uppercase">
-                  48-Hour Dispatch Compliance
+                  48-Hour Dispatch SLA
                 </span>
                 <div className="text-2xl font-black text-[#C88A35] font-display">
                   98.5%
                 </div>
-                <span className="text-[10px] text-[#6B7280] block">
-                  Pretoria / Gauteng Bob Go courier handoff
-                </span>
+                <span className="text-[10px] text-[#6B7280] block">Pretoria / Gauteng Bob Go courier handoff</span>
               </div>
             </div>
 
-            {/* Payout & Banking Info */}
+            {/* Masked Banking Info */}
             <div className="bg-white p-6 rounded-2xl border border-[#E5E7EB] space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-[#111827]">
-                    Registered Payout Account
-                  </h3>
+                  <h3 className="text-base font-bold text-[#111827]">Registered Payout Account</h3>
                   <p className="text-xs text-[#6B7280]">
-                    Weekly automated EFT payouts every Tuesday at 10:00 AM.
+                    Protected under POPIA compliance standards.
                   </p>
                 </div>
                 <span className="bg-emerald-100 text-emerald-800 text-xs font-mono font-bold px-3 py-1 rounded-full">
@@ -965,28 +1046,18 @@ export default function VendorDashboard({
 
               <div className="bg-[#F9FAFB] p-4 rounded-xl border border-[#E5E7EB] grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
                 <div>
-                  <span className="text-[#6B7280] block text-[10px]">
-                    ACCOUNT HOLDER
-                  </span>
+                  <span className="text-[#6B7280] block text-[10px]">ACCOUNT HOLDER</span>
+                  <span className="font-bold text-[#111827]">{activeVendor.name} (Pty) Ltd</span>
+                </div>
+                <div>
+                  <span className="text-[#6B7280] block text-[10px]">BANK ACCOUNT (MASKED)</span>
                   <span className="font-bold text-[#111827]">
-                    {currentVendor.name} (Pty) Ltd
+                    {privacyShield ? "Capitec Business (•••• •••• 4812)" : "Capitec Business (Acct: 1052944812)"}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[#6B7280] block text-[10px]">
-                    BANK & BRANCH
-                  </span>
-                  <span className="font-bold text-[#111827]">
-                    Capitec Business (Branch: 470010)
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[#6B7280] block text-[10px]">
-                    FULFILLMENT DEPOT
-                  </span>
-                  <span className="font-bold text-[#111827]">
-                    {currentVendor.dispatchHub}
-                  </span>
+                  <span className="text-[#6B7280] block text-[10px]">DISPATCH HUB</span>
+                  <span className="font-bold text-[#111827]">{activeVendor.dispatchHub}</span>
                 </div>
               </div>
             </div>
@@ -994,36 +1065,33 @@ export default function VendorDashboard({
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 3: BOB GO ORDERS & LOGISTICS */}
+        {/* TAB 3: BOB GO ORDERS & POPIA CUSTOMER PRIVACY */}
         {/* ========================================================================= */}
         {activeTab === "orders" && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E7EB]">
               <div>
-                <h1 className="text-xl font-bold text-[#111827]">
-                  Customer Orders & Bob Go Dispatch
-                </h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-bold text-[#111827]">Customer Orders & Bob Go Dispatch</h1>
+                  <span className="bg-blue-50 text-blue-800 text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-blue-200">
+                    POPIA Masked
+                  </span>
+                </div>
                 <p className="text-xs text-[#6B7280] mt-0.5">
-                  Pack items in Le Benkeleng branded compostable polybags and
-                  drop off at your designated Bob Go locker depot within 48
-                  hours.
+                  Pack items in Le Benkeleng compostable polybags and hand over to your Bob Go locker within 48 hours.
                 </p>
               </div>
               <div className="text-xs font-mono bg-[#F3F4F6] px-3 py-1.5 rounded-lg text-[#111827]">
-                Local Hub: <strong>{currentVendor.dispatchHub}</strong>
+                Local Depot: <strong>{activeVendor.dispatchHub}</strong>
               </div>
             </div>
 
             {vendorOrders.length === 0 ? (
               <div className="bg-white rounded-2xl border border-dashed border-[#E5E7EB] p-12 text-center space-y-3">
                 <span className="text-4xl block">📦</span>
-                <h3 className="text-base font-bold text-[#111827]">
-                  No customer orders yet
-                </h3>
+                <h3 className="text-base font-bold text-[#111827]">No customer orders currently pending</h3>
                 <p className="text-xs text-[#6B7280] max-w-sm mx-auto">
-                  When customers purchase your items via Capitec QR or Payflex,
-                  orders appear here with Bob Go waybill labels ready for
-                  packing.
+                  When customers purchase your pieces, order slips with Bob Go locker waybill labels appear here.
                 </p>
               </div>
             ) : (
@@ -1044,38 +1112,35 @@ export default function VendorDashboard({
                               order.status === "pending_pack"
                                 ? "bg-amber-100 text-amber-800"
                                 : order.status === "dispatched_to_locker"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : order.status === "in_transit"
-                                    ? "bg-purple-100 text-purple-800"
-                                    : "bg-emerald-100 text-emerald-800"
+                                ? "bg-blue-100 text-blue-800"
+                                : order.status === "in_transit"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-emerald-100 text-emerald-800"
                             }`}
                           >
                             {order.status.replace(/_/g, " ")}
                           </span>
                         </div>
+                        {/* POPIA Customer Privacy Protection */}
                         <span className="text-xs text-[#6B7280] mt-0.5 block">
-                          Placed: {order.createdAt} • Buyer:{" "}
-                          {order.customerName} ({order.customerCity})
+                          Placed: {order.createdAt} • Buyer: <strong className="text-[#111827]">{maskCustomerName(order.customerName)}</strong> ({order.customerCity})
                         </span>
                       </div>
 
-                      <div className="text-right">
-                        <span className="text-xs text-[#6B7280] block">
-                          Vendor Net Payout
-                        </span>
-                        <span className="text-base font-black text-emerald-700 font-mono">
-                          {formatPrice(order.payoutAmount)}
-                        </span>
-                      </div>
+                      {staffRole === "founder" && (
+                        <div className="text-right">
+                          <span className="text-xs text-[#6B7280] block">Vendor Net Payout</span>
+                          <span className="text-base font-black text-emerald-700 font-mono">
+                            {maskAmount(order.payoutAmount)}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Order Items */}
                     <div className="space-y-2">
                       {order.items.map((item, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between text-xs py-1"
-                        >
+                        <div key={idx} className="flex items-center justify-between text-xs py-1">
                           <div className="flex items-center gap-3">
                             <img
                               src={item.image}
@@ -1083,34 +1148,28 @@ export default function VendorDashboard({
                               className="w-10 h-12 object-cover rounded bg-gray-100 border border-[#E5E7EB]"
                             />
                             <div>
-                              <div className="font-bold text-[#111827]">
-                                {item.productTitle}
-                              </div>
+                              <div className="font-bold text-[#111827]">{item.productTitle}</div>
                               <div className="text-[11px] text-[#6B7280] font-mono">
-                                Size:{" "}
-                                <strong className="text-[#111827]">
-                                  {item.size}
-                                </strong>{" "}
-                                • Qty: {item.quantity}
+                                Size: <strong className="text-[#111827]">{item.size}</strong> • Qty: {item.quantity}
                               </div>
                             </div>
                           </div>
-                          <span className="font-bold text-[#111827] font-mono">
-                            {formatPrice(item.price * item.quantity)}
-                          </span>
+                          {staffRole === "founder" && (
+                            <span className="font-bold text-[#111827] font-mono">
+                              {maskAmount(item.price * item.quantity)}
+                            </span>
+                          )}
                         </div>
                       ))}
                     </div>
 
-                    {/* Bob Go Locker Dispatch Info & Action */}
+                    {/* Bob Go Locker Dispatch Info */}
                     <div className="bg-[#F9FAFB] p-4 rounded-xl border border-[#E5E7EB] flex flex-wrap items-center justify-between gap-4 text-xs">
                       <div>
                         <span className="text-[10px] font-mono text-[#6B7280] uppercase block">
                           Destination Bob Go Locker
                         </span>
-                        <span className="font-bold text-[#111827]">
-                          {order.lockerStation}
-                        </span>
+                        <span className="font-bold text-[#111827]">{order.lockerStation}</span>
                         <span className="text-[11px] text-gray-500 block font-mono">
                           Waybill: {order.waybillNumber}
                         </span>
@@ -1120,27 +1179,20 @@ export default function VendorDashboard({
                         {order.status === "pending_pack" && (
                           <button
                             onClick={() => {
-                              onUpdateOrderStatus(
-                                order.id,
-                                "dispatched_to_locker",
-                              )
-                              showToast(
-                                `Order #${order.orderNumber} marked as dispatched to Bob Go locker!`,
-                              )
+                              onUpdateOrderStatus(order.id, "dispatched_to_locker");
+                              showToast(`Order #${order.orderNumber} marked as dispatched to Bob Go locker!`);
                             }}
                             className="bg-[#111827] hover:bg-black text-white font-bold px-4 py-2 rounded-xl transition-colors"
                           >
-                            Mark as Dispatched to Locker →
+                            Mark Dispatched to Locker →
                           </button>
                         )}
 
                         {order.status === "dispatched_to_locker" && (
                           <button
                             onClick={() => {
-                              onUpdateOrderStatus(order.id, "in_transit")
-                              showToast(
-                                `Order #${order.orderNumber} is in transit with courier.`,
-                              )
+                              onUpdateOrderStatus(order.id, "in_transit");
+                              showToast(`Order #${order.orderNumber} is in transit with courier.`);
                             }}
                             className="bg-blue-700 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-xl transition-colors"
                           >
@@ -1151,10 +1203,8 @@ export default function VendorDashboard({
                         {order.status === "in_transit" && (
                           <button
                             onClick={() => {
-                              onUpdateOrderStatus(order.id, "ready_for_pickup")
-                              showToast(
-                                `Order #${order.orderNumber} ready for customer PIN collection.`,
-                              )
+                              onUpdateOrderStatus(order.id, "ready_for_pickup");
+                              showToast(`Order #${order.orderNumber} ready for customer PIN retrieval.`);
                             }}
                             className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-xl transition-colors"
                           >
@@ -1164,7 +1214,7 @@ export default function VendorDashboard({
 
                         {order.status === "ready_for_pickup" && (
                           <span className="text-emerald-700 font-mono font-bold text-xs">
-                            ✓ Waiting for customer PIN retrieval
+                            ✓ Ready at locker station for PIN retrieval
                           </span>
                         )}
                       </div>
@@ -1177,33 +1227,26 @@ export default function VendorDashboard({
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 4: STOREFRONT BRAND SETTINGS */}
+        {/* TAB 4: STOREFRONT BRAND SETTINGS (FOUNDER ONLY) */}
         {/* ========================================================================= */}
-        {activeTab === "storefront" && (
+        {activeTab === "storefront" && staffRole === "founder" && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E7EB]">
               <div>
-                <h1 className="text-xl font-bold text-[#111827]">
-                  Brand Storefront Settings
-                </h1>
+                <h1 className="text-xl font-bold text-[#111827]">Brand Storefront Settings</h1>
                 <p className="text-xs text-[#6B7280] mt-0.5">
-                  Customize the look, cover photo, founder bio, and logistics
-                  hub for your dedicated brand landing page (
-                  <code>#/brand/{currentVendor.slug}</code>).
+                  Customize the look, cover photo, founder bio, and logistics hub for <code>#/brand/{activeVendor.slug}</code>.
                 </p>
               </div>
               <button
-                onClick={() => onNavigateBrand(currentVendor.slug)}
+                onClick={() => onNavigateBrand(activeVendor.slug)}
                 className="bg-[#111827] text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-black"
               >
                 Preview Live Brand Page →
               </button>
             </div>
 
-            <form
-              onSubmit={handleSaveStorefront}
-              className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E5E7EB] space-y-5 text-xs"
-            >
+            <form onSubmit={handleSaveStorefront} className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E5E7EB] space-y-5 text-xs">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block font-bold text-[#111827] uppercase text-[10px] mb-1">
@@ -1249,9 +1292,6 @@ export default function VendorDashboard({
                   className="w-full border border-[#D1D5DB] rounded-lg p-2.5 focus:outline-none focus:border-[#111827] leading-relaxed"
                   required
                 />
-                <span className="text-[10px] text-[#6B7280] mt-1 block">
-                  Displayed prominently on your dedicated brand storefront hero.
-                </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -1265,9 +1305,6 @@ export default function VendorDashboard({
                     onChange={(e) => setProfilePhone(e.target.value)}
                     className="w-full border border-[#D1D5DB] rounded-lg p-2.5 focus:outline-none focus:border-[#111827]"
                   />
-                  <span className="text-[10px] text-[#6B7280] mt-1 block">
-                    Powers the "Chat with Designer" button on your storefront.
-                  </span>
                 </div>
 
                 <div>
@@ -1322,19 +1359,15 @@ export default function VendorDashboard({
                       placeholder="Enter high-res image URL"
                       className="w-full border border-[#D1D5DB] rounded-lg p-2.5 focus:outline-none focus:border-[#111827]"
                     />
-                    <div className="text-[11px] text-[#6B7280]">
-                      Or upload a custom campaign cover image from your device:
-                    </div>
                     <input
                       type="file"
                       accept="image/*"
                       onChange={(e) => {
-                        const file = e.target.files?.[0]
+                        const file = e.target.files?.[0];
                         if (file) {
-                          const reader = new FileReader()
-                          reader.onload = () =>
-                            setProfileCover(reader.result as string)
-                          reader.readAsDataURL(file)
+                          const reader = new FileReader();
+                          reader.onload = () => setProfileCover(reader.result as string);
+                          reader.readAsDataURL(file);
                         }
                       }}
                       className="text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#111827] file:text-white hover:file:bg-black cursor-pointer"
@@ -1357,7 +1390,7 @@ export default function VendorDashboard({
       </main>
 
       {/* ========================================================================= */}
-      {/* 4. MODAL: ADD / EDIT CLOTHING PIECE */}
+      {/* 5. MODAL: ADD / EDIT CLOTHING PIECE */}
       {/* ========================================================================= */}
       {isProductModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
@@ -1370,25 +1403,16 @@ export default function VendorDashboard({
             </button>
 
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#C88A35] block">
-              {productToEdit
-                ? "Modify Existing Piece"
-                : "New Collection Addition"}
+              {productToEdit ? "Modify Existing Piece" : "New Collection Addition"}
             </span>
             <h3 className="text-xl font-bold text-[#111827] mt-0.5">
-              {productToEdit
-                ? `Edit "${productToEdit.title}"`
-                : `Add Piece to ${currentVendor.name}`}
+              {productToEdit ? `Edit "${productToEdit.title}"` : `Add Piece to ${activeVendor.name}`}
             </h3>
             <p className="text-xs text-[#6B7280] mt-0.5">
-              All details and stock quantities will reactively update the
-              customer marketplace cards in real time.
+              Updates will only affect {activeVendor.name}'s items on the commerce storefront.
             </p>
 
-            <form
-              onSubmit={handleSaveProduct}
-              className="mt-5 space-y-4 text-xs"
-            >
-              {/* Title & Category */}
+            <form onSubmit={handleSaveProduct} className="mt-5 space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-bold text-[#111827] uppercase text-[10px] mb-1">
@@ -1410,9 +1434,7 @@ export default function VendorDashboard({
                   </label>
                   <select
                     value={formCategory}
-                    onChange={(e) =>
-                      setFormCategory(e.target.value as Category)
-                    }
+                    onChange={(e) => setFormCategory(e.target.value as Category)}
                     className="w-full border border-[#D1D5DB] rounded-lg p-2.5 focus:outline-none focus:border-[#111827]"
                   >
                     <option value="outerwear">Outerwear & Jackets</option>
@@ -1440,9 +1462,11 @@ export default function VendorDashboard({
                     onChange={(e) => setFormPrice(Number(e.target.value))}
                     className="w-full border border-[#D1D5DB] rounded-lg p-2.5 focus:outline-none focus:border-[#111827] font-mono font-bold"
                   />
-                  <span className="text-[10px] text-emerald-700 font-mono mt-0.5 block">
-                    You receive: R {(formPrice * 0.87).toFixed(0)} (87%)
-                  </span>
+                  {staffRole === "founder" && (
+                    <span className="text-[10px] text-emerald-700 font-mono mt-0.5 block">
+                      Net Payout: {maskAmount(formPrice * 0.87)}
+                    </span>
+                  )}
                 </div>
 
                 <div>
@@ -1455,16 +1479,9 @@ export default function VendorDashboard({
                     step={10}
                     placeholder="e.g. 1200 for discount"
                     value={formOriginalPrice}
-                    onChange={(e) =>
-                      setFormOriginalPrice(
-                        e.target.value ? Number(e.target.value) : "",
-                      )
-                    }
+                    onChange={(e) => setFormOriginalPrice(e.target.value ? Number(e.target.value) : "")}
                     className="w-full border border-[#D1D5DB] rounded-lg p-2.5 focus:outline-none focus:border-[#111827] font-mono"
                   />
-                  <span className="text-[10px] text-[#6B7280] mt-0.5 block">
-                    Triggers a sale badge & discount percentage.
-                  </span>
                 </div>
 
                 <div>
@@ -1481,7 +1498,7 @@ export default function VendorDashboard({
                 </div>
               </div>
 
-              {/* Fabric & Composition */}
+              {/* Fabric */}
               <div>
                 <label className="block font-bold text-[#111827] uppercase text-[10px] mb-1">
                   Fabric & Construction Specification
@@ -1495,7 +1512,7 @@ export default function VendorDashboard({
                 />
               </div>
 
-              {/* Photo Input (Preset OR Custom Upload / URL) */}
+              {/* Photo Input */}
               <div className="border border-[#E5E7EB] rounded-xl p-4 bg-[#F9FAFB] space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="font-bold text-[#111827] uppercase text-[10px]">
@@ -1511,7 +1528,7 @@ export default function VendorDashboard({
                           : "bg-gray-200 text-[#4B5563]"
                       }`}
                     >
-                      Pick Streetwear Preset
+                      Streetwear Presets
                     </button>
                     <button
                       type="button"
@@ -1529,25 +1546,19 @@ export default function VendorDashboard({
 
                 {formImageMode === "preset" ? (
                   <div>
-                    <span className="text-[11px] text-[#6B7280] block mb-2">
-                      Select one of our curated high-res street style
-                      photography presets:
-                    </span>
                     <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
                       {streetwearImagePresets.map((preset, idx) => (
                         <button
                           key={idx}
                           type="button"
                           onClick={() => {
-                            setFormImage(preset.image)
-                            setFormSecondaryImage(preset.secondaryImage)
-                            if (!formTitle) setFormTitle(preset.label)
-                            setFormCategory(preset.category)
+                            setFormImage(preset.image);
+                            setFormSecondaryImage(preset.secondaryImage);
+                            if (!formTitle) setFormTitle(preset.label);
+                            setFormCategory(preset.category);
                           }}
                           className={`group rounded-lg overflow-hidden border-2 relative transition-all ${
-                            formImage === preset.image
-                              ? "border-[#111827] scale-105"
-                              : "border-transparent"
+                            formImage === preset.image ? "border-[#111827] scale-105" : "border-transparent"
                           }`}
                         >
                           <img
@@ -1567,7 +1578,7 @@ export default function VendorDashboard({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-[10px] text-[#6B7280] font-bold mb-1">
-                          Primary Front Image (URL or Upload):
+                          Front Image (URL or File Upload):
                         </label>
                         <input
                           type="url"
@@ -1592,9 +1603,7 @@ export default function VendorDashboard({
                           type="url"
                           placeholder="https://..."
                           value={formSecondaryImage}
-                          onChange={(e) =>
-                            setFormSecondaryImage(e.target.value)
-                          }
+                          onChange={(e) => setFormSecondaryImage(e.target.value)}
                           className="w-full border border-[#D1D5DB] rounded-lg p-2 text-xs mb-2"
                         />
                         <input
@@ -1607,110 +1616,54 @@ export default function VendorDashboard({
                     </div>
                   </div>
                 )}
-
-                {/* Preview Thumbnail */}
-                {formImage && (
-                  <div className="flex items-center gap-3 pt-2 border-t border-[#E5E7EB]">
-                    <span className="text-[10px] font-mono text-[#6B7280]">
-                      Preview:
-                    </span>
-                    <img
-                      src={formImage}
-                      alt="Front"
-                      className="w-12 h-14 object-cover rounded border border-[#E5E7EB]"
-                    />
-                    {formSecondaryImage && (
-                      <img
-                        src={formSecondaryImage}
-                        alt="Hover Angle"
-                        className="w-12 h-14 object-cover rounded border border-[#E5E7EB]"
-                      />
-                    )}
-                  </div>
-                )}
               </div>
 
-              {/* Sizes & Stock Per Size */}
+              {/* Sizes & Stock */}
               <div className="border border-[#E5E7EB] rounded-xl p-4 space-y-3">
                 <label className="block font-bold text-[#111827] uppercase text-[10px]">
                   Sizes & Stock Quantities *
                 </label>
-                <div>
-                  <span className="text-[10px] text-[#6B7280] block mb-1">
-                    Enter comma-separated size labels (e.g. S, M, L, XL or UK 7,
-                    UK 8, UK 9):
-                  </span>
-                  <input
-                    type="text"
-                    value={formSizesInput}
-                    onChange={(e) => {
-                      const val = e.target.value
-                      setFormSizesInput(val)
-                      const parsed = val
-                        .split(",")
-                        .map((s) => s.trim())
-                        .filter(Boolean)
-                      const nextStock = { ...formStockPerSize }
-                      parsed.forEach((s) => {
-                        if (nextStock[s] === undefined) nextStock[s] = 5
-                      })
-                      setFormStockPerSize(nextStock)
-                    }}
-                    className="w-full border border-[#D1D5DB] rounded-lg p-2 focus:outline-none focus:border-[#111827]"
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={formSizesInput}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFormSizesInput(val);
+                    const parsed = val.split(",").map((s) => s.trim()).filter(Boolean);
+                    const nextStock = { ...formStockPerSize };
+                    parsed.forEach((s) => {
+                      if (nextStock[s] === undefined) nextStock[s] = 5;
+                    });
+                    setFormStockPerSize(nextStock);
+                  }}
+                  className="w-full border border-[#D1D5DB] rounded-lg p-2 focus:outline-none focus:border-[#111827]"
+                  placeholder="e.g. S, M, L, XL"
+                />
 
-                {/* Stock per size input boxes */}
-                <div>
-                  <span className="text-[10px] font-mono text-[#6B7280] uppercase block mb-1.5">
-                    Available Stock Count per Size:
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {formSizesInput
-                      .split(",")
-                      .map((s) => s.trim())
-                      .filter(Boolean)
-                      .map((size) => (
-                        <div
-                          key={size}
-                          className="flex items-center gap-1 border border-[#D1D5DB] rounded-lg px-2 py-1 bg-white"
-                        >
-                          <span className="font-bold font-mono text-xs">
-                            {size}:
-                          </span>
-                          <input
-                            type="number"
-                            min={0}
-                            value={formStockPerSize[size] ?? 0}
-                            onChange={(e) => {
-                              const qty = Math.max(
-                                0,
-                                parseInt(e.target.value) || 0,
-                              )
-                              setFormStockPerSize((prev) => ({
-                                ...prev,
-                                [size]: qty,
-                              }))
-                            }}
-                            className="w-12 text-center font-mono font-bold focus:outline-none border-b border-gray-300"
-                          />
-                        </div>
-                      ))}
-                  </div>
-                  <span className="text-[10px] text-[#6B7280] font-mono mt-2 block">
-                    Total Calculated Stock:{" "}
-                    <strong>
-                      {Object.values(formStockPerSize).reduce(
-                        (a, b) => a + Number(b || 0),
-                        0,
-                      )}{" "}
-                      units
-                    </strong>
-                  </span>
+                <div className="flex flex-wrap gap-2">
+                  {formSizesInput
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                    .map((size) => (
+                      <div key={size} className="flex items-center gap-1 border border-[#D1D5DB] rounded-lg px-2 py-1 bg-white">
+                        <span className="font-bold font-mono text-xs">{size}:</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={formStockPerSize[size] ?? 0}
+                          onChange={(e) => {
+                            const qty = Math.max(0, parseInt(e.target.value) || 0);
+                            setFormStockPerSize((prev) => ({ ...prev, [size]: qty }));
+                          }}
+                          className="w-12 text-center font-mono font-bold focus:outline-none border-b border-gray-300"
+                        />
+                      </div>
+                    ))}
                 </div>
               </div>
 
-              {/* Thrift 1-of-1 specifics */}
+              {/* Thrift Specifics */}
               {formIsThrift && (
                 <div className="border border-amber-200 bg-amber-50 rounded-xl p-4 space-y-3">
                   <span className="text-[10px] font-mono font-bold text-amber-900 uppercase block">
@@ -1718,9 +1671,7 @@ export default function VendorDashboard({
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[10px] font-bold text-amber-900 mb-1">
-                        Condition Standard
-                      </label>
+                      <label className="block text-[10px] font-bold text-amber-900 mb-1">Condition Standard</label>
                       <input
                         type="text"
                         value={formCondition}
@@ -1729,9 +1680,7 @@ export default function VendorDashboard({
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-amber-900 mb-1">
-                        Garment Measurements (cm)
-                      </label>
+                      <label className="block text-[10px] font-bold text-amber-900 mb-1">Measurements (cm)</label>
                       <input
                         type="text"
                         value={formMeasurements}
@@ -1757,7 +1706,6 @@ export default function VendorDashboard({
                 />
               </div>
 
-              {/* Submit Buttons */}
               <div className="pt-4 border-t border-[#E5E7EB] flex items-center justify-end gap-3">
                 <button
                   type="button"
@@ -1770,90 +1718,13 @@ export default function VendorDashboard({
                   type="submit"
                   className="bg-[#111827] hover:bg-black text-white font-bold px-6 py-2.5 rounded-xl transition-colors shadow-sm"
                 >
-                  {productToEdit
-                    ? "Save Changes to Commerce Site"
-                    : "Add to Commerce Storefront →"}
+                  {productToEdit ? "Save Changes to Commerce Site" : "Add to Commerce Storefront →"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
-      {/* ========================================================================= */}
-      {/* 5. MODAL: SWITCH VENDOR ACCOUNT (DEMO LOGIN) */}
-      {/* ========================================================================= */}
-      {isSwitchVendorOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white max-w-lg w-full rounded-2xl shadow-2xl p-6 sm:p-8 relative">
-            <button
-              onClick={() => setIsSwitchVendorOpen(false)}
-              className="absolute top-4 right-4 text-[#6B7280] hover:text-[#111827] font-bold"
-            >
-              ✕
-            </button>
-
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#C88A35] block">
-              Vendor Authentication
-            </span>
-            <h3 className="text-xl font-bold text-[#111827] mt-0.5">
-              Switch Vendor Account
-            </h3>
-            <p className="text-xs text-[#6B7280] mt-1">
-              Select any verified Gauteng / Pretoria brand partner to manage
-              their inventory and storefront:
-            </p>
-
-            <div className="grid grid-cols-1 gap-2.5 mt-4 max-h-[60vh] overflow-y-auto pr-1">
-              {allVendors.map((v) => (
-                <button
-                  key={v.id}
-                  onClick={() => {
-                    onSelectVendor(v)
-                    setIsSwitchVendorOpen(false)
-                    showToast(`Logged in as ${v.name} (${v.origin})`)
-                  }}
-                  className={`p-3.5 rounded-xl border text-left flex items-center justify-between transition-all ${
-                    v.id === currentVendor.id
-                      ? "border-[#111827] bg-[#F9FAFB] shadow-xs"
-                      : "border-[#E5E7EB] hover:border-gray-400"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm shrink-0"
-                      style={{ backgroundColor: v.color }}
-                    >
-                      {v.letter}
-                    </div>
-                    <div>
-                      <div className="font-bold text-[#111827] text-xs flex items-center gap-2">
-                        <span>{v.name}</span>
-                        {v.isThrift && (
-                          <span className="text-[9px] bg-amber-100 text-amber-800 px-1 rounded font-mono">
-                            Thrift
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-[11px] text-[#6B7280] block">
-                        {v.origin}
-                      </span>
-                    </div>
-                  </div>
-
-                  {v.id === currentVendor.id ? (
-                    <span className="text-xs font-bold text-emerald-600">
-                      Active ✓
-                    </span>
-                  ) : (
-                    <span className="text-xs text-[#6B7280]">Select →</span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
-  )
+  );
 }

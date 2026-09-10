@@ -107,8 +107,8 @@ export default function BrandLandingPage({
           <div className="max-w-3xl space-y-4">
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="bg-[#C88A35] text-white text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                ✓ Verified Founding Label
+              <span className="bg-white/10 text-white backdrop-blur-xs text-[11px] font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
+                <span>✓</span> Verified Founding Label
               </span>
               <span className="bg-white/15 text-white text-[10px] font-mono px-2.5 py-0.5 rounded-full uppercase">
                 {vendor.origin}
@@ -159,7 +159,7 @@ export default function BrandLandingPage({
                   navigator.clipboard.writeText(window.location.href)
                   alert(`Copied link to ${vendor.name} store!`)
                 }}
-                className="border border-white/30 text-white text-xs font-bold px-5 py-2.5 rounded-full hover:bg-white/10 transition-colors"
+                className="bg-white/10 hover:bg-white/15 text-white text-xs font-bold px-5 py-2.5 rounded-full backdrop-blur-xs transition-all"
               >
                 Share Brand Store
               </button>
@@ -209,7 +209,7 @@ export default function BrandLandingPage({
             <span className="text-[#6B7280] text-[10px] uppercase block">
               Curation Quality:
             </span>
-            <span className="font-bold text-[#C88A35] text-sm">
+            <span className="font-bold text-gray-900 text-sm">
               4.9 / 5.0 ★
             </span>
             <span className="text-[10px] text-[#059669] block">
@@ -222,8 +222,8 @@ export default function BrandLandingPage({
       {/* 4. ATELIER STORY & PHILOSOPHY */}
       <section className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 sm:p-8 space-y-3">
-          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#C88A35] block">
-            About the Atelier
+          <span className="inline-flex items-center gap-1.5 bg-neutral-100 text-neutral-700 px-3 py-1 rounded-full text-xs font-semibold mb-1">
+            <span>✦</span> About the Atelier
           </span>
           <h2 className="text-xl font-bold text-[#111827]">
             Craftsmanship, Silhouette & South African Heritage
@@ -411,10 +411,10 @@ export default function BrandLandingPage({
                                       e.stopPropagation()
                                       if (!isSizeOut) onAddToCart(product, sz)
                                     }}
-                                    className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-colors ${
+                                    className={`px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition-all ${
                                       isSizeOut
-                                        ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed line-through"
-                                        : "bg-white border border-[#D1D5DB] hover:border-[#111827] hover:bg-[#111827] hover:text-white"
+                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed line-through"
+                                        : "bg-gray-100 text-gray-800 hover:bg-black hover:text-white"
                                     }`}
                                   >
                                     {sz}
@@ -474,8 +474,8 @@ export default function BrandLandingPage({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#C88A35] block">
-                Discover More
+              <span className="inline-flex items-center gap-1.5 bg-neutral-100 text-neutral-700 px-3 py-1 rounded-full text-xs font-semibold mb-2">
+                <span>✦</span> Discover More
               </span>
               <h3 className="text-lg font-bold text-[#111827]">
                 Other Independent Streetwear Labels
@@ -497,7 +497,7 @@ export default function BrandLandingPage({
                   onNavigateBrand(rel.slug)
                   window.scrollTo({ top: 0, behavior: "smooth" })
                 }}
-                className="bg-white border border-[#E5E7EB] rounded-xl p-4 cursor-pointer hover:border-[#111827] transition-all flex items-center gap-3.5 shadow-xs"
+                className="bg-white border border-[#E5E7EB] rounded-2xl p-4 cursor-pointer hover:border-[#111827] transition-all flex items-center gap-3.5 shadow-xs"
               >
                 <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold font-display text-base shrink-0"
@@ -509,7 +509,7 @@ export default function BrandLandingPage({
                   <h4 className="text-xs font-bold text-[#111827] truncate">
                     {rel.name}
                   </h4>
-                  <span className="text-[10px] font-mono text-[#C88A35] block">
+                  <span className="text-xs text-gray-500 font-medium block">
                     {rel.origin}
                   </span>
                   <span className="text-[10px] text-[#6B6964] block">

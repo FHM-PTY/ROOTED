@@ -16,17 +16,17 @@ export const lockerStations: LockerStation[] = [
     name: "Braamfontein Juta Smart Locker",
     address: "68 Juta Street (Next to The Playground), Braamfontein",
     hours: "24/7 Smart PIN Access",
-    type: "Automated Smart Vault",
+    type: "Automated Smart Locker",
     distance: "Central JHB",
     city: "Johannesburg",
     commuterTag: "⚡ 24/7 Smart PIN • 🚆 350m Park Station",
   },
   {
     id: "loc-3",
-    name: "Hatfield Plaza Smart Vault (012)",
+    name: "Hatfield Plaza Smart Locker (012)",
     address: "1122 Burnett St, Hatfield, Pretoria (Near Gautrain)",
     hours: "06:00 – 22:00 Mon-Sun",
-    type: "Pargo Campus Vault",
+    type: "Pargo Campus Station",
     distance: "Pretoria East",
     city: "Pretoria",
     commuterTag: "🎓 Hatfield Campus • 🚆 200m Gautrain Station",
@@ -56,7 +56,7 @@ export const lockerStations: LockerStation[] = [
     name: "Umlazi Mega City Station",
     address: "50 Mangosuthu Hwy, Umlazi V, Durban",
     hours: "08:30 – 17:30 Mon-Sun",
-    type: "Smart Locker Vault",
+    type: "Smart Locker Station",
     distance: "KZN South",
     city: "Durban",
     commuterTag: "⚡ Smart Locker • 🚕 Mega City Rank 2",
@@ -831,7 +831,7 @@ export const initialVendorOrders: VendorOrder[] = [
     orderNumber: "LB-84920",
     customerName: "Thabo Molefe",
     customerCity: "Pretoria",
-    lockerStation: "Hatfield Plaza Smart Vault (012)",
+    lockerStation: "Hatfield Plaza Smart Locker (012)",
     items: [
       {
         productId: 1,
@@ -881,7 +881,7 @@ export const initialVendorOrders: VendorOrder[] = [
     orderNumber: "LB-84732",
     customerName: "Nandi Khumalo",
     customerCity: "Pretoria",
-    lockerStation: "Hatfield Plaza Smart Vault (012)",
+    lockerStation: "Hatfield Plaza Smart Locker (012)",
     items: [
       {
         productId: 13,

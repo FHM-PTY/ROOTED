@@ -487,9 +487,9 @@ export default function App() {
             onClick={() => setIsLockerPickerOpen(true)}
             className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors group"
           >
-            <span className="text-[#C88A35]">📍</span>
+            <span>📍</span>
             <span>Deliver to:</span>
-            <span className="font-semibold text-white underline decoration-dotted underline-offset-4 group-hover:text-[#C88A35]">
+            <span className="font-semibold text-white underline decoration-dotted underline-offset-4 group-hover:text-gray-200">
               {selectedStation.name}
             </span>
             <span className="text-[9px] text-[#9CA3AF]">(Change)</span>
@@ -501,7 +501,7 @@ export default function App() {
               Free Smart Locker & Pick-Up Hub Delivery on Orders Over R 650
             </span>
             <span className="text-[#374151]">|</span>
-            <span className="text-[#C88A35] font-semibold">
+            <span className="text-white font-semibold">
               48h Vendor Dispatch SLA
             </span>
           </div>
@@ -515,8 +515,8 @@ export default function App() {
             </button>
             <a
               href="#/vendor"
-              className={`hover:text-[#C88A35] transition-colors flex items-center gap-1 text-xs font-semibold ${
-                currentRoute.type === "vendor-portal" ? "text-[#C88A35]" : ""
+              className={`hover:text-white transition-colors flex items-center gap-1 text-xs font-semibold ${
+                currentRoute.type === "vendor-portal" ? "text-white underline underline-offset-4" : ""
               }`}
               title="Merchant & Designer Atelier Portal"
             >
@@ -627,7 +627,7 @@ export default function App() {
             {/* 1. Location Pin (Locker Stations & Pickup Hubs) */}
             <button
               onClick={() => setIsLockerPickerOpen(true)}
-              className="p-2 text-white hover:text-[#C88A35] transition-colors relative cursor-pointer"
+              className="p-2 text-white hover:text-gray-300 transition-colors relative cursor-pointer"
               title={`Deliver to: ${selectedStation.name}`}
               aria-label="Smart Locker & Pickup Locations"
             >
@@ -654,7 +654,7 @@ export default function App() {
             {/* 2. User Profile (Order Tracking & Account) */}
             <button
               onClick={() => setIsTrackingModalOpen(true)}
-              className="p-2 text-white hover:text-[#C88A35] transition-colors relative cursor-pointer"
+              className="p-2 text-white hover:text-gray-300 transition-colors relative cursor-pointer"
               title="Track Orders & Account"
               aria-label="Account and Order Tracking"
             >
@@ -676,7 +676,7 @@ export default function App() {
             {/* 3. Shopping Cart (Bag) */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="p-2 text-white hover:text-[#C88A35] transition-colors relative cursor-pointer"
+              className="p-2 text-white hover:text-gray-300 transition-colors relative cursor-pointer"
               title="Shopping Cart"
               aria-label="Shopping Cart"
             >
@@ -694,7 +694,7 @@ export default function App() {
                 />
               </svg>
               {cart.reduce((acc, item) => acc + item.quantity, 0) > 0 && (
-                <span className="absolute 0 top-0.5 right-0.5 bg-[#C88A35] text-black text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute 0 top-0.5 right-0.5 bg-white text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
                   {cart.reduce((acc, item) => acc + item.quantity, 0)}
                 </span>
               )}
@@ -856,7 +856,7 @@ export default function App() {
               Brands
             </a>
 
-            {/* The Dunusa Vault */}
+            {/* Thrift Zone */}
             <a
               href="#/vault"
               className={`rounded-full transition-all shrink-0 ${
@@ -865,7 +865,7 @@ export default function App() {
                   : "text-[#4B5563] hover:text-black font-semibold px-2 py-1"
               }`}
             >
-              The Vault (1-of-1)
+              Thrift Zone
             </a>
 
             {/* Locker Stations */}
@@ -1012,14 +1012,14 @@ export default function App() {
           </div>
         </main>
       ) : currentRoute.type === "vault" ? (
-        /* DEDICATED 1-OF-1 DUNUSA VINTAGE VAULT VIEW */
+        /* DEDICATED 1-OF-1 THRIFT ZONE VIEW */
         <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
           <div className="bg-[#111827] text-white rounded-2xl p-8 sm:p-12 space-y-4">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#C88A35] block">
-              1-of-1 Curated South African Archive
+            <span className="inline-flex items-center gap-2 bg-white/10 text-neutral-200 px-3.5 py-1 rounded-full text-xs font-medium backdrop-blur-xs">
+              <span>✦</span> Curated South African Vintage (1-of-1)
             </span>
             <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight font-display">
-              The Dunusa Vintage Vault.
+              Thrift Zone.
             </h1>
             <p className="text-xs sm:text-sm text-[#D1D5DB] max-w-2xl leading-relaxed">
               Hand-hunted across Small Street CBD wholesale stashes, Bree Taxi
@@ -1109,7 +1109,7 @@ export default function App() {
             <div className="bg-linear-to-r from-[#111827] via-[#1F2937] to-[#111827] text-white rounded-2xl overflow-hidden shadow-sm">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-8 sm:p-12">
                 <div className="lg:col-span-7 space-y-4">
-                  <div className="inline-flex items-center gap-2 bg-[#C88A35]/20 text-[#FBBF24] border border-[#C88A35]/40 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider font-mono">
+                  <div className="inline-flex items-center gap-2 bg-white/10 text-neutral-200 px-3.5 py-1.5 rounded-full text-xs font-medium backdrop-blur-xs">
                     <span>✦</span> Home of Pretoria & Gauteng Streetwear
                   </div>
 
@@ -1146,13 +1146,13 @@ export default function App() {
                   <div className="flex flex-wrap items-center gap-3 pt-2">
                     <a
                       href="#/brand/lesupa-atelier"
-                      className="bg-white text-[#111827] font-bold px-6 py-3 rounded-full text-xs hover:bg-[#F3F4F6] transition-colors shadow-xs"
+                      className="bg-white text-[#111827] font-bold px-6 py-3 rounded-full text-xs hover:bg-neutral-100 transition-all shadow-xs"
                     >
                       Visit Lesupa Atelier Store
                     </a>
                     <a
                       href="#/brand/mokasi"
-                      className="border border-white/30 text-white font-bold px-6 py-3 rounded-full text-xs hover:bg-white/10 transition-colors"
+                      className="bg-white/10 hover:bg-white/15 text-white font-bold px-6 py-3 rounded-full text-xs transition-all backdrop-blur-xs"
                     >
                       Visit Mokasi Store
                     </a>
@@ -1292,7 +1292,7 @@ export default function App() {
                     : selectedCategory === "pretoria"
                       ? "Pretoria (012) Streetwear"
                       : selectedCategory === "thrift"
-                        ? "The Dunusa 1-of-1 Vault"
+                      ? "Thrift Zone (1-of-1 Archive)"
                         : "All Products"}
                 </h2>
                 <span className="text-xs text-[#6B7280]">
@@ -1473,10 +1473,10 @@ export default function App() {
                                         e.stopPropagation()
                                         if (!isSizeOut) addToCart(product, sz)
                                       }}
-                                      className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-colors ${
+                                      className={`px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition-all ${
                                         isSizeOut
-                                          ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed line-through"
-                                          : "bg-white border border-[#D1D5DB] hover:border-[#111827] hover:bg-[#111827] hover:text-white"
+                                          ? "bg-gray-100 text-gray-400 cursor-not-allowed line-through"
+                                          : "bg-gray-100 text-gray-800 hover:bg-black hover:text-white"
                                       }`}
                                     >
                                       {sz}
@@ -1533,64 +1533,64 @@ export default function App() {
 
       {/* 5. SMART LOCKERS & LOGISTICS NETWORK */}
       <section id="lockers" className="max-w-7xl mx-auto px-4 sm:px-8 py-12">
-        <div className="bg-[#111827] text-white rounded-2xl p-6 sm:p-10">
+        <div className="bg-[#0E121B] text-white rounded-3xl p-7 sm:p-12 shadow-xl relative overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-6 space-y-4">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#C88A35] block">
-                Frictionless Commuter Logistics
+              <span className="inline-flex items-center gap-2 bg-white/10 text-neutral-200 px-3.5 py-1.5 rounded-full text-xs font-medium backdrop-blur-xs">
+                <span>📍</span> Frictionless Commuter Logistics
               </span>
               <h2 className="text-2xl sm:text-4xl font-bold tracking-tight">
                 1,400+ Smart Lockers & Collection Hubs.
               </h2>
-              <p className="text-xs sm:text-sm text-[#D1D5DB] leading-relaxed">
+              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
                 Powered by Bob Go courier aggregation (The Courier Guy, Pargo,
                 PEP Paxi). Collect your drops on your daily commute at transit
                 stations, spaza counters, and retail plazas.
               </p>
 
-              <div className="grid grid-cols-2 gap-3 pt-2 font-mono text-xs">
-                <div className="bg-white/5 border border-white/10 p-3 rounded-lg">
-                  <span className="text-[#C88A35] font-bold block">
+              <div className="grid grid-cols-2 gap-3.5 pt-2">
+                <div className="bg-white/10 backdrop-blur-xs p-4 rounded-2xl transition-all">
+                  <span className="text-white font-bold text-sm block">
                     48-Hour SLA
                   </span>
-                  <span className="text-[10px] text-[#9CA3AF]">
+                  <span className="text-xs text-gray-300 block mt-0.5">
                     Direct brand dispatch
                   </span>
                 </div>
-                <div className="bg-white/5 border border-white/10 p-3 rounded-lg">
-                  <span className="text-[#C88A35] font-bold block">
+                <div className="bg-white/10 backdrop-blur-xs p-4 rounded-2xl transition-all">
+                  <span className="text-white font-bold text-sm block">
                     WhatsApp PIN
                   </span>
-                  <span className="text-[10px] text-[#9CA3AF]">
+                  <span className="text-xs text-gray-300 block mt-0.5">
                     Contactless locker access
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="lg:col-span-6 bg-white text-[#111827] rounded-xl p-5 space-y-3">
-              <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-2">
-                <span className="text-xs font-bold uppercase">
+            <div className="lg:col-span-6 bg-white text-[#111827] rounded-2xl p-6 sm:p-7 shadow-xl space-y-4">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
                   Current Collection Hub:
                 </span>
-                <span className="text-xs font-bold text-[#059669]">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700">
                   Free over R 650
                 </span>
               </div>
-              <div className="p-3 bg-[#F3F4F6] rounded-lg">
-                <span className="text-xs font-bold block">
+              <div className="p-4 bg-gray-50 rounded-xl space-y-1">
+                <span className="text-sm font-bold text-gray-900 block">
                   {selectedStation.name}
                 </span>
-                <span className="text-[11px] text-[#6B6964] block">
+                <span className="text-xs text-gray-500 block">
                   {selectedStation.address}
                 </span>
-                <span className="text-[10px] font-mono text-[#C88A35] block mt-1">
+                <span className="text-xs font-medium text-gray-600 block pt-1">
                   {selectedStation.commuterTag}
                 </span>
               </div>
               <button
                 onClick={() => setIsLockerPickerOpen(true)}
-                className="w-full bg-[#111827] text-white py-2.5 rounded-lg text-xs font-bold hover:bg-black transition-colors"
+                className="w-full bg-[#111827] hover:bg-black text-white py-3 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
               >
                 Change Locker Location ({lockerStations.length} Hubs Available)
               </button>
@@ -1602,19 +1602,19 @@ export default function App() {
       {/* 6. BASH-INSPIRED MARKETPLACE FOOTER */}
       <footer className="bg-white border-t border-[#E5E7EB] pt-14 pb-24 md:pb-12 text-[#111827]">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          {/* Main 4-Column Grid directly matching Bash layout */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 pb-12 border-b border-[#E5E7EB]">
+          {/* Main 3-Column Grid without TFG services */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 pb-12 border-b border-[#E5E7EB]">
             {/* Column 1: Quick Action Utility List with Icons & Dividers */}
-            <div className="lg:col-span-4 space-y-0 divide-y divide-[#E5E7EB]">
+            <div className="lg:col-span-5 space-y-0 divide-y divide-[#E5E7EB]">
               {/* Row 1: Pay online */}
               <div
                 onClick={() => {
                   alert("Pay online with Capitec 1-Tap QR, Payflex 4x 0% installments, Ozow Instant EFT, or Visa/Mastercard at checkout.")
                 }}
-                className="py-3.5 first:pt-0 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-[#C88A35] cursor-pointer transition-colors group"
+                className="py-3.5 first:pt-0 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-black cursor-pointer transition-colors group"
               >
                 <svg
-                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:text-[#C88A35] transition-colors"
+                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:scale-110 transition-transform"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.75"
@@ -1623,16 +1623,16 @@ export default function App() {
                   <rect x="2" y="5" width="20" height="14" rx="2" />
                   <line x1="2" y1="10" x2="22" y2="10" />
                 </svg>
-                <span>Pay your order online</span>
+                <span className="group-hover:translate-x-0.5 transition-transform">Pay your order online</span>
               </div>
 
               {/* Row 2: Track order */}
               <div
                 onClick={() => setIsTrackingModalOpen(true)}
-                className="py-3.5 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-[#C88A35] cursor-pointer transition-colors group"
+                className="py-3.5 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-black cursor-pointer transition-colors group"
               >
                 <svg
-                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:text-[#C88A35] transition-colors"
+                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:scale-110 transition-transform"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.75"
@@ -1649,7 +1649,7 @@ export default function App() {
                     d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"
                   />
                 </svg>
-                <span>Track your order</span>
+                <span className="group-hover:translate-x-0.5 transition-transform">Track your order</span>
               </div>
 
               {/* Row 3: Log a return */}
@@ -1657,10 +1657,10 @@ export default function App() {
                 onClick={() => {
                   alert("Returns & Exchanges: Independent labels offer 7-day unworn returns and size exchanges. Log directly via WhatsApp or your order tracking code.")
                 }}
-                className="py-3.5 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-[#C88A35] cursor-pointer transition-colors group"
+                className="py-3.5 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-black cursor-pointer transition-colors group"
               >
                 <svg
-                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:text-[#C88A35] transition-colors"
+                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:scale-110 transition-transform"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.75"
@@ -1672,16 +1672,16 @@ export default function App() {
                     d="M3 10h10a5 5 0 015 5v2m0 0l-4-4m4 4l4-4M3 10l4-4M3 10l4 4"
                   />
                 </svg>
-                <span>Log a return</span>
+                <span className="group-hover:translate-x-0.5 transition-transform">Log a return</span>
               </div>
 
               {/* Row 4: Find nearest locker or store */}
               <div
                 onClick={() => setIsLockerPickerOpen(true)}
-                className="py-3.5 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-[#C88A35] cursor-pointer transition-colors group"
+                className="py-3.5 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-black cursor-pointer transition-colors group"
               >
                 <svg
-                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:text-[#C88A35] transition-colors"
+                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:scale-110 transition-transform"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.75"
@@ -1698,7 +1698,7 @@ export default function App() {
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                <span>Find your nearest store or locker</span>
+                <span className="group-hover:translate-x-0.5 transition-transform">Find your nearest store or locker</span>
               </div>
 
               {/* Row 5: Get the app */}
@@ -1706,24 +1706,27 @@ export default function App() {
                 onClick={() => {
                   alert("Le Benkeleng Mobile PWA is optimized for all iOS & Android browsers! Tap Share > 'Add to Home Screen' for instant drop notifications.")
                 }}
-                className="py-3.5 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-[#C88A35] cursor-pointer transition-colors group"
+                className="py-3.5 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-black cursor-pointer transition-colors group"
               >
                 <svg
-                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:text-[#C88A35] transition-colors"
+                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:scale-110 transition-transform"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.75"
                   viewBox="0 0 24 24"
                 >
-                  <rect x="5" y="2" width="14" height="20" rx="3" />
-                  <line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="2" strokeLinecap="round" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  />
                 </svg>
-                <span>Get the Le Benkeleng app</span>
+                <span className="group-hover:translate-x-0.5 transition-transform">Le Benkeleng Web & Mobile PWA</span>
               </div>
             </div>
 
-            {/* Column 2: Le Benkeleng Help (mirrors Bash Help) */}
-            <div className="lg:col-span-3 space-y-3">
+            {/* Column 2: Le Benkeleng Help */}
+            <div className="lg:col-span-4 space-y-3">
               <h3 className="font-bold text-sm text-[#111827]">
                 Le Benkeleng Help
               </h3>
@@ -1738,7 +1741,7 @@ export default function App() {
                     }}
                     className="hover:text-[#111827] hover:underline"
                   >
-                    Bash Help home
+                    Help home
                   </a>
                 </li>
                 <li>
@@ -1746,7 +1749,7 @@ export default function App() {
                     onClick={() => setIsLockerPickerOpen(true)}
                     className="hover:text-[#111827] hover:underline text-left cursor-pointer"
                   >
-                    Collect and Deliver
+                    Collect and Deliver (Lockers)
                   </button>
                 </li>
                 <li>
@@ -1774,11 +1777,19 @@ export default function App() {
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#/vault"
-                    className="hover:text-[#111827] hover:underline"
+                  <button
+                    onClick={() => setIsVendorModalOpen(true)}
+                    className="hover:text-[#111827] hover:underline text-left cursor-pointer"
                   >
-                    Airtime, data & vouchers
+                    Sell with us (13% Commission)
+                  </button>
+                </li>
+                <li>
+                  <a
+                    href="#/vendor"
+                    className="hover:text-[#C88A35] hover:underline font-semibold flex items-center gap-1"
+                  >
+                    <span>🔒</span> Atelier Studio & Merchant Portal
                   </a>
                 </li>
                 <li>
@@ -1791,68 +1802,11 @@ export default function App() {
                     Contact us
                   </span>
                 </li>
-                <li>
-                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
-                    Knowledge Hub
-                  </span>
-                </li>
               </ul>
             </div>
 
-            {/* Column 3: Marketplace services (mirrors TFG services) */}
+            {/* Column 3: Company */}
             <div className="lg:col-span-3 space-y-3">
-              <h3 className="font-bold text-sm text-[#111827]">
-                TFG services
-              </h3>
-              <ul className="space-y-2.5 text-xs text-[#6B7280]">
-                <li>
-                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
-                    TFG Financial Services
-                  </span>
-                </li>
-                <li>
-                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
-                    TFG Money account
-                  </span>
-                </li>
-                <li>
-                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
-                    TFG Rewards
-                  </span>
-                </li>
-                <li>
-                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
-                    TFG Insurance
-                  </span>
-                </li>
-                <li>
-                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
-                    TFG Connect airtime & data
-                  </span>
-                </li>
-                <li>
-                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
-                    TFG Media
-                  </span>
-                </li>
-                <li>
-                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
-                    Repairs, valuation & ring sizing
-                  </span>
-                </li>
-                <li>
-                  <a
-                    href="#/vendor"
-                    className="hover:text-[#C88A35] hover:underline font-semibold flex items-center gap-1"
-                  >
-                    <span>🔒</span> Atelier Studio & Merchant Portal
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 4: Company (mirrors Company) */}
-            <div className="lg:col-span-2 space-y-3">
               <h3 className="font-bold text-sm text-[#111827]">Company</h3>
               <ul className="space-y-2.5 text-xs text-[#6B7280]">
                 <li>
@@ -1860,7 +1814,7 @@ export default function App() {
                     onClick={() => setIsLockerPickerOpen(true)}
                     className="hover:text-[#111827] hover:underline text-left cursor-pointer"
                   >
-                    Store finder
+                    Store & Locker finder
                   </button>
                 </li>
                 <li>
@@ -1868,7 +1822,7 @@ export default function App() {
                     href="#/brands"
                     className="hover:text-[#111827] hover:underline"
                   >
-                    About Bash
+                    About Le Benkeleng
                   </a>
                 </li>
                 <li>
@@ -1876,7 +1830,7 @@ export default function App() {
                     href="#/brand/lesupa-atelier"
                     className="hover:text-[#111827] hover:underline"
                   >
-                    About TFG - The Foschini Group Ltd.
+                    About Gauteng Streetwear
                   </a>
                 </li>
                 <li>
@@ -1889,7 +1843,7 @@ export default function App() {
                     onClick={() => setIsVendorModalOpen(true)}
                     className="hover:text-[#111827] hover:underline text-left cursor-pointer"
                   >
-                    Bash Careers
+                    Careers & Designer Submissions
                   </button>
                 </li>
               </ul>
@@ -1978,17 +1932,19 @@ export default function App() {
 
         <a
           href="#/vault"
-          className="flex flex-col items-center gap-1 hover:text-[#111827]"
+          className={`flex flex-col items-center gap-1 ${
+            currentRoute.type === "vault" ? "text-black font-bold" : "hover:text-[#111827]"
+          }`}
         >
           <span className="text-base">⚡</span>
-          <span className="text-[10px]">Vault</span>
+          <span className="text-[10px]">Thrift Zone</span>
         </a>
 
         <a
           href="#/vendor"
           className={`flex flex-col items-center gap-1 ${
             currentRoute.type === "vendor-portal"
-              ? "text-[#C88A35] font-bold"
+              ? "text-black font-bold"
               : "hover:text-[#111827]"
           }`}
           title="Merchant Studio"
@@ -2159,9 +2115,9 @@ export default function App() {
                           setIsMobileMenuOpen(false)
                           navigateTo("#/vault")
                         }}
-                        className="text-left px-3 py-2 rounded-lg bg-amber-50 text-amber-900 hover:bg-amber-900 hover:text-white text-xs font-bold transition-all cursor-pointer"
+                        className="text-left px-3 py-2 rounded-lg bg-neutral-100 text-neutral-800 hover:bg-black hover:text-white text-xs font-bold transition-all cursor-pointer"
                       >
-                        1-of-1 Vault ⚡
+                        Thrift Zone ⚡
                       </button>
                     </div>
                   </div>
@@ -2647,24 +2603,24 @@ export default function App() {
       {/* 11. LOCKER PICKER MODAL */}
       {isLockerPickerOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white max-w-xl w-full rounded-2xl shadow-2xl p-6 relative max-h-[85vh] overflow-y-auto">
+          <div className="bg-white max-w-xl w-full rounded-3xl shadow-2xl p-6 sm:p-8 relative max-h-[85vh] overflow-y-auto">
             <button
               onClick={() => setIsLockerPickerOpen(false)}
-              className="absolute top-4 right-4 text-[#6B7280] hover:text-[#111827]"
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-[#6B7280] hover:text-[#111827] flex items-center justify-center text-sm transition-colors cursor-pointer"
             >
               ✕
             </button>
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#C88A35] block">
-              1,400+ Smart Lockers & Spaza Hubs
+            <span className="inline-flex items-center gap-1.5 bg-neutral-100 text-neutral-800 px-3 py-1 rounded-full text-xs font-semibold mb-2">
+              <span>📍</span> 1,400+ Smart Lockers & Spaza Hubs
             </span>
-            <h3 className="text-xl font-bold text-[#111827] mt-0.5">
+            <h3 className="text-xl font-bold text-[#111827]">
               Select Your Preferred Pickup Hub
             </h3>
             <p className="text-xs text-[#6B7280] mt-1">
               Select a secure pickup point along your transit or campus route.
             </p>
 
-            <div className="mt-4 space-y-2.5">
+            <div className="mt-5 space-y-3">
               {lockerStations.map((station) => (
                 <div
                   key={station.id}
@@ -2672,25 +2628,25 @@ export default function App() {
                     setSelectedStation(station)
                     setIsLockerPickerOpen(false)
                   }}
-                  className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                  className={`p-4 rounded-2xl border cursor-pointer transition-all ${
                     selectedStation.id === station.id
-                      ? "border-[#111827] bg-[#F9FAFB] ring-1 ring-[#111827]"
-                      : "border-[#E5E7EB] hover:border-[#9CA3AF] bg-white"
+                      ? "border-black bg-neutral-50 shadow-xs ring-1 ring-black"
+                      : "border-[#E5E7EB] hover:border-neutral-400 bg-white"
                   }`}
                 >
-                  <div className="flex items-center justify-between text-[11px] font-mono">
-                    <span className="font-bold text-[#C88A35]">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-[#111827]">
                       {station.city}
                     </span>
-                    <span className="text-[#6B7280]">{station.distance}</span>
+                    <span className="text-[#6B7280] font-medium">{station.distance}</span>
                   </div>
-                  <h4 className="font-bold text-sm text-[#111827] mt-0.5">
+                  <h4 className="font-bold text-sm text-[#111827] mt-1">
                     {station.name}
                   </h4>
                   <p className="text-xs text-[#6B7280] mt-0.5">
                     {station.address}
                   </p>
-                  <div className="mt-2 text-[10px] font-mono text-[#111827] bg-[#F3F4F6] p-1.5 rounded">
+                  <div className="mt-2.5 text-xs text-gray-700 bg-neutral-100 p-2 rounded-xl">
                     {station.commuterTag}
                   </div>
                 </div>

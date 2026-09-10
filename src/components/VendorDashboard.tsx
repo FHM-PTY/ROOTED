@@ -398,7 +398,7 @@ export default function VendorDashboard({
             <span className="text-xl font-black uppercase font-display tracking-tight text-white">
               LE BENKELENG
             </span>
-            <span className="bg-[#C88A35]/20 text-[#C88A35] text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase border border-[#C88A35]/40">
+            <span className="bg-white/10 text-neutral-300 text-[10px] font-mono font-medium px-2.5 py-1 rounded-full uppercase tracking-wider backdrop-blur-xs">
               Merchant Studio 🔒
             </span>
           </div>
@@ -412,9 +412,9 @@ export default function VendorDashboard({
         </div>
 
         {/* Center Card */}
-        <div className="max-w-md w-full mx-auto my-8 bg-[#161B26] border border-gray-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative">
+        <div className="max-w-md w-full mx-auto my-8 bg-[#161B26] rounded-3xl p-6 sm:p-8 shadow-2xl relative">
           <div className="text-center space-y-2">
-            <div className="w-14 h-14 bg-[#1F2937] border border-gray-700 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-inner">
+            <div className="w-14 h-14 bg-white/10 rounded-2xl mx-auto flex items-center justify-center text-2xl backdrop-blur-xs">
               🔒
             </div>
             <h2 className="text-2xl font-bold text-white tracking-tight">Atelier Studio Login</h2>
@@ -424,7 +424,7 @@ export default function VendorDashboard({
           </div>
 
           {loginError && (
-            <div className="mt-4 bg-red-950/60 border border-red-800 text-red-300 text-xs p-3 rounded-xl flex items-center gap-2">
+            <div className="mt-4 bg-red-950/40 text-red-300 text-xs p-3 rounded-xl flex items-center gap-2">
               <span>⚠️</span>
               <span>{loginError}</span>
             </div>
@@ -440,7 +440,7 @@ export default function VendorDashboard({
                 placeholder="e.g. lesupa-atelier or Mokasi"
                 value={loginIdentifier}
                 onChange={(e) => setLoginIdentifier(e.target.value)}
-                className="w-full bg-[#0E121B] border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:border-[#C88A35] transition-colors"
+                className="w-full bg-white/5 focus:bg-white/10 rounded-xl p-3 text-white placeholder-gray-500 text-xs focus:outline-none focus:ring-1 focus:ring-white/30 transition-all"
                 required
               />
             </div>
@@ -454,28 +454,28 @@ export default function VendorDashboard({
                 placeholder="••••••••"
                 value={loginPin}
                 onChange={(e) => setLoginPin(e.target.value)}
-                className="w-full bg-[#0E121B] border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:border-[#C88A35] transition-colors tracking-widest"
+                className="w-full bg-white/5 focus:bg-white/10 rounded-xl p-3 text-white placeholder-gray-500 text-xs focus:outline-none focus:ring-1 focus:ring-white/30 transition-all tracking-widest"
                 required
               />
             </div>
 
             <div className="flex items-center justify-between text-[11px] text-gray-400">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" defaultChecked className="rounded border-gray-700 bg-gray-900 accent-[#C88A35]" />
+                <input type="checkbox" defaultChecked className="rounded bg-gray-900 accent-white" />
                 <span>Remember this Atelier device</span>
               </label>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-[#C88A35] hover:bg-[#B37827] text-white font-bold py-3 rounded-xl transition-all shadow-lg text-xs"
+              className="w-full bg-white hover:bg-neutral-200 text-black font-bold py-3 rounded-xl transition-all shadow-md text-xs cursor-pointer"
             >
               Sign In to Atelier Studio →
             </button>
           </form>
 
           {/* Quick Demo Access Passkeys (For seamless verification without cross-brand leaks) */}
-          <div className="mt-6 pt-5 border-t border-gray-800">
+          <div className="mt-6 pt-5 border-t border-white/10">
             <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider block text-center mb-2.5">
               ⚡ Quick Demo Verification Passkeys:
             </span>
@@ -484,7 +484,7 @@ export default function VendorDashboard({
                 <button
                   key={v.id}
                   onClick={() => handleLogin(undefined, v)}
-                  className="bg-[#1F2937] hover:bg-gray-700 border border-gray-700 rounded-xl p-2 text-left flex items-center gap-2 transition-all group"
+                  className="bg-white/5 hover:bg-white/10 rounded-xl p-2.5 text-left flex items-center gap-2.5 transition-all cursor-pointer group backdrop-blur-xs"
                 >
                   <div
                     className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[10px] font-bold shrink-0"
@@ -531,7 +531,7 @@ export default function VendorDashboard({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-base font-black tracking-tight">{activeVendor.name}</span>
-                <span className="bg-emerald-500/20 text-emerald-400 text-[9px] font-mono font-bold px-2 py-0.5 rounded border border-emerald-500/30">
+                <span className="bg-emerald-500/15 text-emerald-300 text-[9px] font-mono font-bold px-2.5 py-0.5 rounded-full">
                   🔒 Studio Active
                 </span>
                 {staffRole === "staff" && (
@@ -553,7 +553,7 @@ export default function VendorDashboard({
               onClick={togglePrivacyShield}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                 privacyShield
-                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                  ? "bg-amber-500/15 text-amber-300 font-bold"
                   : "bg-white/10 hover:bg-white/20 text-gray-200"
               }`}
               title="Mask financial amounts from shoulder surfing"
@@ -577,7 +577,7 @@ export default function VendorDashboard({
             {/* View Live Brand Page */}
             <button
               onClick={() => onNavigateBrand(activeVendor.slug)}
-              className="bg-[#C88A35] hover:bg-[#B37827] text-white font-bold px-3 py-1.5 rounded-lg transition-colors"
+              className="bg-white hover:bg-neutral-200 text-black font-semibold px-3.5 py-1.5 rounded-xl transition-all shadow-xs text-xs cursor-pointer"
             >
               Public Storefront →
             </button>
@@ -585,7 +585,7 @@ export default function VendorDashboard({
             {/* Lock Studio & Sign Out */}
             <button
               onClick={handleSignOut}
-              className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+              className="bg-red-500/15 hover:bg-red-500/25 text-red-200 font-bold px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1 cursor-pointer"
             >
               <span>🔒 Lock Studio</span>
             </button>
@@ -596,9 +596,9 @@ export default function VendorDashboard({
         <div className="max-w-7xl mx-auto px-4 sm:px-8 flex items-center gap-6 overflow-x-auto text-xs font-bold border-t border-gray-800">
           <button
             onClick={() => setActiveTab("inventory")}
-            className={`py-3 border-b-2 transition-colors flex items-center gap-2 ${
+            className={`py-3.5 border-b-2 transition-colors flex items-center gap-2 cursor-pointer ${
               activeTab === "inventory"
-                ? "border-[#C88A35] text-[#C88A35]"
+                ? "border-white text-white"
                 : "border-transparent text-gray-400 hover:text-white"
             }`}
           >
@@ -612,14 +612,14 @@ export default function VendorDashboard({
           {staffRole === "founder" && (
             <button
               onClick={() => setActiveTab("overview")}
-              className={`py-3 border-b-2 transition-colors flex items-center gap-2 ${
+              className={`py-3.5 border-b-2 transition-colors flex items-center gap-2 cursor-pointer ${
                 activeTab === "overview"
-                  ? "border-[#C88A35] text-[#C88A35]"
+                  ? "border-white text-white"
                   : "border-transparent text-gray-400 hover:text-white"
               }`}
             >
               <span>📊 Sales & Payouts</span>
-              <span className="bg-[#C88A35]/20 text-[#C88A35] px-2 py-0.5 rounded-full text-[10px] font-mono">
+              <span className="bg-white/10 text-white px-2 py-0.5 rounded-full text-[10px] font-mono">
                 {maskAmount(analytics.netPayout)}
               </span>
             </button>
@@ -627,15 +627,15 @@ export default function VendorDashboard({
 
           <button
             onClick={() => setActiveTab("orders")}
-            className={`py-3 border-b-2 transition-colors flex items-center gap-2 ${
+            className={`py-3.5 border-b-2 transition-colors flex items-center gap-2 cursor-pointer ${
               activeTab === "orders"
-                ? "border-[#C88A35] text-[#C88A35]"
+                ? "border-white text-white"
                 : "border-transparent text-gray-400 hover:text-white"
             }`}
           >
             <span>🚚 Bob Go Orders & Logistics</span>
             {analytics.activeOrdersCount > 0 && (
-              <span className="bg-amber-500 text-black px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold">
+              <span className="bg-white text-black px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold">
                 {analytics.activeOrdersCount}
               </span>
             )}
@@ -644,9 +644,9 @@ export default function VendorDashboard({
           {staffRole === "founder" && (
             <button
               onClick={() => setActiveTab("storefront")}
-              className={`py-3 border-b-2 transition-colors flex items-center gap-2 ${
+              className={`py-3.5 border-b-2 transition-colors flex items-center gap-2 cursor-pointer ${
                 activeTab === "storefront"
-                  ? "border-[#C88A35] text-[#C88A35]"
+                  ? "border-white text-white"
                   : "border-transparent text-gray-400 hover:text-white"
               }`}
             >
@@ -1020,10 +1020,10 @@ export default function VendorDashboard({
               </div>
 
               <div className="bg-white p-5 rounded-2xl border border-[#E5E7EB] space-y-1">
-                <span className="text-[10px] font-mono font-bold text-[#C88A35] uppercase">
+                <span className="text-[10px] font-mono font-bold text-gray-500 uppercase">
                   48-Hour Dispatch SLA
                 </span>
-                <div className="text-2xl font-black text-[#C88A35] font-display">
+                <div className="text-2xl font-black text-emerald-600 font-display">
                   98.5%
                 </div>
                 <span className="text-[10px] text-[#6B7280] block">Pretoria / Gauteng Bob Go courier handoff</span>
@@ -1402,8 +1402,8 @@ export default function VendorDashboard({
               ✕
             </button>
 
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#C88A35] block">
-              {productToEdit ? "Modify Existing Piece" : "New Collection Addition"}
+            <span className="inline-flex items-center gap-1.5 bg-neutral-100 text-neutral-800 px-3 py-1 rounded-full text-xs font-semibold mb-1">
+              <span>✦</span> {productToEdit ? "Modify Existing Piece" : "New Collection Addition"}
             </span>
             <h3 className="text-xl font-bold text-[#111827] mt-0.5">
               {productToEdit ? `Edit "${productToEdit.title}"` : `Add Piece to ${activeVendor.name}`}
@@ -1667,7 +1667,7 @@ export default function VendorDashboard({
               {formIsThrift && (
                 <div className="border border-amber-200 bg-amber-50 rounded-xl p-4 space-y-3">
                   <span className="text-[10px] font-mono font-bold text-amber-900 uppercase block">
-                    1-of-1 Curated Vintage Specs (Dunusa Vault)
+                    1-of-1 Curated Vintage Specs (Thrift Zone)
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>

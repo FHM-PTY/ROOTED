@@ -69,10 +69,10 @@ const lockerStations: LockerStation[] = [
     name: "Diepkloof Zone 4 Spaza Hub",
     address: "Mthembu Superette, 1248 Immink Dr, Diepkloof, Soweto",
     hours: "07:00 – 21:00 Daily",
-    type: "Spaza Collection Counter",
+    type: "Community Collection Counter",
     distance: "0.6 km",
     city: "Soweto",
-    commuterTag: "🏪 Local Spaza Concierge • 🚕 Zone 4 Rank",
+    commuterTag: "🏪 Local Collection Hub • 🚕 Zone 4 Taxi Rank",
   },
   {
     id: "loc-2",
@@ -142,12 +142,12 @@ const vendors: Vendor[] = [
     productCount: 42,
     coordinates: "25.7479° S, 28.2293° E",
     isThrift: false,
-    specialty: "High-GSM Combed Cotton & Pitori Cut",
+    specialty: "High-GSM Combed Cotton & Minimalist Boxy Cut",
   },
   {
     id: 2,
     name: "Mokasi Streetwear",
-    tagline: "Pitori kasi silhouettes, oversized double-knit tracksuits & bold vernacular prints",
+    tagline: "Pretoria urban silhouettes, oversized double-knit tracksuits & bold streetwear prints",
     origin: "Mamelodi & Soshanguve, Pretoria",
     city: "Pretoria",
     gender: ["UNISEX", "MEN", "WOMEN"],
@@ -158,7 +158,7 @@ const vendors: Vendor[] = [
     productCount: 38,
     coordinates: "25.7069° S, 28.3275° E",
     isThrift: false,
-    specialty: "Kasi Drip & Oversized Street Cuts",
+    specialty: "Oversized Streetwear Cuts & Heavy Cotton",
   },
   {
     id: 3,
@@ -181,7 +181,7 @@ const vendors: Vendor[] = [
   {
     id: 4,
     name: "Soweto Threads",
-    tagline: "Heritage raw selvage denim, chainstitched kasi tailoring & formal pleats",
+    tagline: "Heritage raw selvage denim, chainstitched tailoring & formal pleats",
     origin: "Orlando West, Soweto",
     city: "Soweto",
     gender: ["MEN", "WOMEN", "UNISEX"],
@@ -315,7 +315,7 @@ const products: Product[] = [
     origin: "Arcadia, Pretoria",
     fabric: "280 GSM Combed Ring-Spun Cotton",
     sizes: ["S", "M", "L", "XL"],
-    description: "Architecturally cut with a high ribbed collar, dropped shoulder seams, and subtle tone-on-tone embroidery. Designed for the modern Pitori aesthete.",
+    description: "Architecturally cut with a high ribbed collar, dropped shoulder seams, and subtle tone-on-tone embroidery. Designed for the modern South African streetwear enthusiast.",
     isNew: true,
     isPretoria: true,
   },
@@ -330,11 +330,11 @@ const products: Product[] = [
     originalPrice: 1750,
     image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=900&q=80",
     secondaryImage: "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?auto=format&fit=crop&w=900&q=80",
-    badge: "PITORI DRIP",
+    badge: "PRETORIA CUT",
     origin: "Mamelodi, Pretoria",
     fabric: "420 GSM Double-Knit Cotton Interlock",
     sizes: ["M", "L", "XL"],
-    description: "Cut with extreme volume through the sleeve and stacked hem trousers. Embroidered with Mokasi's signature township stamp in antique ochre thread.",
+    description: "Cut with extreme volume through the sleeve and stacked hem trousers. Embroidered with Mokasi's signature brand stamp in antique ochre thread.",
     isNew: true,
     isPretoria: true,
   },
@@ -449,7 +449,7 @@ const products: Product[] = [
     badge: "1-OF-1 DUNUSA ARCHIVE",
     origin: "Diepkloof Zone 2, Soweto",
     fabric: "Heavy Aniline Calfskin Leather & Quilted Lining",
-    sizes: ["XL (Tailored Swenka Cut)"],
+    sizes: ["XL (Tailored Boxy Fit)"],
     description: "Authentic Sophiatown jazz-era silhouette. Deep aged espresso patina with original shearling collar and heavy Talon zipper. Triple conditioned.",
     isThrift: true,
     condition: "★ Grade A (Rich Natural Patina)",
@@ -530,7 +530,7 @@ const products: Product[] = [
     originalPrice: 1100,
     image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=900&q=80",
     secondaryImage: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=900&q=80",
-    badge: "SWENKA FORMAL",
+    badge: "TAILORED FORMAL",
     origin: "Orlando West, Soweto",
     fabric: "100% Heavy Twill Cotton (320 GSM)",
     sizes: ["30", "32", "34", "36"],
@@ -538,7 +538,7 @@ const products: Product[] = [
   },
   {
     id: 13,
-    title: "Lesupa Minimalist Pitori Waxed Tote",
+    title: "Lesupa Minimalist Commuter Waxed Tote",
     brand: "Lesupa Atelier",
     category: "accessories",
     city: "Pretoria",
@@ -551,7 +551,7 @@ const products: Product[] = [
     origin: "Hatfield, Pretoria",
     fabric: "16oz Waxed Canvas & Full Grain Leather Handles",
     sizes: ["One Size (18L)"],
-    description: "Clean architectural carryall engineered for laptop commuting between Hatfield, Menlyn, and Jozi. Weather-resistant finish.",
+    description: "Clean architectural carryall engineered for laptop commuting between Hatfield, Menlyn, and Johannesburg. Weather-resistant finish.",
     isPretoria: true,
   },
   {
@@ -752,35 +752,35 @@ export default function App() {
 
   const applyVoucher = (code: string) => {
     const clean = code.trim().toUpperCase();
-    if (clean === "SWENKA10") {
+    if (clean === "LOCAL10" || clean === "SWENKA10") {
       setAppliedDiscount(10);
-      setVoucherMessage("✓ 'SWENKA10' applied: 10% off your entire order");
-    } else if (clean === "DUNUSA") {
+      setVoucherMessage("✓ 'LOCAL10' applied: 10% off your entire order");
+    } else if (clean === "VINTAGE15" || clean === "DUNUSA") {
       setAppliedDiscount(15);
-      setVoucherMessage("✓ 'DUNUSA' applied: 15% off Dunusa Archival pieces");
-    } else if (clean === "PITORI") {
+      setVoucherMessage("✓ 'VINTAGE15' applied: 15% off Dunusa Archival vintage pieces");
+    } else if (clean === "PRETORIA12" || clean === "PITORI") {
       setAppliedDiscount(12);
-      setVoucherMessage("✓ 'PITORI' applied: 12% off Pretoria labels (Lesupa/Mokasi)");
+      setVoucherMessage("✓ 'PRETORIA12' applied: 12% off Pretoria labels (Lesupa/Mokasi)");
     } else {
-      setVoucherMessage("✕ Invalid code. Try SWENKA10, DUNUSA, or PITORI");
+      setVoucherMessage("✕ Invalid code. Try LOCAL10, VINTAGE15, or PRETORIA12");
     }
   };
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#0E0E10] font-sans antialiased selection:bg-[#0E0E10] selection:text-[#FAF7F2]">
-      {/* 1. TOP ANNOUNCEMENT MARQUEE — PITORI TO JOZI CULTURE */}
+      {/* 1. TOP ANNOUNCEMENT MARQUEE */}
       <aside aria-label="Announcement banner" className="bg-[#0E0E10] text-[#FAF7F2] border-b border-[#FAF7F2]/10 py-2.5 overflow-hidden select-none text-[11px] tracking-[0.22em] uppercase font-mono">
         <div className="flex marquee-track whitespace-nowrap gap-12 items-center">
           <span className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[#C88A35] inline-block animate-ping"></span>
-            PRETORIA (012) TO JOZI STREETWEAR DROP
+            PRETORIA (012) TO JOHANNESBURG STREETWEAR MARKETPLACE
           </span>
           <span className="text-[#C88A35]">✦</span>
-          <span>FREE LOCKER & SPAZA HUB PICKUP NATIONWIDE ON ORDERS OVER R 650</span>
+          <span>FREE SMART LOCKER & HUB PICKUP NATIONWIDE ON ORDERS OVER R 650</span>
           <span className="text-[#C88A35]">✦</span>
           <span>FEATURING LESUPA ATELIER, MOKASI & SOWETO THREADS</span>
           <span className="text-[#C88A35]">✦</span>
-          <span>100% AUTHENTIC 1-OF-1 DUNUSA ARCHIVE</span>
+          <span>100% AUTHENTIC 1-OF-1 CURATED VINTAGE ARCHIVE</span>
           <span className="text-[#C88A35]">✦</span>
           <span>PAY IN 4 INTEREST-FREE WITH PAYFLEX · CAPITEC 1-TAP QR</span>
           <span className="text-[#C88A35]">✦</span>
@@ -834,7 +834,7 @@ export default function App() {
               LE BENKELENG
             </span>
             <span className="text-[10px] tracking-[0.35em] uppercase text-[#6B6964] font-mono mt-0.5">
-              EST. 2026 · PRETORIA · SOWETO · JOZI · DURBAN
+              EST. 2026 · PRETORIA · SOWETO · JOHANNESBURG · DURBAN
             </span>
           </div>
 
@@ -878,9 +878,9 @@ export default function App() {
             <button
               onClick={() => setIsCartOpen(true)}
               className="flex items-center gap-2.5 bg-[#0E0E10] text-[#FAF7F2] px-4 py-2 text-[12px] uppercase tracking-[0.18em] font-medium hover:bg-[#C88A35] transition-colors"
-              aria-label="View Cart"
+              aria-label="View Shopping Bag"
             >
-              <span>Isikhwama</span>
+              <span>Bag</span>
               <span className="bg-[#FAF7F2] text-[#0E0E10] font-mono text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
                 {cart.reduce((acc, item) => acc + item.quantity, 0)}
               </span>
@@ -897,7 +897,7 @@ export default function App() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search Pretoria drip, Soweto raw denim, 1-of-1 Dunusa windbreakers, sizes..."
+                placeholder="Search Pretoria streetwear, Soweto raw denim, 1-of-1 vintage windbreakers, sizes..."
                 className="w-full bg-transparent border-b border-[#0E0E10]/30 py-2 text-sm focus:outline-none focus:border-[#C88A35]"
                 autoFocus
               />
@@ -914,7 +914,7 @@ export default function App() {
         )}
       </header>
 
-      {/* 3. HERO SECTION — "UBUCIKO BASE KASI: PRETORIA TO JOZI" */}
+      {/* 3. HERO SECTION — THE ART OF LOCAL STREETWEAR */}
       <section className="relative border-b border-[#0E0E10]/10 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 py-12 lg:py-20">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -926,13 +926,13 @@ export default function App() {
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-light leading-[1.08] tracking-tight text-[#0E0E10]">
-                Ubuciko <span className="italic font-normal text-[#C88A35]">Base Kasi</span>.
+                The Art of <span className="italic font-normal text-[#C88A35]">Local Streetwear</span>.
                 <br />
-                Pretoria to Jozi.
+                Pretoria to Johannesburg.
               </h1>
 
               <p className="text-base sm:text-lg text-[#6B6964] font-light leading-relaxed max-w-xl">
-                From Arcadia boxy heavyweight tees (Lesupa) and Mamelodi tracksuits (Mokasi) to Orlando West selvage denim and Small Street 1-of-1 Dunusa vintage grails. All local labels on one unified platform with 48h smart locker pickup.
+                From Arcadia boxy heavyweight tees (Lesupa) and Mamelodi tracksuits (Mokasi) to Orlando West selvage denim and Small Street 1-of-1 vintage grails. All local labels on one unified platform with 48h smart locker pickup.
               </p>
 
               {/* Action Buttons */}
@@ -941,13 +941,13 @@ export default function App() {
                   href="#catalog"
                   className="bg-[#0E0E10] text-[#FAF7F2] px-7 py-3.5 text-[12px] uppercase tracking-[0.2em] font-medium hover:bg-[#C88A35] transition-colors"
                 >
-                  Shop Kasi Drip
+                  Shop Streetwear
                 </a>
                 <a
                   href="#dunusa-vault"
                   className="border border-[#0E0E10] text-[#0E0E10] px-7 py-3.5 text-[12px] uppercase tracking-[0.2em] font-medium hover:bg-[#0E0E10] hover:text-[#FAF7F2] transition-colors"
                 >
-                  Dunusa 1-of-1 Vault
+                  1-of-1 Vintage Vault
                 </a>
               </div>
 
@@ -963,7 +963,7 @@ export default function App() {
                 </div>
                 <div>
                   <span className="block text-2xl font-serif font-bold text-[#0E0E10]">1,400+</span>
-                  <span className="text-[10px] uppercase tracking-wider text-[#6B6964]">Locker & Spaza Hubs</span>
+                  <span className="text-[10px] uppercase tracking-wider text-[#6B6964]">Smart Lockers & Hubs</span>
                 </div>
               </div>
             </div>
@@ -1023,7 +1023,7 @@ export default function App() {
 
                 {/* Bottom Overlay Label */}
                 <div className="absolute bottom-4 left-4 right-4 bg-[#0E0E10]/90 backdrop-blur-md text-[#FAF7F2] p-3.5 flex items-center justify-between font-mono text-[11px]">
-                  <span>LOOK 01 · PITORI STREETWEAR ESSENTIALS</span>
+                  <span>LOOK 01 · PRETORIA STREETWEAR ESSENTIALS</span>
                   <span className="text-[#C88A35]">COORDINATES 25.7479° S, 28.2293° E</span>
                 </div>
               </div>
@@ -1129,7 +1129,7 @@ export default function App() {
                 <span>⚡</span> ZERO DUPLICATES · SINGLE PIECES
               </div>
               <h2 className="text-3xl sm:text-4xl font-serif tracking-tight text-[#0E0E10]">
-                The Dunusa Vault <span className="italic text-[#C88A35]">(1-of-1 Stash)</span>
+                The Dunusa Vault <span className="italic text-[#C88A35]">(1-of-1 Vintage Archive)</span>
               </h2>
               <p className="text-sm text-[#6B6964] font-light max-w-2xl">
                 Hand-hunted across Small Street CBD wholesale stashes, Sophiatown private archives, and Durban beachfront arcades. Every piece is triple steam-cleaned, measured to the centimeter, and guaranteed 1-of-1 in South Africa.
@@ -1141,7 +1141,7 @@ export default function App() {
                 onClick={() => setSelectedCategory("thrift")}
                 className="bg-[#0E0E10] text-[#FAF7F2] px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] font-mono hover:bg-[#C88A35] transition-colors"
               >
-                Filter All Dunusa ({products.filter((p) => p.isThrift).length})
+                View All Vintage Pieces ({products.filter((p) => p.isThrift).length})
               </button>
             </div>
           </div>
@@ -1212,7 +1212,7 @@ export default function App() {
                       onClick={() => addToCart(item, item.sizes[0])}
                       className="bg-[#0E0E10] text-[#FAF7F2] px-3 py-1.5 text-[10px] uppercase font-mono tracking-widest hover:bg-[#C88A35] transition-colors"
                     >
-                      Cop 1-of-1
+                      Add 1-of-1 to Bag
                     </button>
                   </div>
                 </div>
@@ -1258,11 +1258,11 @@ export default function App() {
           <div className="flex flex-wrap gap-2 pt-2 border-b border-[#0E0E10]/10 pb-4 text-[11px] uppercase tracking-[0.16em] font-medium">
             {[
               { id: "all", label: "All Drops" },
-              { id: "pretoria", label: "⚡ Pretoria Drip (012)" },
-              { id: "thrift", label: "Dunusa 1-of-1 Grails" },
+              { id: "pretoria", label: "⚡ Pretoria Streetwear (012)" },
+              { id: "thrift", label: "1-of-1 Vintage Archive" },
               { id: "outerwear", label: "Hoodies & Jackets" },
               { id: "workwear", label: "Denim & Workwear" },
-              { id: "kicks", label: "Kicks (Iteki)" },
+              { id: "kicks", label: "Footwear & Sneakers" },
               { id: "accessories", label: "Accessories" },
             ].map((cat) => (
               <button
@@ -1380,7 +1380,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* 7. PRIVATE CLIENT CAPSULE — "THE COMMUTER UNIFORM" (INGUBO EPHELELE) */}
+      {/* 7. PRIVATE CLIENT CAPSULE — "THE COMMUTER UNIFORM" (THE COMPLETE LOOK) */}
       <section className="py-16 bg-[#0E0E10] text-[#FAF7F2]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -1391,10 +1391,10 @@ export default function App() {
               <h2 className="text-3xl sm:text-5xl font-serif font-light leading-tight">
                 The Commuter Uniform.
                 <br />
-                <span className="italic font-normal text-[#C88A35]">Ingubo Ephelele</span>.
+                <span className="italic font-normal text-[#C88A35]">The Complete 3-Piece Look</span>.
               </h2>
               <p className="text-sm sm:text-base text-[#FAF7F2]/70 font-light leading-relaxed">
-                Save R 350 when acquiring the full 3-piece uniform: The Soweto Raw Selvage Denim Jacket, Lesupa Pitori Waxed Messenger Tote, and Soweto Double-Pleated Tailored Chinos.
+                Save R 350 when acquiring the full 3-piece uniform: The Soweto Raw Selvage Denim Jacket, Lesupa Commuter Waxed Tote, and Soweto Double-Pleated Tailored Chinos.
               </p>
 
               <div className="space-y-3 font-mono text-xs border-y border-white/10 py-4">
@@ -1407,7 +1407,7 @@ export default function App() {
                   <span className="text-[#C88A35]">R 950</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>3. Lesupa Minimalist Pitori Waxed Tote (18L)</span>
+                  <span>3. Lesupa Minimalist Commuter Waxed Tote (18L)</span>
                   <span className="text-[#C88A35]">R 450</span>
                 </div>
                 <div className="flex justify-between font-bold pt-2 border-t border-white/10 text-sm">
@@ -1424,7 +1424,7 @@ export default function App() {
                 }}
                 className="bg-[#C88A35] text-black px-8 py-4 text-xs font-mono uppercase tracking-[0.2em] font-bold hover:bg-white transition-colors block text-center"
               >
-                + Add Full 3-Piece Fit to Bag (Save R 350)
+                + Add Complete 3-Piece Look to Bag (Save R 350)
               </button>
             </div>
 
@@ -1518,7 +1518,7 @@ export default function App() {
                 LOGISTICS & ORDER FULFILMENT
               </span>
               <h2 className="text-3xl sm:text-4xl font-serif tracking-tight text-[#0E0E10]">
-                1,400+ Smart Lockers & Spaza Hubs.
+                1,400+ Smart Lockers & Pick-Up Hubs.
               </h2>
               <p className="text-sm text-[#6B6964] font-light leading-relaxed">
                 Aggregated via **Bob Go** (The Courier Guy, Pargo, PEP Paxi) with decentralized vendor dispatch. Pick up your drops on your daily commute with zero home-delivery stress.
@@ -1542,8 +1542,8 @@ export default function App() {
                 <div className="flex items-center gap-3 bg-white p-3 border border-[#0E0E10]/10">
                   <span className="text-lg">🏪</span>
                   <div>
-                    <span className="font-bold block">Spaza & Taxi Rank Proximity</span>
-                    <span className="text-[#6B6964] text-[11px]">Convenient collection stations at major transit interchanges.</span>
+                    <span className="font-bold block">Transit & Retail Location Network</span>
+                    <span className="text-[#6B6964] text-[11px]">Convenient collection lockers at transit centers, malls, and neighborhood hubs.</span>
                   </div>
                 </div>
               </div>
@@ -1688,7 +1688,7 @@ export default function App() {
         </div>
       </footer>
 
-      {/* 12. SLIDE-OUT CART DRAWER (ISIKHWAMA) */}
+      {/* 12. SLIDE-OUT SHOPPING BAG DRAWER */}
       {isCartOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setIsCartOpen(false)} />
@@ -1698,7 +1698,7 @@ export default function App() {
               <div className="p-6 border-b border-[#0E0E10]/10 flex items-center justify-between">
                 <div>
                   <h3 className="font-serif text-xl font-bold uppercase tracking-wider text-[#0E0E10]">
-                    Isikhwama (Cart)
+                    Shopping Bag
                   </h3>
                   <span className="text-[11px] font-mono text-[#6B6964]">
                     {cart.reduce((acc, item) => acc + item.quantity, 0)} Items across South African Labels
@@ -1719,7 +1719,7 @@ export default function App() {
                     <span className="text-3xl">🛍️</span>
                     <h4 className="font-serif text-lg font-bold text-[#0E0E10]">Your Bag is Empty</h4>
                     <p className="text-xs text-[#6B6964] font-light max-w-xs mx-auto">
-                      Explore Pretoria streetwear from Lesupa & Mokasi or unique 1-of-1 Dunusa grails.
+                      Explore independent streetwear from Lesupa, Mokasi, or 1-of-1 vintage pieces.
                     </p>
                     <button
                       onClick={() => setIsCartOpen(false)}
@@ -1854,7 +1854,7 @@ export default function App() {
                     }}
                     className="w-full bg-[#0E0E10] text-[#FAF7F2] py-3.5 text-xs uppercase font-mono tracking-[0.2em] font-bold hover:bg-[#C88A35] transition-colors"
                   >
-                    Bhadala / Proceed to Checkout →
+                    Proceed to Secure Checkout →
                   </button>
                 </div>
               )}
@@ -1975,7 +1975,7 @@ export default function App() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                alert("Sharp! Your brand application has been received. Our curator team will review your lookbook on Instagram/WhatsApp within 24 hours.");
+                alert("Thank you! Your brand application has been received. Our curator team will review your lookbook and catalogue within 24 hours.");
                 setIsVendorModalOpen(false);
               }}
               className="mt-6 space-y-3.5 font-mono text-xs"

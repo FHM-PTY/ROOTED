@@ -5,6 +5,7 @@ import path from 'node:path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: process.env.BASE_PATH || (process.env.GITHUB_ACTIONS ? '/LeBenkeleng/' : '/'),
   plugins: [
     react(),
     tailwindcss(),

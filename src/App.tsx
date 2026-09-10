@@ -1104,46 +1104,6 @@ export default function App() {
       ) : (
         /* MARKETPLACE HOME PAGE VIEW */
         <main>
-          {/* Shop By Brand Strip (Clicking opens brand landing page) */}
-          <section className="bg-white border-b border-[#E5E7EB] py-4 px-4 sm:px-8">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex items-center justify-between mb-2.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">
-                  Featured Independent Labels:
-                </span>
-                <a
-                  href="#/brands"
-                  className="text-xs font-bold text-[#111827] hover:underline"
-                >
-                  View All Brands A–Z →
-                </a>
-              </div>
-
-              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-1">
-                {vendors.map((vendor) => (
-                  <a
-                    key={vendor.id}
-                    href={`#/brand/${vendor.slug}`}
-                    className="flex items-center gap-2.5 px-3.5 py-2 rounded-full border text-xs font-bold shrink-0 transition-all bg-[#F9FAFB] text-[#374151] border-[#E5E7EB] hover:border-[#111827] hover:bg-white hover:shadow-xs"
-                  >
-                    <span
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] text-white font-mono"
-                      style={{ backgroundColor: vendor.color }}
-                    >
-                      {vendor.letter}
-                    </span>
-                    <span>{vendor.name}</span>
-                    {vendor.city === "Pretoria" && (
-                      <span className="text-[9px] bg-[#FEF3C7] text-[#92400E] px-1.5 py-0.2 rounded font-mono font-normal">
-                        012
-                      </span>
-                    )}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </section>
-
           {/* Hero Promo Banner */}
           <section className="max-w-7xl mx-auto px-4 sm:px-8 py-6">
             <div className="bg-linear-to-r from-[#111827] via-[#1F2937] to-[#111827] text-white rounded-2xl overflow-hidden shadow-sm">

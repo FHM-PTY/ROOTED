@@ -1,61 +1,67 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&family=Syne:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&family=Syne:wght@600;700;800&display=swap');
 @import 'tailwindcss';
 
 @theme {
-  --font-serif: 'Cormorant Garamond', serif;
   --font-display: 'Syne', sans-serif;
   --font-sans: 'Plus Jakarta Sans', sans-serif;
   --font-mono: 'Space Mono', monospace;
 
-  --color-kasi-black: #0E0E10;
-  --color-kasi-cream: #FAF7F2;
-  --color-kasi-sand: #F2EDE4;
-  --color-kasi-gold: #C88A35;
-  --color-kasi-brass: #D49B4B;
-  --color-kasi-terracotta: #C45434;
-  --color-kasi-orange: #FF5500;
-  --color-kasi-hairline: rgba(14, 14, 16, 0.09);
-  --color-kasi-muted: #6B6964;
+  --color-bash-black: #111827;
+  --color-bash-dark: #1F2937;
+  --color-bash-gray: #F3F4F6;
+  --color-bash-light: #F9FAFB;
+  --color-bash-border: #E5E7EB;
+  --color-bash-gold: #C88A35;
+  --color-bash-amber: #D97706;
+  --color-bash-green: #059669;
 
-  --color-background: #FAF7F2;
-  --color-foreground: #0E0E10;
+  --color-background: #F9FAFB;
+  --color-foreground: #111827;
   --color-card: #FFFFFF;
-  --color-card-foreground: #0E0E10;
-  --color-border: rgba(14, 14, 16, 0.09);
+  --color-card-foreground: #111827;
+  --color-border: #E5E7EB;
 }
 
 ::selection {
-  background-color: #0E0E10;
-  color: #FAF7F2;
+  background-color: #111827;
+  color: #FFFFFF;
 }
 
-.border-kasi {
-  border-color: rgba(14, 14, 16, 0.09);
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .product-image-container {
-  background-color: #FFFFFF;
+  background-color: #F3F4F6;
   position: relative;
   overflow: hidden;
 }
 
 .product-image-container img {
-  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease-in-out;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
 }
 
 .product-image-container:hover img.main-img {
-  transform: scale(1.04);
+  transform: scale(1.05);
 }
 
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #FAF7F2;
+  background: #F3F4F6;
 }
 ::-webkit-scrollbar-thumb {
-  background: #0E0E10;
+  background: #9CA3AF;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6B7280;
 }
 
 @keyframes marquee {
@@ -64,31 +70,12 @@
 }
 
 .marquee-track {
-  animation: marquee 28s linear infinite;
-}
-
-@keyframes beacon-ping {
-  0% {
-    transform: scale(0.9);
-    box-shadow: 0 0 0 0 rgba(200, 138, 53, 0.7);
-  }
-  70% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(200, 138, 53, 0);
-  }
-  100% {
-    transform: scale(0.9);
-    box-shadow: 0 0 0 0 rgba(200, 138, 53, 0);
-  }
-}
-
-.kasi-beacon {
-  animation: beacon-ping 2.2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  animation: marquee 26s linear infinite;
 }
 
 @keyframes drop-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.75; transform: scale(0.98); }
+  50% { opacity: 0.75; transform: scale(0.96); }
 }
 
 .pulse-drop {

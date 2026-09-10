@@ -1,633 +1,79 @@
 import { useState, useEffect, useMemo } from "react";
+import { Gender, Category, Product, LockerStation, CartItem } from "./types";
+import { vendors, products, lockerStations } from "./data/marketplaceData";
+import BrandLandingPage from "./components/BrandLandingPage";
 
-export type Gender = "ALL" | "WOMEN" | "MEN" | "UNISEX";
-export type Category = "all" | "kicks" | "outerwear" | "workwear" | "accessories" | "thrift" | "pretoria";
-
-export interface Vendor {
-  id: number;
-  name: string;
-  tagline: string;
-  origin: string;
-  city: "Pretoria" | "Johannesburg" | "Soweto" | "Durban";
-  gender: Gender[];
-  categories: Category[];
-  priceRange: string;
-  featured: boolean;
-  color: string;
-  productCount: number;
-  coordinates: string;
-  isThrift?: boolean;
-  specialty?: string;
-  conditionStandard?: string;
-}
-
-export interface Product {
-  id: number;
-  title: string;
-  brand: string;
-  category: Category;
-  city: "Pretoria" | "Johannesburg" | "Soweto" | "Durban";
-  gender: Gender[];
-  price: number;
-  originalPrice?: number | null;
-  image: string;
-  secondaryImage: string;
-  badge: string;
-  origin: string;
-  fabric: string;
-  sizes: string[];
-  description: string;
-  isNew?: boolean;
-  isSale?: boolean;
-  isThrift?: boolean;
-  isPretoria?: boolean;
-  condition?: string;
-  measurements?: string;
-  rarity?: string;
-}
-
-export interface LockerStation {
-  id: string;
-  name: string;
-  address: string;
-  hours: string;
-  type: string;
-  distance: string;
-  city: string;
-  commuterTag: string;
-}
-
-export interface CartItem {
-  product: Product;
-  size: string;
-  quantity: number;
-}
-
-const lockerStations: LockerStation[] = [
-  {
-    id: "loc-1",
-    name: "Diepkloof Zone 4 Spaza Hub",
-    address: "Mthembu Superette, 1248 Immink Dr, Diepkloof, Soweto",
-    hours: "07:00 – 21:00 Daily",
-    type: "Community Collection Counter",
-    distance: "0.6 km",
-    city: "Soweto",
-    commuterTag: "🏪 Local Collection Hub • 🚕 Zone 4 Taxi Rank",
-  },
-  {
-    id: "loc-2",
-    name: "Braamfontein Juta Smart Locker",
-    address: "68 Juta Street (Next to The Playground), Braamfontein",
-    hours: "24/7 Smart PIN Access",
-    type: "Automated Smart Vault",
-    distance: "Central JHB",
-    city: "Johannesburg",
-    commuterTag: "⚡ 24/7 Smart PIN • 🚆 350m Park Station",
-  },
-  {
-    id: "loc-3",
-    name: "Hatfield Plaza Smart Vault (012)",
-    address: "1122 Burnett St, Hatfield, Pretoria (Near Gautrain)",
-    hours: "06:00 – 22:00 Mon-Sun",
-    type: "Pargo Campus Vault",
-    distance: "Pretoria East",
-    city: "Pretoria",
-    commuterTag: "🎓 Hatfield Campus • 🚆 200m Gautrain Station",
-  },
-  {
-    id: "loc-4",
-    name: "Maponya Mall PEP Paxi Counter",
-    address: "Chris Hani Rd, Klipspruit, Soweto (Lower Level Entrance 3)",
-    hours: "09:00 – 18:00 Mon-Sun",
-    type: "PEP Paxi Hub",
-    distance: "1.4 km",
-    city: "Soweto",
-    commuterTag: "📦 Dedicated Counter • 🚌 Central Bus Terminal",
-  },
-  {
-    id: "loc-5",
-    name: "Tembisa Plaza Pargo Hub",
-    address: "Shop 14, Andrew Mapheto Dr, Tembisa",
-    hours: "08:00 – 18:00 Daily",
-    type: "Pargo Collection Salon",
-    distance: "East Rand",
-    city: "Gauteng East",
-    commuterTag: "📍 Pargo Station • 🏬 Main Lower Plaza",
-  },
-  {
-    id: "loc-6",
-    name: "Umlazi Mega City Station",
-    address: "50 Mangosuthu Hwy, Umlazi V, Durban",
-    hours: "08:30 – 17:30 Mon-Sun",
-    type: "Smart Locker Vault",
-    distance: "KZN South",
-    city: "Durban",
-    commuterTag: "⚡ Smart Locker • 🚕 Mega City Rank 2",
-  },
-];
-
-const vendors: Vendor[] = [
-  // 1. Pretoria (012) Streetwear Labels
-  {
-    id: 1,
-    name: "Lesupa Atelier",
-    tagline: "Pretoria minimalist luxury, 280 GSM heavyweight tees & architectural embroidery",
-    origin: "Arcadia / Hatfield, Pretoria",
-    city: "Pretoria",
-    gender: ["UNISEX", "MEN", "WOMEN"],
-    categories: ["pretoria", "outerwear", "workwear"],
-    priceRange: "R 550 - R 1,400",
-    featured: true,
-    color: "#C88A35",
-    productCount: 42,
-    coordinates: "25.7479° S, 28.2293° E",
-    isThrift: false,
-    specialty: "High-GSM Combed Cotton & Minimalist Boxy Cut",
-  },
-  {
-    id: 2,
-    name: "Mokasi Streetwear",
-    tagline: "Pretoria urban silhouettes, oversized double-knit tracksuits & bold streetwear prints",
-    origin: "Mamelodi & Soshanguve, Pretoria",
-    city: "Pretoria",
-    gender: ["UNISEX", "MEN", "WOMEN"],
-    categories: ["pretoria", "outerwear"],
-    priceRange: "R 650 - R 1,650",
-    featured: true,
-    color: "#C45434",
-    productCount: 38,
-    coordinates: "25.7069° S, 28.3275° E",
-    isThrift: false,
-    specialty: "Oversized Streetwear Cuts & Heavy Cotton",
-  },
-  {
-    id: 3,
-    name: "Galxboy Heritage Drop",
-    tagline: "Pretoria's pioneer streetwear legacy — iconic graphic silhouettes & statement headwear",
-    origin: "Menlyn / Pretoria, 012",
-    city: "Pretoria",
-    gender: ["UNISEX", "MEN", "WOMEN"],
-    categories: ["pretoria", "accessories", "outerwear"],
-    priceRange: "R 450 - R 1,950",
-    featured: true,
-    color: "#0E0E10",
-    productCount: 56,
-    coordinates: "25.7825° S, 28.2755° E",
-    isThrift: false,
-    specialty: "Iconic SA Pop Culture & Bold Typography",
-  },
-
-  // 2. Soweto & Johannesburg Ateliers
-  {
-    id: 4,
-    name: "Soweto Threads",
-    tagline: "Heritage raw selvage denim, chainstitched tailoring & formal pleats",
-    origin: "Orlando West, Soweto",
-    city: "Soweto",
-    gender: ["MEN", "WOMEN", "UNISEX"],
-    categories: ["workwear", "outerwear"],
-    priceRange: "R 780 - R 1,800",
-    featured: true,
-    color: "#C88A35",
-    productCount: 48,
-    coordinates: "26.2415° S, 27.9157° E",
-    isThrift: false,
-    specialty: "14oz Raw Denim & Chainstitching",
-  },
-  {
-    id: 5,
-    name: "Braam District",
-    tagline: "480 GSM heavy fleece & commuter technical silhouettes",
-    origin: "Braamfontein, Johannesburg",
-    city: "Johannesburg",
-    gender: ["UNISEX", "MEN", "WOMEN"],
-    categories: ["outerwear", "accessories"],
-    priceRange: "R 520 - R 1,200",
-    featured: true,
-    color: "#0E0E10",
-    productCount: 64,
-    coordinates: "26.1929° S, 28.0345° E",
-    isThrift: false,
-    specialty: "Heavy Cotton & Tactile Cargo Details",
-  },
-  {
-    id: 6,
-    name: "Gusheshe Classics",
-    tagline: "Vulcanized footwear inspired by South African motorsport & spinning heritage",
-    origin: "Pinetown, KwaZulu-Natal",
-    city: "Durban",
-    gender: ["UNISEX", "MEN"],
-    categories: ["kicks"],
-    priceRange: "R 1,450 - R 2,200",
-    featured: true,
-    color: "#C88A35",
-    productCount: 32,
-    coordinates: "29.8167° S, 30.8500° E",
-    isThrift: false,
-    specialty: "Vulcanized Waffle Sole & Suede Overlays",
-  },
-
-  // 3. Dunusa Vintage & 1-of-1 Curators
-  {
-    id: 7,
-    name: "Dunusa Archive Co.",
-    tagline: "Curated 1-of-1 90s sportswear, crinkle nylon windbreakers & motorsport track tops",
-    origin: "Small Street CBD, Johannesburg",
-    city: "Johannesburg",
-    gender: ["UNISEX", "MEN", "WOMEN"],
-    categories: ["thrift", "outerwear"],
-    priceRange: "R 380 - R 890",
-    featured: true,
-    color: "#C88A35",
-    productCount: 26,
-    coordinates: "26.2023° S, 28.0471° E",
-    isThrift: true,
-    specialty: "90s Sportswear & Technical Windbreakers",
-    conditionStandard: "Grade A+ Flawless Mint (Steam Cleaned)",
-  },
-  {
-    id: 8,
-    name: "Kasi Vintage Vault",
-    tagline: "Sophiatown heavy leather flight jackets, vintage knit polos & pleated trousers",
-    origin: "Diepkloof Zone 2, Soweto",
-    city: "Soweto",
-    gender: ["MEN", "UNISEX"],
-    categories: ["thrift", "workwear", "outerwear"],
-    priceRange: "R 420 - R 1,450",
-    featured: true,
-    color: "#C45434",
-    productCount: 19,
-    coordinates: "26.2482° S, 27.9401° E",
-    isThrift: true,
-    specialty: "Heavy Leathers & 70s Sophiatown Knits",
-    conditionStandard: "Grade A Mint (Conditioned Leather)",
-  },
-  {
-    id: 9,
-    name: "Bree St. Reworks",
-    tagline: "1-of-1 upcycled workwear vests, patched raw denim & commuter canvas gear",
-    origin: "Bree Taxi Interchange, Johannesburg",
-    city: "Johannesburg",
-    gender: ["UNISEX", "MEN", "WOMEN"],
-    categories: ["thrift", "workwear"],
-    priceRange: "R 480 - R 920",
-    featured: true,
-    color: "#6B6964",
-    productCount: 22,
-    coordinates: "26.1989° S, 28.0380° E",
-    isThrift: true,
-    specialty: "Reworked Duck Canvas & Patchwork",
-    conditionStandard: "Upcycled Heritage Grade (Triple Reinforced)",
-  },
-  {
-    id: 10,
-    name: "South Beach Retro",
-    tagline: "Coastal 90s washed corduroy overshirts, graphic tees & vintage surf wear",
-    origin: "The Workshop / South Beach, Durban",
-    city: "Durban",
-    gender: ["UNISEX", "MEN", "WOMEN"],
-    categories: ["thrift", "outerwear"],
-    priceRange: "R 350 - R 750",
-    featured: true,
-    color: "#C88A35",
-    productCount: 17,
-    coordinates: "29.8587° S, 31.0218° E",
-    isThrift: true,
-    specialty: "Sun-Drenched Corduroys & 90s Graphic Tees",
-    conditionStandard: "Grade A+ Vintage Mint (Pre-shrunk & Washed)",
-  },
-];
-
-const products: Product[] = [
-  // Pretoria (012) Labels
-  {
-    id: 1,
-    title: "Lesupa 280 GSM Boxy Heavyweight Tee",
-    brand: "Lesupa Atelier",
-    category: "pretoria",
-    city: "Pretoria",
-    gender: ["UNISEX", "MEN", "WOMEN"],
-    price: 620,
-    originalPrice: 750,
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=80",
-    badge: "PRETORIA 012",
-    origin: "Arcadia, Pretoria",
-    fabric: "280 GSM Combed Ring-Spun Cotton",
-    sizes: ["S", "M", "L", "XL"],
-    description: "Architecturally cut with a high ribbed collar, dropped shoulder seams, and subtle tone-on-tone embroidery. Designed for the modern South African streetwear enthusiast.",
-    isNew: true,
-    isPretoria: true,
-  },
-  {
-    id: 2,
-    title: "Mokasi Pitori Signature Oversized Tracksuit",
-    brand: "Mokasi Streetwear",
-    category: "pretoria",
-    city: "Pretoria",
-    gender: ["UNISEX", "MEN"],
-    price: 1450,
-    originalPrice: 1750,
-    image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?auto=format&fit=crop&w=900&q=80",
-    badge: "PRETORIA CUT",
-    origin: "Mamelodi, Pretoria",
-    fabric: "420 GSM Double-Knit Cotton Interlock",
-    sizes: ["M", "L", "XL"],
-    description: "Cut with extreme volume through the sleeve and stacked hem trousers. Embroidered with Mokasi's signature brand stamp in antique ochre thread.",
-    isNew: true,
-    isPretoria: true,
-  },
-  {
-    id: 3,
-    title: "Galxboy Heritage 2008 Varsity Jacket",
-    brand: "Galxboy Heritage Drop",
-    category: "pretoria",
-    city: "Pretoria",
-    gender: ["UNISEX", "MEN", "WOMEN"],
-    price: 1850,
-    originalPrice: null,
-    image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=900&q=80",
-    badge: "HERITAGE ARCHIVE",
-    origin: "Menlyn, Pretoria",
-    fabric: "Heavy Melton Wool & Contrast Vegan Leather Sleeves",
-    sizes: ["S", "M", "L", "XL"],
-    description: "An archival tribute to Pretoria's greatest streetwear pioneer. Heavyweight chenille patch branding with ribbed striped trim.",
-    isPretoria: true,
-  },
-
-  // Soweto & Johannesburg Ateliers
-  {
-    id: 4,
-    title: "Soweto Raw Selvage Denim Jacket",
-    brand: "Soweto Threads",
-    category: "workwear",
-    city: "Soweto",
-    gender: ["MEN", "UNISEX"],
-    price: 1280,
-    originalPrice: 1450,
-    image: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=900&q=80",
-    badge: "SOWETO CUT",
-    origin: "Orlando West, Soweto",
-    fabric: "14oz Unwashed Red-Line Selvage Denim",
-    sizes: ["S", "M", "L", "XL"],
-    description: "Handcrafted in Orlando West using Japanese shuttle-loom shuttle selvage. Unwashed, deep indigo with copper hardware that patinas uniquely over time.",
-    isNew: true,
-  },
-  {
-    id: 5,
-    title: "Braam 480 GSM Thermal Fleece Hoodie",
-    brand: "Braam District",
-    category: "outerwear",
-    city: "Johannesburg",
-    gender: ["UNISEX", "MEN", "WOMEN"],
-    price: 890,
-    originalPrice: null,
-    image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=900&q=80",
-    badge: "BRAAM EXCLUSIVE",
-    origin: "Braamfontein, JHB",
-    fabric: "480 GSM Heavy French Terry Cotton",
-    sizes: ["XS", "S", "M", "L", "XL"],
-    description: "Cut with a boxy, dropped-shoulder silhouette built for chilly Highveld evenings and early morning metro commutes.",
-    isNew: true,
-  },
-  {
-    id: 6,
-    title: "Gusheshe Low-Top 325i Vulcanized Sneakers",
-    brand: "Gusheshe Classics",
-    category: "kicks",
-    city: "Durban",
-    gender: ["UNISEX", "MEN"],
-    price: 1650,
-    originalPrice: 1950,
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=900&q=80",
-    badge: "SPINNING HERITAGE",
-    origin: "Pinetown, KZN",
-    fabric: "Full-Grain Cowhide Leather & High-Density Vulcanized Waffle Rubber",
-    sizes: ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
-    description: "Inspired by South Africa's motorsport culture. Double-stitched toe cap, custom tire-tread outsole, and memory-foam insole.",
-    isSale: true,
-  },
-
-  // Dunusa 1-of-1 Vault (South African Curated Vintage)
-  {
-    id: 7,
-    title: "90s Italian Colorblock Retro Windbreaker",
-    brand: "Dunusa Archive Co.",
-    category: "thrift",
-    city: "Johannesburg",
-    gender: ["UNISEX"],
-    price: 480,
-    originalPrice: 650,
-    image: "https://images.unsplash.com/photo-1548883354-7622d03aca27?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=900&q=80",
-    badge: "1-OF-1 DUNUSA ARCHIVE",
-    origin: "Small Street CBD, JHB",
-    fabric: "Crinkle Taslan Nylon & Mesh Lining",
-    sizes: ["L (Boxy 90s Fit)"],
-    description: "Hand-picked from Small Street CBD wholesale stashes. Vibrant turquoise and cadmium orange blocking with brass YKK pulls. Steam-cleaned & sanitized.",
-    isThrift: true,
-    condition: "★ Grade A+ Flawless Mint",
-    measurements: "Pit-to-Pit: 62cm | Length: 70cm | Raglan Sleeve",
-    rarity: "Unique Single Item",
-  },
-  {
-    id: 8,
-    title: "Archival Sophiatown Leather Flight Bomber",
-    brand: "Kasi Vintage Vault",
-    category: "thrift",
-    city: "Soweto",
-    gender: ["MEN", "UNISEX"],
-    price: 1350,
-    originalPrice: 1800,
-    image: "https://images.unsplash.com/photo-1520975954732-35dd22299614?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=80",
-    badge: "1-OF-1 DUNUSA ARCHIVE",
-    origin: "Diepkloof Zone 2, Soweto",
-    fabric: "Heavy Aniline Calfskin Leather & Quilted Lining",
-    sizes: ["XL (Tailored Boxy Fit)"],
-    description: "Authentic Sophiatown jazz-era silhouette. Deep aged espresso patina with original shearling collar and heavy Talon zipper. Triple conditioned.",
-    isThrift: true,
-    condition: "★ Grade A (Rich Natural Patina)",
-    measurements: "Pit-to-Pit: 64cm | Shoulder: 52cm | Length: 68cm",
-    rarity: "Unique Single Item",
-  },
-  {
-    id: 9,
-    title: "Reworked Duck Canvas Commuter Vest",
-    brand: "Bree St. Reworks",
-    category: "thrift",
-    city: "Johannesburg",
-    gender: ["UNISEX", "MEN", "WOMEN"],
-    price: 820,
-    originalPrice: null,
-    image: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=900&q=80",
-    badge: "1-OF-1 DUNUSA ARCHIVE",
-    origin: "Bree Taxi Interchange, JHB",
-    fabric: "16oz Repurposed Carhartt Duck Canvas",
-    sizes: ["M / L Adjustable"],
-    description: "Reconstructed from decommissioned South African transit overalls and workwear jackets. Multi-pocket commuter layout with brass D-rings.",
-    isThrift: true,
-    condition: "★ Upcycled Grade (Triple Stitched)",
-    measurements: "Pit-to-Pit: 58cm | Length: 64cm",
-    rarity: "Unique Single Item",
-  },
-  {
-    id: 10,
-    title: "1994 Durban Surf Corduroy Overshirt",
-    brand: "South Beach Retro",
-    category: "thrift",
-    city: "Durban",
-    gender: ["UNISEX", "MEN", "WOMEN"],
-    price: 420,
-    originalPrice: 550,
-    image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=80",
-    badge: "1-OF-1 DUNUSA ARCHIVE",
-    origin: "South Beach, Durban",
-    fabric: "100% Cotton 8-Wale Vintage Corduroy",
-    sizes: ["L (Relaxed Fit)"],
-    description: "Sun-drenched honey corduroy from Durban's 90s coastal surf era. Features tortoise-shell buttons and dual flap pockets. Sanitized and steam-ironed.",
-    isThrift: true,
-    condition: "★ Grade A+ Mint",
-    measurements: "Pit-to-Pit: 60cm | Shoulder: 49cm | Length: 74cm",
-    rarity: "Unique Single Item",
-  },
-  {
-    id: 11,
-    title: "Vintage Highveld Racing Team Track Top",
-    brand: "Dunusa Archive Co.",
-    category: "thrift",
-    city: "Johannesburg",
-    gender: ["UNISEX"],
-    price: 560,
-    originalPrice: null,
-    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1548883354-7622d03aca27?auto=format&fit=crop&w=900&q=80",
-    badge: "1-OF-1 DUNUSA ARCHIVE",
-    origin: "Small Street CBD, JHB",
-    fabric: "Brushed Tricot Poly-Cotton Blend",
-    sizes: ["M (Slim Vintage Track Cut)"],
-    description: "Sourced from a private collector in Turffontein. Embroidered chest insignia with gold piping along the raglan sleeves. Mint original condition.",
-    isThrift: true,
-    condition: "★ Grade A+ Mint",
-    measurements: "Pit-to-Pit: 54cm | Length: 67cm",
-    rarity: "Unique Single Item",
-  },
-  {
-    id: 12,
-    title: "Soweto Double-Pleated Tailored Chinos",
-    brand: "Soweto Threads",
-    category: "workwear",
-    city: "Soweto",
-    gender: ["MEN", "UNISEX"],
-    price: 950,
-    originalPrice: 1100,
-    image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=900&q=80",
-    badge: "TAILORED FORMAL",
-    origin: "Orlando West, Soweto",
-    fabric: "100% Heavy Twill Cotton (320 GSM)",
-    sizes: ["30", "32", "34", "36"],
-    description: "Engineered with deep double front pleats, high-rise waistband with side tab adjusters, and a clean tapered break.",
-  },
-  {
-    id: 13,
-    title: "Lesupa Minimalist Commuter Waxed Tote",
-    brand: "Lesupa Atelier",
-    category: "accessories",
-    city: "Pretoria",
-    gender: ["UNISEX"],
-    price: 450,
-    originalPrice: null,
-    image: "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
-    badge: "PRETORIA 012",
-    origin: "Hatfield, Pretoria",
-    fabric: "16oz Waxed Canvas & Full Grain Leather Handles",
-    sizes: ["One Size (18L)"],
-    description: "Clean architectural carryall engineered for laptop commuting between Hatfield, Menlyn, and Johannesburg. Weather-resistant finish.",
-    isPretoria: true,
-  },
-  {
-    id: 14,
-    title: "Braam Tactical Crossbody Messenger",
-    brand: "Braam District",
-    category: "accessories",
-    city: "Johannesburg",
-    gender: ["UNISEX"],
-    price: 520,
-    originalPrice: null,
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=900&q=80",
-    badge: "COMMUTER GEAR",
-    origin: "Braamfontein, JHB",
-    fabric: "1000D Ballistic Cordura Nylon & Fidlock Magnetic Buckle",
-    sizes: ["One Size (5L)"],
-    description: "Built for hands-free mobility across the Nelson Mandela Bridge and MetroRail carriages. Rapid magnetic release clasp.",
-  },
-  {
-    id: 15,
-    title: "Kasi Archive Hand-Tooled Leather Belt",
-    brand: "Kasi Vintage Vault",
-    category: "accessories",
-    city: "Soweto",
-    gender: ["MEN", "UNISEX"],
-    price: 380,
-    originalPrice: null,
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1520975954732-35dd22299614?auto=format&fit=crop&w=900&q=80",
-    badge: "SOLID BRASS",
-    origin: "Diepkloof, Soweto",
-    fabric: "Vegetable-Tanned Saddle Leather & Solid Brass Hardware",
-    sizes: ["32", "34", "36", "38"],
-    description: "Hand-burnished edges with custom brass buckle. Built to last a lifetime, softening with every wear.",
-  },
-  {
-    id: 16,
-    title: "Gusheshe Suede Track High-Tops",
-    brand: "Gusheshe Classics",
-    category: "kicks",
-    city: "Durban",
-    gender: ["UNISEX", "MEN"],
-    price: 1890,
-    originalPrice: 2200,
-    image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=900&q=80",
-    badge: "LIMITED RUN",
-    origin: "Pinetown, KZN",
-    fabric: "Perforated Suede, Padded Collar & Gum Rubber Outsole",
-    sizes: ["UK 7", "UK 8", "UK 9", "UK 10"],
-    description: "High-top ankle support built with reinforced heel counter and authentic motorsport race striping.",
-    isSale: true,
-  },
-];
+export type RouteState =
+  | { type: "home" }
+  | { type: "brand"; slug: string }
+  | { type: "brands" }
+  | { type: "vault" };
 
 export default function App() {
+  // Navigation & Routing state (hash-based for multi-page support)
+  const [currentRoute, setCurrentRoute] = useState<RouteState>({ type: "home" });
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace(/^#\/?/, "");
+      if (hash.startsWith("brand/")) {
+        const slug = hash.replace("brand/", "");
+        setCurrentRoute({ type: "brand", slug });
+      } else if (hash === "brands") {
+        setCurrentRoute({ type: "brands" });
+      } else if (hash === "vault") {
+        setCurrentRoute({ type: "vault" });
+      } else {
+        setCurrentRoute({ type: "home" });
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    // Initial parse
+    handleHashChange();
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  const navigateTo = (path: string) => {
+    window.location.hash = path;
+  };
+
+  // Filtering & Commerce state
+  const [selectedDepartment, setSelectedDepartment] = useState<"ALL" | "MEN" | "WOMEN" | "VINTAGE">("ALL");
   const [selectedCategory, setSelectedCategory] = useState<Category>("all");
-  const [selectedGender, setSelectedGender] = useState<Gender>("ALL");
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"featured" | "price-low" | "price-high" | "newest">("featured");
+
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [wishlist, setWishlist] = useState<number[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [selectedStation, setSelectedStation] = useState<LockerStation>(lockerStations[0]);
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+  const [selectedStation, setSelectedStation] = useState<LockerStation>(lockerStations[2]); // Hatfield default
   const [currency, setCurrency] = useState<"ZAR" | "USD" | "EUR">("ZAR");
-  const [activeHotspot, setActiveHotspot] = useState<number | null>(null);
-  const [vendorFilter, setVendorFilter] = useState<"all" | "pretoria" | "streetwear" | "thrift">("all");
+
+  // Modals
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
+  const [isLockerPickerOpen, setIsLockerPickerOpen] = useState(false);
+  const [isVendorModalOpen, setIsVendorModalOpen] = useState(false);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+
+  // Forms
   const [voucherCode, setVoucherCode] = useState("");
   const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
   const [voucherMessage, setVoucherMessage] = useState<string>("");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
-  const [isVendorModalOpen, setIsVendorModalOpen] = useState(false);
+  const [trackingInput, setTrackingInput] = useState("");
+  const [trackingResult, setTrackingResult] = useState<any | null>(null);
   const [whatsappUpdates, setWhatsappUpdates] = useState(true);
   const [buyerPhone, setBuyerPhone] = useState("+27 ");
+
+  // Brand directory jump filter
+  const [brandLetterFilter, setBrandLetterFilter] = useState<string>("ALL");
 
   // Drop countdown timer state
   const [timeLeft, setTimeLeft] = useState({
@@ -672,46 +118,67 @@ export default function App() {
     return `${currencySymbols[currency]}${converted.toFixed(0)}`;
   };
 
+  const toggleWishlist = (productId: number) => {
+    setWishlist((prev) =>
+      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
+    );
+  };
+
+  // Filtered products logic
   const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
-      const matchCat =
-        selectedCategory === "all"
-          ? true
-          : selectedCategory === "pretoria"
-          ? p.city === "Pretoria"
-          : selectedCategory === "thrift"
-          ? p.isThrift
-          : p.category === selectedCategory;
+    let result = products.filter((p) => {
+      if (selectedDepartment === "MEN" && !p.gender.includes("MEN") && !p.gender.includes("UNISEX")) return false;
+      if (selectedDepartment === "WOMEN" && !p.gender.includes("WOMEN") && !p.gender.includes("UNISEX")) return false;
+      if (selectedDepartment === "VINTAGE" && !p.isThrift) return false;
 
-      const matchGender = selectedGender === "ALL" ? true : p.gender.includes(selectedGender);
+      if (selectedCategory === "pretoria" && p.city !== "Pretoria") return false;
+      if (selectedCategory === "thrift" && !p.isThrift) return false;
+      if (selectedCategory !== "all" && selectedCategory !== "pretoria" && selectedCategory !== "thrift" && p.category !== selectedCategory) return false;
 
-      const matchCity = selectedCity === "ALL" ? true : p.city === selectedCity;
+      if (selectedBrand && p.brand !== selectedBrand) return false;
+      if (selectedCity !== "ALL" && p.city !== selectedCity) return false;
 
-      const matchSearch =
-        searchQuery === ""
-          ? true
-          : p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.origin.toLowerCase().includes(searchQuery.toLowerCase());
+      if (searchQuery.trim() !== "") {
+        const query = searchQuery.toLowerCase();
+        const matchTitle = p.title.toLowerCase().includes(query);
+        const matchBrand = p.brand.toLowerCase().includes(query);
+        const matchOrigin = p.origin.toLowerCase().includes(query);
+        const matchFabric = p.fabric.toLowerCase().includes(query);
+        if (!matchTitle && !matchBrand && !matchOrigin && !matchFabric) return false;
+      }
 
-      return matchCat && matchGender && matchCity && matchSearch;
+      return true;
     });
-  }, [selectedCategory, selectedGender, selectedCity, searchQuery]);
 
-  const filteredVendors = useMemo(() => {
-    if (vendorFilter === "all") return vendors;
-    if (vendorFilter === "pretoria") return vendors.filter((v) => v.city === "Pretoria");
-    if (vendorFilter === "streetwear") return vendors.filter((v) => !v.isThrift);
-    if (vendorFilter === "thrift") return vendors.filter((v) => v.isThrift);
-    return vendors;
-  }, [vendorFilter]);
+    if (sortBy === "price-low") {
+      result.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "price-high") {
+      result.sort((a, b) => b.price - a.price);
+    } else if (sortBy === "newest") {
+      result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+    }
+
+    return result;
+  }, [selectedDepartment, selectedCategory, selectedBrand, selectedCity, searchQuery, sortBy]);
+
+  const filteredBrandDirectory = useMemo(() => {
+    return vendors.filter((v) => {
+      if (brandLetterFilter !== "ALL" && v.letter !== brandLetterFilter) return false;
+      return true;
+    });
+  }, [brandLetterFilter]);
+
+  const activeVendorForRoute = useMemo(() => {
+    if (currentRoute.type !== "brand") return null;
+    return vendors.find((v) => v.slug === currentRoute.slug) || null;
+  }, [currentRoute]);
 
   const addToCart = (product: Product, size: string) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id && item.size === size);
       if (existing) {
         if (product.isThrift) {
-          alert("Notice: This is a 1-of-1 Dunusa Archival item. Only one unit exists in South Africa.");
+          alert("Notice: This is a 1-of-1 vintage piece. Only one unit is available in South Africa.");
           return prev;
         }
         return prev.map((item) =>
@@ -733,7 +200,7 @@ export default function App() {
         .map((item) => {
           if (item.product.id === productId && item.size === size) {
             if (item.product.isThrift && delta > 0) {
-              alert("Notice: 1-of-1 Dunusa items are limited to single inventory.");
+              alert("Notice: 1-of-1 vintage items are limited to single quantity.");
               return item;
             }
             const newQty = item.quantity + delta;
@@ -754,10 +221,10 @@ export default function App() {
     const clean = code.trim().toUpperCase();
     if (clean === "LOCAL10" || clean === "SWENKA10") {
       setAppliedDiscount(10);
-      setVoucherMessage("✓ 'LOCAL10' applied: 10% off your entire order");
+      setVoucherMessage("✓ 'LOCAL10' applied: 10% discount on order");
     } else if (clean === "VINTAGE15" || clean === "DUNUSA") {
       setAppliedDiscount(15);
-      setVoucherMessage("✓ 'VINTAGE15' applied: 15% off Dunusa Archival vintage pieces");
+      setVoucherMessage("✓ 'VINTAGE15' applied: 15% off curated vintage pieces");
     } else if (clean === "PRETORIA12" || clean === "PITORI") {
       setAppliedDiscount(12);
       setVoucherMessage("✓ 'PRETORIA12' applied: 12% off Pretoria labels (Lesupa/Mokasi)");
@@ -766,1016 +233,966 @@ export default function App() {
     }
   };
 
+  const handleTrackOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!trackingInput.trim()) return;
+    setTrackingResult({
+      waybill: trackingInput.startsWith("BOB") ? trackingInput : `BOB-GO-${Math.floor(100000 + Math.random() * 900000)}`,
+      destination: selectedStation.name,
+      status: "In Transit with The Courier Guy",
+      step: 3,
+      eta: "Tomorrow by 14:00",
+      pin: "849 201",
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#0E0E10] font-sans antialiased selection:bg-[#0E0E10] selection:text-[#FAF7F2]">
-      {/* 1. TOP ANNOUNCEMENT MARQUEE */}
-      <aside aria-label="Announcement banner" className="bg-[#0E0E10] text-[#FAF7F2] border-b border-[#FAF7F2]/10 py-2.5 overflow-hidden select-none text-[11px] tracking-[0.22em] uppercase font-mono">
-        <div className="flex marquee-track whitespace-nowrap gap-12 items-center">
-          <span className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#C88A35] inline-block animate-ping"></span>
-            PRETORIA (012) TO JOHANNESBURG STREETWEAR MARKETPLACE
-          </span>
-          <span className="text-[#C88A35]">✦</span>
-          <span>FREE SMART LOCKER & HUB PICKUP NATIONWIDE ON ORDERS OVER R 650</span>
-          <span className="text-[#C88A35]">✦</span>
-          <span>FEATURING LESUPA ATELIER, MOKASI & SOWETO THREADS</span>
-          <span className="text-[#C88A35]">✦</span>
-          <span>100% AUTHENTIC 1-OF-1 CURATED VINTAGE ARCHIVE</span>
-          <span className="text-[#C88A35]">✦</span>
-          <span>PAY IN 4 INTEREST-FREE WITH PAYFLEX · CAPITEC 1-TAP QR</span>
-          <span className="text-[#C88A35]">✦</span>
-          <span>DISPATCH SLA: 48 HOURS VIA BOB GO (THE COURIER GUY & PARGO)</span>
-        </div>
-      </aside>
-
-      {/* 2. MAIN HEADER — SYMMETRICAL SARTORIAL MASTHEAD */}
-      <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#0E0E10]/10 transition-all">
-        <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
-          {/* Left Navigation */}
-          <nav className="hidden lg:flex items-center gap-7 text-[12px] uppercase tracking-[0.18em] font-medium text-[#0E0E10]/80">
-            <a
-              href="#catalog"
-              onClick={() => setSelectedCategory("all")}
-              className="hover:text-[#C88A35] transition-colors py-1"
-            >
-              Catalog
-            </a>
-            <a
-              href="#drop-calendar"
-              className="hover:text-[#C88A35] transition-colors py-1 flex items-center gap-1.5"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#FF5500] pulse-drop"></span>
-              Drop Calendar
-            </a>
-            <a
-              href="#dunusa-vault"
-              onClick={() => setSelectedCategory("thrift")}
-              className="text-[#C88A35] font-semibold hover:text-[#0E0E10] transition-colors py-1"
-            >
-              Dunusa Vault (1-of-1)
-            </a>
-            <a
-              href="#vendors"
-              className="hover:text-[#C88A35] transition-colors py-1"
-            >
-              Founding Brands
-            </a>
-            <a
-              href="#lockers"
-              className="hover:text-[#C88A35] transition-colors py-1"
-            >
-              Locker Stations
-            </a>
-          </nav>
-
-          {/* Centered Brand Masthead */}
-          <div className="flex flex-col items-center text-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-            <span className="text-2xl md:text-3xl font-serif font-bold tracking-[0.14em] uppercase text-[#0E0E10]">
-              LE BENKELENG
+    <div className="min-h-screen bg-[#F9FAFB] text-[#111827] font-sans antialiased pb-16 md:pb-0">
+      {/* 1. BASH-STYLE TOP UTILITY BAR */}
+      <aside aria-label="Utility bar" className="bg-[#111827] text-[#F3F4F6] text-[11px] font-medium border-b border-[#374151] px-4 sm:px-8 py-2">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div
+            onClick={() => setIsLockerPickerOpen(true)}
+            className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors group"
+          >
+            <span className="text-[#C88A35]">📍</span>
+            <span className="text-[#9CA3AF]">Deliver to:</span>
+            <span className="font-semibold text-white underline decoration-dotted underline-offset-4 group-hover:text-[#C88A35]">
+              {selectedStation.name}
             </span>
-            <span className="text-[10px] tracking-[0.35em] uppercase text-[#6B6964] font-mono mt-0.5">
-              EST. 2026 · PRETORIA · SOWETO · JOHANNESBURG · DURBAN
-            </span>
+            <span className="text-[9px] text-[#9CA3AF]">(Change)</span>
           </div>
 
-          {/* Right Utility Bar */}
-          <div className="flex items-center gap-5">
-            {/* Currency Selector */}
-            <div className="hidden sm:flex items-center border border-[#0E0E10]/15 rounded-none px-2.5 py-1 text-[11px] font-mono tracking-wider bg-white">
+          <div className="hidden md:flex items-center gap-2 text-center text-[#D1D5DB]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
+            <span>Free Smart Locker & Pick-Up Hub Delivery on Orders Over R 650</span>
+            <span className="text-[#6B7280]">|</span>
+            <span className="text-[#C88A35] font-semibold">48h Vendor Dispatch SLA</span>
+          </div>
+
+          <div className="flex items-center gap-4 text-[#D1D5DB]">
+            <button
+              onClick={() => setIsTrackingModalOpen(true)}
+              className="hover:text-white transition-colors flex items-center gap-1"
+            >
+              <span>📦</span> Track Order
+            </button>
+            <button
+              onClick={() => setIsVendorModalOpen(true)}
+              className="hidden lg:inline hover:text-[#C88A35] transition-colors"
+            >
+              Sell With Us (13%)
+            </button>
+            <div className="flex items-center gap-1 bg-[#1F2937] px-2 py-0.5 rounded text-[10px] font-mono">
               {(["ZAR", "USD", "EUR"] as const).map((curr) => (
                 <button
                   key={curr}
                   onClick={() => setCurrency(curr)}
-                  className={`px-1.5 py-0.5 transition-colors ${
-                    currency === curr ? "font-bold text-[#0E0E10] bg-[#FAF7F2]" : "text-[#6B6964] hover:text-[#0E0E10]"
-                  }`}
+                  className={`px-1 rounded ${currency === curr ? "bg-[#374151] text-white font-bold" : "text-[#9CA3AF] hover:text-white"}`}
                 >
                   {curr}
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+      </aside>
 
-            {/* Vendor Onboarding Link */}
-            <button
-              onClick={() => setIsVendorModalOpen(true)}
-              className="hidden md:inline-flex items-center gap-1.5 border border-[#0E0E10]/20 px-3.5 py-1.5 text-[11px] tracking-[0.18em] uppercase font-mono hover:bg-[#0E0E10] hover:text-[#FAF7F2] transition-colors"
-            >
-              <span>✦</span> Sell With Us (13%)
-            </button>
+      {/* 2. MAIN STICKY NAVIGATION BAR */}
+      <header className="sticky top-0 z-40 bg-white border-b border-[#E5E7EB] shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between gap-6">
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="md:hidden p-2 text-[#111827] hover:bg-gray-100 rounded-md"
+            aria-label="Open Mobile Menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
 
-            {/* Search Trigger */}
+          {/* Brand Identity */}
+          <div
+            className="flex flex-col cursor-pointer shrink-0"
+            onClick={() => {
+              setSelectedCategory("all");
+              setSelectedBrand(null);
+              setSelectedDepartment("ALL");
+              setSearchQuery("");
+              navigateTo("#/");
+            }}
+          >
+            <span className="text-2xl sm:text-3xl font-black tracking-tight uppercase text-[#111827] font-display">
+              LE BENKELENG
+            </span>
+            <span className="text-[9px] font-mono font-bold tracking-[0.25em] text-[#C88A35] -mt-0.5 uppercase">
+              Pretoria & Gauteng Streetwear
+            </span>
+          </div>
+
+          {/* Department Tabs (Desktop) */}
+          <div className="hidden xl:flex items-center gap-1 bg-[#F3F4F6] p-1 rounded-lg text-xs font-semibold text-[#4B5563]">
+            {(["ALL", "MEN", "WOMEN", "VINTAGE"] as const).map((dept) => (
+              <button
+                key={dept}
+                onClick={() => {
+                  setSelectedDepartment(dept);
+                  if (dept === "VINTAGE") {
+                    navigateTo("#/vault");
+                  } else if (currentRoute.type !== "home") {
+                    navigateTo("#/");
+                  }
+                }}
+                className={`px-3 py-1.5 rounded-md transition-all ${
+                  selectedDepartment === dept
+                    ? "bg-white text-[#111827] shadow-xs font-bold"
+                    : "hover:text-[#111827]"
+                }`}
+              >
+                {dept === "VINTAGE" ? "1-OF-1 VINTAGE" : dept}
+              </button>
+            ))}
+          </div>
+
+          {/* Search Bar */}
+          <div className="flex-1 max-w-xl hidden md:block relative">
+            <div className="relative flex items-center">
+              <span className="absolute left-3.5 text-[#9CA3AF] pointer-events-none">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (currentRoute.type !== "home") navigateTo("#/");
+                }}
+                placeholder="Search brands (Lesupa, Mokasi), sneakers, 1-of-1 vintage..."
+                className="w-full bg-[#F3F4F6] border border-transparent focus:border-[#111827] focus:bg-white rounded-full py-2.5 pl-10 pr-10 text-xs text-[#111827] placeholder-[#9CA3AF] focus:outline-none transition-all"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 text-xs text-[#9CA3AF] hover:text-[#111827]"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Right Action Utilities */}
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <button
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="p-2 text-[#0E0E10] hover:text-[#C88A35] transition-colors"
-              aria-label="Search Catalog"
+              onClick={() => setIsWishlistOpen(true)}
+              className="relative p-2 text-[#111827] hover:bg-gray-100 rounded-full transition-colors flex items-center gap-1.5"
+              aria-label="Wishlist"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg className="w-5 h-5" fill={wishlist.length > 0 ? "#EF4444" : "none"} stroke={wishlist.length > 0 ? "#EF4444" : "currentColor"} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
+              <span className="hidden lg:inline text-xs font-semibold">Saved</span>
+              {wishlist.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-[#EF4444] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {wishlist.length}
+                </span>
+              )}
             </button>
 
-            {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="flex items-center gap-2.5 bg-[#0E0E10] text-[#FAF7F2] px-4 py-2 text-[12px] uppercase tracking-[0.18em] font-medium hover:bg-[#C88A35] transition-colors"
+              className="bg-[#111827] text-white hover:bg-black px-4 py-2 rounded-full flex items-center gap-2.5 transition-colors shadow-xs"
               aria-label="View Shopping Bag"
             >
-              <span>Bag</span>
-              <span className="bg-[#FAF7F2] text-[#0E0E10] font-mono text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <span className="text-xs font-bold hidden sm:inline">Bag</span>
+              <span className="bg-white text-[#111827] text-[10px] font-bold px-2 py-0.5 rounded-full">
                 {cart.reduce((acc, item) => acc + item.quantity, 0)}
               </span>
             </button>
           </div>
         </div>
 
-        {/* Collapsible Search Drawer */}
-        {isSearchOpen && (
-          <div className="bg-white border-t border-[#0E0E10]/10 px-6 py-4 animate-in slide-in-from-top duration-300">
-            <div className="max-w-3xl mx-auto flex items-center gap-4">
-              <span className="text-[#6B6964] font-mono text-sm">SEARCH:</span>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search Pretoria streetwear, Soweto raw denim, 1-of-1 vintage windbreakers, sizes..."
-                className="w-full bg-transparent border-b border-[#0E0E10]/30 py-2 text-sm focus:outline-none focus:border-[#C88A35]"
-                autoFocus
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="text-xs uppercase font-mono text-[#6B6964] hover:text-[#0E0E10]"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
+        {/* 3. BASH CATEGORY SUB-NAV STRIP */}
+        <nav className="border-t border-[#E5E7EB] bg-white px-4 sm:px-8">
+          <div className="max-w-7xl mx-auto flex items-center gap-6 overflow-x-auto no-scrollbar py-2 text-xs font-semibold whitespace-nowrap text-[#4B5563]">
+            <a
+              href="#/brands"
+              className={`flex items-center gap-1.5 transition-colors ${currentRoute.type === "brands" ? "text-[#111827] font-bold" : "text-[#C88A35] hover:text-[#111827]"}`}
+            >
+              <span>⚡</span> Brands A–Z
+            </a>
+            <button
+              onClick={() => { setSelectedCategory("pretoria"); setSelectedBrand(null); navigateTo("#/"); }}
+              className={`hover:text-[#111827] transition-colors ${selectedCategory === "pretoria" && currentRoute.type === "home" ? "text-[#111827] font-bold" : ""}`}
+            >
+              Pretoria (012)
+            </button>
+            <a
+              href="#/vault"
+              className={`hover:text-[#111827] transition-colors ${currentRoute.type === "vault" ? "text-[#111827] font-bold" : ""}`}
+            >
+              The Dunusa Vault (1-of-1)
+            </a>
+            <button
+              onClick={() => { setSelectedCategory("outerwear"); setSelectedBrand(null); navigateTo("#/"); }}
+              className={`hover:text-[#111827] transition-colors ${selectedCategory === "outerwear" && currentRoute.type === "home" ? "text-[#111827] font-bold" : ""}`}
+            >
+              Hoodies & Sweats
+            </button>
+            <button
+              onClick={() => { setSelectedCategory("workwear"); setSelectedBrand(null); navigateTo("#/"); }}
+              className={`hover:text-[#111827] transition-colors ${selectedCategory === "workwear" && currentRoute.type === "home" ? "text-[#111827] font-bold" : ""}`}
+            >
+              Denim & Workwear
+            </button>
+            <button
+              onClick={() => { setSelectedCategory("kicks"); setSelectedBrand(null); navigateTo("#/"); }}
+              className={`hover:text-[#111827] transition-colors ${selectedCategory === "kicks" && currentRoute.type === "home" ? "text-[#111827] font-bold" : ""}`}
+            >
+              Footwear & Sneakers
+            </button>
+            <button
+              onClick={() => { setSelectedCategory("accessories"); setSelectedBrand(null); navigateTo("#/"); }}
+              className={`hover:text-[#111827] transition-colors ${selectedCategory === "accessories" && currentRoute.type === "home" ? "text-[#111827] font-bold" : ""}`}
+            >
+              Accessories
+            </button>
+            <a
+              href="#lockers"
+              className="hover:text-[#111827] transition-colors text-[#6B7280]"
+            >
+              Locker Stations
+            </a>
           </div>
-        )}
+        </nav>
       </header>
 
-      {/* 3. HERO SECTION — THE ART OF LOCAL STREETWEAR */}
-      <section className="relative border-b border-[#0E0E10]/10 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 py-12 lg:py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Narrative Column */}
-            <div className="lg:col-span-6 space-y-7">
-              <div className="inline-flex items-center gap-2.5 px-3 py-1 bg-[#F2EDE4] border border-[#0E0E10]/10 text-[11px] font-mono uppercase tracking-[0.2em] text-[#C88A35]">
-                <span className="w-2 h-2 rounded-full bg-[#C88A35]"></span>
-                The Home for Independent Streetwear Labels
+      {/* 4. MULTI-PAGE ROUTE SWITCHER */}
+      {currentRoute.type === "brand" && activeVendorForRoute ? (
+        /* DEDICATED BRAND LANDING PAGE VIEW */
+        <BrandLandingPage
+          vendor={activeVendorForRoute}
+          allProducts={products}
+          allVendors={vendors}
+          wishlist={wishlist}
+          currency={currency}
+          formatPrice={formatPrice}
+          onAddToCart={addToCart}
+          onToggleWishlist={toggleWishlist}
+          onSelectProduct={(p) => setQuickViewProduct(p)}
+          onNavigateHome={() => navigateTo("#/")}
+          onNavigateBrand={(slug) => navigateTo(`#/brand/${slug}`)}
+        />
+      ) : currentRoute.type === "brands" ? (
+        /* DEDICATED BRANDS A-Z DIRECTORY PAGE VIEW */
+        <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
+          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 sm:p-8 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#E5E7EB] pb-4">
+              <div>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#C88A35] block">
+                  Marketplace Directory
+                </span>
+                <h1 className="text-3xl font-black text-[#111827] uppercase font-display">
+                  All Independent Streetwear Labels A–Z
+                </h1>
+                <p className="text-xs text-[#6B7280] mt-1 max-w-xl">
+                  Explore dedicated brand storefronts for Pretoria (012), Soweto, Johannesburg, and Durban designers.
+                </p>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-light leading-[1.08] tracking-tight text-[#0E0E10]">
-                The Art of <span className="italic font-normal text-[#C88A35]">Local Streetwear</span>.
-                <br />
-                Pretoria to Johannesburg.
-              </h1>
-
-              <p className="text-base sm:text-lg text-[#6B6964] font-light leading-relaxed max-w-xl">
-                From Arcadia boxy heavyweight tees (Lesupa) and Mamelodi tracksuits (Mokasi) to Orlando West selvage denim and Small Street 1-of-1 vintage grails. All local labels on one unified platform with 48h smart locker pickup.
-              </p>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
-                <a
-                  href="#catalog"
-                  className="bg-[#0E0E10] text-[#FAF7F2] px-7 py-3.5 text-[12px] uppercase tracking-[0.2em] font-medium hover:bg-[#C88A35] transition-colors"
-                >
-                  Shop Streetwear
-                </a>
-                <a
-                  href="#dunusa-vault"
-                  className="border border-[#0E0E10] text-[#0E0E10] px-7 py-3.5 text-[12px] uppercase tracking-[0.2em] font-medium hover:bg-[#0E0E10] hover:text-[#FAF7F2] transition-colors"
-                >
-                  1-of-1 Vintage Vault
-                </a>
-              </div>
-
-              {/* Trust Metadata Grid from Business Plan */}
-              <div className="grid grid-cols-3 gap-6 pt-6 border-t border-[#0E0E10]/10 font-mono text-left">
-                <div>
-                  <span className="block text-2xl font-serif font-bold text-[#0E0E10]">10+</span>
-                  <span className="text-[10px] uppercase tracking-wider text-[#6B6964]">Curated Labels</span>
-                </div>
-                <div>
-                  <span className="block text-2xl font-serif font-bold text-[#C88A35]">48h</span>
-                  <span className="text-[10px] uppercase tracking-wider text-[#6B6964]">Dispatch SLA</span>
-                </div>
-                <div>
-                  <span className="block text-2xl font-serif font-bold text-[#0E0E10]">1,400+</span>
-                  <span className="text-[10px] uppercase tracking-wider text-[#6B6964]">Smart Lockers & Hubs</span>
-                </div>
+              {/* Letter Filter Pills */}
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 text-xs font-mono font-bold">
+                {["ALL", "B", "D", "G", "K", "L", "M", "S"].map((letter) => (
+                  <button
+                    key={letter}
+                    onClick={() => setBrandLetterFilter(letter)}
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                      brandLetterFilter === letter
+                        ? "bg-[#111827] text-white"
+                        : "bg-[#F3F4F6] text-[#4B5563] hover:bg-gray-200"
+                    }`}
+                  >
+                    {letter}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Right Editorial Lookbook with Interactive Garment Hotspots */}
-            <div className="lg:col-span-6 relative">
-              <div className="relative aspect-[4/5] bg-white border border-[#0E0E10]/15 overflow-hidden shadow-2xl">
-                <img
-                  src="https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=1200&q=85"
-                  alt="Le Benkeleng Mzansi Streetwear Lookbook"
-                  className="w-full h-full object-cover"
-                />
-
-                {/* Hotspot 1: Lesupa Heavyweight Tee */}
+            {/* Brand Storefront Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
+              {filteredBrandDirectory.map((b) => (
                 <div
-                  className="absolute top-[32%] left-[48%] cursor-pointer group"
-                  onMouseEnter={() => setActiveHotspot(1)}
-                  onMouseLeave={() => setActiveHotspot(null)}
-                  onClick={() => addToCart(products[0], "L")}
+                  key={b.id}
+                  className="border border-[#E5E7EB] rounded-xl p-5 hover:border-[#111827] transition-all flex flex-col justify-between space-y-4 bg-[#F9FAFB] hover:shadow-sm"
                 >
-                  <div className="w-7 h-7 rounded-full bg-[#C88A35] text-white flex items-center justify-center text-xs font-mono font-bold kasi-beacon shadow-lg">
-                    +
-                  </div>
-                  {activeHotspot === 1 && (
-                    <div className="absolute left-8 top-0 bg-[#0E0E10] text-[#FAF7F2] p-3.5 rounded-none shadow-2xl w-60 z-30 animate-in fade-in zoom-in-95 duration-200">
-                      <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-[#C88A35] block">Pretoria 012 Cut</span>
-                      <h4 className="text-xs font-semibold uppercase tracking-wider mt-0.5">Lesupa 280 GSM Tee</h4>
-                      <p className="text-[11px] text-[#FAF7F2]/70 mt-1 font-mono">R 620 · Dropped Shoulder</p>
-                      <button className="mt-2 text-[10px] uppercase tracking-widest text-[#C88A35] font-mono underline block">
-                        + Add Size L to Bag
-                      </button>
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono font-bold text-[#C88A35] uppercase">
+                        {b.origin}
+                      </span>
+                      <span className="text-[10px] font-mono text-[#9CA3AF]">{b.coordinates}</span>
                     </div>
-                  )}
-                </div>
 
-                {/* Hotspot 2: Soweto Raw Denim */}
-                <div
-                  className="absolute top-[64%] left-[42%] cursor-pointer group"
-                  onMouseEnter={() => setActiveHotspot(2)}
-                  onMouseLeave={() => setActiveHotspot(null)}
-                  onClick={() => addToCart(products[3], "L")}
-                >
-                  <div className="w-7 h-7 rounded-full bg-[#C88A35] text-white flex items-center justify-center text-xs font-mono font-bold kasi-beacon shadow-lg">
-                    +
-                  </div>
-                  {activeHotspot === 2 && (
-                    <div className="absolute left-8 top-0 bg-[#0E0E10] text-[#FAF7F2] p-3.5 rounded-none shadow-2xl w-64 z-30 animate-in fade-in zoom-in-95 duration-200">
-                      <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-[#C88A35] block">Soweto Heritage</span>
-                      <h4 className="text-xs font-semibold uppercase tracking-wider mt-0.5">14oz Selvage Denim Jacket</h4>
-                      <p className="text-[11px] text-[#FAF7F2]/70 mt-1 font-mono">R 1,280 · Chainstitched</p>
-                      <button className="mt-2 text-[10px] uppercase tracking-widest text-[#C88A35] font-mono underline block">
-                        + Add Size L to Bag
-                      </button>
+                    <div className="flex items-center gap-3 mt-3">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-base shrink-0"
+                        style={{ backgroundColor: b.color }}
+                      >
+                        {b.letter}
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-[#111827]">{b.name}</h3>
+                        <span className="text-[11px] text-[#6B7280] block">Est. {b.establishedYear}</span>
+                      </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Bottom Overlay Label */}
-                <div className="absolute bottom-4 left-4 right-4 bg-[#0E0E10]/90 backdrop-blur-md text-[#FAF7F2] p-3.5 flex items-center justify-between font-mono text-[11px]">
-                  <span>LOOK 01 · PRETORIA STREETWEAR ESSENTIALS</span>
-                  <span className="text-[#C88A35]">COORDINATES 25.7479° S, 28.2293° E</span>
+                    <p className="text-xs text-[#6B7280] mt-2.5 line-clamp-2 leading-relaxed">
+                      {b.tagline}
+                    </p>
+
+                    {b.specialty && (
+                      <div className="mt-2.5 text-[10px] font-mono text-[#111827] bg-white p-2 rounded border border-[#E5E7EB]">
+                        {b.specialty}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between">
+                    <span className="text-[11px] font-mono text-[#6B7280]">{b.productCount} active styles</span>
+                    <a
+                      href={`#/brand/${b.slug}`}
+                      className="bg-[#111827] text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-black transition-colors"
+                    >
+                      Visit Brand Store →
+                    </a>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
-        </div>
-
-        {/* Real-time Transit Route Ticker */}
-        <div className="bg-[#F2EDE4] border-t border-[#0E0E10]/10 py-3 px-6 overflow-hidden">
-          <div className="max-w-7xl mx-auto flex items-center justify-between text-[11px] font-mono text-[#6B6964]">
-            <span className="font-bold text-[#0E0E10] flex items-center gap-1.5">
-              <span>🚕</span> TRANSIT ARTERY:
+        </main>
+      ) : currentRoute.type === "vault" ? (
+        /* DEDICATED 1-OF-1 DUNUSA VINTAGE VAULT VIEW */
+        <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
+          <div className="bg-[#111827] text-white rounded-2xl p-8 sm:p-12 space-y-4">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#C88A35] block">
+              1-of-1 Curated South African Archive
             </span>
-            <span className="hidden md:inline">Hatfield Plaza ⇄ Pretoria CBD ⇄ Bree Taxi Interchange ⇄ Braamfontein Juta ⇄ Orlando West ⇄ Umlazi Mega City</span>
-            <span className="text-[#C88A35] font-bold">ALL HUB SHIPMENTS COVERED VIA BOB GO</span>
+            <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight font-display">
+              The Dunusa Vintage Vault.
+            </h1>
+            <p className="text-xs sm:text-sm text-[#D1D5DB] max-w-2xl leading-relaxed">
+              Hand-hunted across Small Street CBD wholesale stashes, Bree Taxi Interchange, and Durban beachfront arcades. Every single piece is verified Grade A+ mint, triple steam-cleaned, measured to the centimeter, and guaranteed 1-of-1 in South Africa.
+            </p>
           </div>
-        </div>
-      </section>
 
-      {/* 4. HYPE DROP CALENDAR & LIVE COUNTDOWN (FROM BUSINESS PLAN SECTION 07) */}
-      <section id="drop-calendar" className="bg-[#0E0E10] text-[#FAF7F2] py-12 border-b border-[#FAF7F2]/10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Countdown Metadata */}
-            <div className="lg:col-span-7 space-y-3">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-[#FF5500]/20 text-[#FF5500] border border-[#FF5500]/40 text-[10px] font-mono uppercase tracking-[0.25em]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FF5500] pulse-drop"></span>
-                Next Limited Capsule Drop
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-serif tracking-tight">
-                Lesupa × Mokasi: <span className="italic text-[#C88A35]">The 012 Autumn Drop</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-[#FAF7F2]/70 font-light max-w-lg">
-                Exclusive 50-piece numbered capsule engineered in Pretoria. Heavyweight fleece, stacked corduroy pants, and 3M reflective embroidery. Will not be restocked.
-              </p>
-            </div>
-
-            {/* Live Clock & WhatsApp Opt-In */}
-            <div className="lg:col-span-5 bg-white/5 border border-white/10 p-6 space-y-4">
-              <div className="grid grid-cols-4 gap-2 text-center font-mono">
-                <div className="bg-white/10 py-2.5">
-                  <span className="block text-2xl font-bold text-[#C88A35]">{String(timeLeft.days).padStart(2, "0")}</span>
-                  <span className="text-[9px] uppercase tracking-widest text-[#FAF7F2]/60">Days</span>
-                </div>
-                <div className="bg-white/10 py-2.5">
-                  <span className="block text-2xl font-bold text-[#C88A35]">{String(timeLeft.hours).padStart(2, "0")}</span>
-                  <span className="text-[9px] uppercase tracking-widest text-[#FAF7F2]/60">Hours</span>
-                </div>
-                <div className="bg-white/10 py-2.5">
-                  <span className="block text-2xl font-bold text-[#C88A35]">{String(timeLeft.minutes).padStart(2, "0")}</span>
-                  <span className="text-[9px] uppercase tracking-widest text-[#FAF7F2]/60">Mins</span>
-                </div>
-                <div className="bg-white/10 py-2.5">
-                  <span className="block text-2xl font-bold text-[#C88A35]">{String(timeLeft.seconds).padStart(2, "0")}</span>
-                  <span className="text-[9px] uppercase tracking-widest text-[#FAF7F2]/60">Secs</span>
-                </div>
-              </div>
-
-              {/* WhatsApp Notification Form */}
-              <div className="space-y-2">
-                {isDropNotified ? (
-                  <div className="bg-[#25D366]/20 border border-[#25D366]/40 p-2.5 text-center text-[11px] font-mono text-[#25D366]">
-                    ✓ VIP Drop Alert Registered on WhatsApp! You will get the direct link 15 mins early.
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {products.filter((p) => p.isThrift).map((product) => (
+              <div
+                key={product.id}
+                className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all"
+              >
+                <div
+                  className="relative aspect-3/4 bg-[#F3F4F6] overflow-hidden cursor-pointer"
+                  onClick={() => setQuickViewProduct(product)}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute top-2.5 left-2.5 bg-[#111827] text-white text-[9px] font-bold px-2 py-0.5 rounded font-mono">
+                    1-OF-1 VINTAGE
                   </div>
+                  <div className="absolute bottom-2 left-2 right-2 bg-black/80 text-white text-[9px] font-mono p-1.5 rounded">
+                    {product.measurements}
+                  </div>
+                </div>
+
+                <div className="p-3.5 space-y-1.5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <a
+                      href={`#/brand/${product.brandSlug}`}
+                      className="text-[10px] font-bold uppercase tracking-wider text-[#C88A35] block truncate hover:underline"
+                    >
+                      {product.brand}
+                    </a>
+                    <h3 className="text-xs font-semibold text-[#111827] line-clamp-2 mt-0.5">{product.title}</h3>
+                  </div>
+
+                  <div className="pt-2 border-t border-[#F3F4F6] flex items-center justify-between">
+                    <span className="text-sm font-bold text-[#111827]">{formatPrice(product.price)}</span>
+                    <button
+                      onClick={() => addToCart(product, product.sizes[0])}
+                      className="bg-[#111827] text-white text-[10px] font-bold px-3 py-1.5 rounded-full hover:bg-black"
+                    >
+                      Add to Bag
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
+      ) : (
+        /* MARKETPLACE HOME PAGE VIEW */
+        <main>
+          {/* Shop By Brand Strip (Clicking opens brand landing page) */}
+          <section className="bg-white border-b border-[#E5E7EB] py-4 px-4 sm:px-8">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">
+                  Featured Independent Labels:
+                </span>
+                <a href="#/brands" className="text-xs font-bold text-[#111827] hover:underline">
+                  View All Brands A–Z →
+                </a>
+              </div>
+
+              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-1">
+                {vendors.map((vendor) => (
+                  <a
+                    key={vendor.id}
+                    href={`#/brand/${vendor.slug}`}
+                    className="flex items-center gap-2.5 px-3.5 py-2 rounded-full border text-xs font-bold shrink-0 transition-all bg-[#F9FAFB] text-[#374151] border-[#E5E7EB] hover:border-[#111827] hover:bg-white hover:shadow-xs"
+                  >
+                    <span
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] text-white font-mono"
+                      style={{ backgroundColor: vendor.color }}
+                    >
+                      {vendor.letter}
+                    </span>
+                    <span>{vendor.name}</span>
+                    {vendor.city === "Pretoria" && (
+                      <span className="text-[9px] bg-[#FEF3C7] text-[#92400E] px-1.5 py-0.2 rounded font-mono font-normal">
+                        012
+                      </span>
+                    )}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Hero Promo Banner */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-8 py-6">
+            <div className="bg-linear-to-r from-[#111827] via-[#1F2937] to-[#111827] text-white rounded-2xl overflow-hidden shadow-sm">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-8 sm:p-12">
+                <div className="lg:col-span-7 space-y-4">
+                  <div className="inline-flex items-center gap-2 bg-[#C88A35]/20 text-[#FBBF24] border border-[#C88A35]/40 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider font-mono">
+                    <span>✦</span> Home of Pretoria & Gauteng Streetwear
+                  </div>
+
+                  <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight font-display">
+                    The Curated Multi-Brand Marketplace.
+                  </h1>
+
+                  <p className="text-sm sm:text-base text-[#D1D5DB] max-w-xl leading-relaxed">
+                    Featuring dedicated storefronts for <a href="#/brand/lesupa-atelier" className="text-white font-semibold underline">Lesupa Atelier</a>, <a href="#/brand/mokasi" className="text-white font-semibold underline">Mokasi</a>, and <a href="#/brand/galxboy" className="text-white font-semibold underline">Galxboy</a> alongside Soweto raw denim and 1-of-1 vintage grails. One basket, one checkout, and 48-hour smart locker pickup.
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-3 pt-2">
+                    <a
+                      href="#/brand/lesupa-atelier"
+                      className="bg-white text-[#111827] font-bold px-6 py-3 rounded-full text-xs hover:bg-[#F3F4F6] transition-colors shadow-xs"
+                    >
+                      Visit Lesupa Atelier Store
+                    </a>
+                    <a
+                      href="#/brand/mokasi"
+                      className="border border-white/30 text-white font-bold px-6 py-3 rounded-full text-xs hover:bg-white/10 transition-colors"
+                    >
+                      Visit Mokasi Store
+                    </a>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-5 grid grid-cols-2 gap-3">
+                  <a href="#/brand/lesupa-atelier" className="rounded-xl overflow-hidden aspect-4/5 relative group bg-black/40 block">
+                    <img
+                      src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80"
+                      alt="Lesupa Tee"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute bottom-2 left-2 right-2 bg-black/80 backdrop-blur-xs p-2 rounded text-white text-[10px] font-mono">
+                      <span className="font-bold block">Lesupa Atelier</span>
+                      <span className="text-[#C88A35]">Visit Brand Page →</span>
+                    </div>
+                  </a>
+                  <a href="#/brand/soweto-threads" className="rounded-xl overflow-hidden aspect-4/5 relative group bg-black/40 mt-6 block">
+                    <img
+                      src="https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=600&q=80"
+                      alt="Soweto Raw Denim"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute bottom-2 left-2 right-2 bg-black/80 backdrop-blur-xs p-2 rounded text-white text-[10px] font-mono">
+                      <span className="font-bold block">Soweto Threads</span>
+                      <span className="text-[#C88A35]">Visit Brand Page →</span>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Hype Drop Calendar */}
+          <section id="drop-calendar" className="max-w-7xl mx-auto px-4 sm:px-8 py-4">
+            <div className="bg-white border border-[#E5E7EB] rounded-xl p-6 sm:p-8 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-xs">
+              <div className="space-y-1.5">
+                <div className="inline-flex items-center gap-2 bg-[#FEE2E2] text-[#DC2626] px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#DC2626] pulse-drop"></span>
+                  Scheduled Capsule Drop
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-[#111827]">
+                  Lesupa × Mokasi: The 012 Autumn Drop
+                </h2>
+                <p className="text-xs text-[#6B7280]">
+                  Exclusive 50-piece numbered release engineered in Pretoria. Heavyweight fleece & corduroy sets.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+                <div className="grid grid-cols-4 gap-2 font-mono text-center shrink-0">
+                  <div className="bg-[#F3F4F6] px-3 py-1.5 rounded-md">
+                    <span className="block text-lg font-bold text-[#111827]">{String(timeLeft.days).padStart(2, "0")}</span>
+                    <span className="text-[9px] uppercase text-[#6B7280]">Days</span>
+                  </div>
+                  <div className="bg-[#F3F4F6] px-3 py-1.5 rounded-md">
+                    <span className="block text-lg font-bold text-[#111827]">{String(timeLeft.hours).padStart(2, "0")}</span>
+                    <span className="text-[9px] uppercase text-[#6B7280]">Hours</span>
+                  </div>
+                  <div className="bg-[#F3F4F6] px-3 py-1.5 rounded-md">
+                    <span className="block text-lg font-bold text-[#111827]">{String(timeLeft.minutes).padStart(2, "0")}</span>
+                    <span className="text-[9px] uppercase text-[#6B7280]">Mins</span>
+                  </div>
+                  <div className="bg-[#F3F4F6] px-3 py-1.5 rounded-md">
+                    <span className="block text-lg font-bold text-[#DC2626]">{String(timeLeft.seconds).padStart(2, "0")}</span>
+                    <span className="text-[9px] uppercase text-[#6B7280]">Secs</span>
+                  </div>
+                </div>
+
+                {isDropNotified ? (
+                  <span className="text-xs font-bold text-[#059669] bg-[#DCFCE7] px-4 py-2 rounded-full">
+                    ✓ WhatsApp Alert Registered
+                  </span>
                 ) : (
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full sm:w-auto">
                     <input
                       type="tel"
                       value={dropWhatsapp}
                       onChange={(e) => setDropWhatsapp(e.target.value)}
                       placeholder="+27 WhatsApp Number"
-                      className="bg-white/10 border border-white/20 text-xs px-3 py-2 flex-1 focus:outline-none focus:border-[#C88A35] font-mono"
+                      className="bg-[#F3F4F6] border border-[#E5E7EB] rounded-full px-4 py-2 text-xs focus:outline-none focus:border-[#111827] font-mono"
                     />
                     <button
                       onClick={() => {
                         if (dropWhatsapp.length >= 10) {
                           setIsDropNotified(true);
                         } else {
-                          alert("Please enter a valid South African WhatsApp number (e.g. +27 82 123 4567)");
+                          alert("Please enter a valid South African WhatsApp number.");
                         }
                       }}
-                      className="bg-[#25D366] text-black text-[11px] font-mono uppercase tracking-wider font-bold px-4 py-2 hover:bg-[#20bd5a] transition-colors whitespace-nowrap"
+                      className="bg-[#25D366] text-black font-bold text-xs px-4 py-2 rounded-full hover:bg-[#20ba5a] transition-colors shrink-0"
                     >
-                      Notify on WhatsApp
+                      Notify Me
                     </button>
                   </div>
                 )}
-                <span className="text-[10px] text-[#FAF7F2]/50 font-mono block">
-                  Zero spam. Strictly one WhatsApp drop alert before public release.
+              </div>
+            </div>
+          </section>
+
+          {/* Product Catalog with Toolbar */}
+          <section id="catalog" className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
+            <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+              <div>
+                <h2 className="text-xl font-bold text-[#111827]">
+                  {selectedBrand ? selectedBrand : selectedCategory === "pretoria" ? "Pretoria (012) Streetwear" : selectedCategory === "thrift" ? "The Dunusa 1-of-1 Vault" : "All Products"}
+                </h2>
+                <span className="text-xs text-[#6B7280]">
+                  Showing {filteredProducts.length} items from South African labels
                 </span>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* 5. THE DUNUSA VAULT — 1-OF-1 CURATED VINTAGE & THRIFT */}
-      <section id="dunusa-vault" className="py-16 bg-[#FAF7F2] border-b border-[#0E0E10]/10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 pb-6 border-b border-[#0E0E10]/10 gap-4">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#C88A35]/15 border border-[#C88A35]/30 text-[#C88A35] text-[10px] font-mono uppercase tracking-[0.2em] font-semibold">
-                <span>⚡</span> ZERO DUPLICATES · SINGLE PIECES
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-serif tracking-tight text-[#0E0E10]">
-                The Dunusa Vault <span className="italic text-[#C88A35]">(1-of-1 Vintage Archive)</span>
-              </h2>
-              <p className="text-sm text-[#6B6964] font-light max-w-2xl">
-                Hand-hunted across Small Street CBD wholesale stashes, Sophiatown private archives, and Durban beachfront arcades. Every piece is triple steam-cleaned, measured to the centimeter, and guaranteed 1-of-1 in South Africa.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setSelectedCategory("thrift")}
-                className="bg-[#0E0E10] text-[#FAF7F2] px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] font-mono hover:bg-[#C88A35] transition-colors"
-              >
-                View All Vintage Pieces ({products.filter((p) => p.isThrift).length})
-              </button>
-            </div>
-          </div>
-
-          {/* Dunusa Curators Showcase Banner */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-            {vendors.filter((v) => v.isThrift).map((curator) => (
-              <div key={curator.id} className="bg-white border border-[#0E0E10]/10 p-5 hover:border-[#C88A35] transition-colors">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#C88A35] block">
-                  {curator.origin}
-                </span>
-                <h3 className="font-serif text-lg font-bold mt-1 text-[#0E0E10]">{curator.name}</h3>
-                <p className="text-[11px] text-[#6B6964] mt-1.5 line-clamp-2 leading-relaxed">
-                  {curator.tagline}
-                </p>
-                <div className="mt-3 pt-3 border-t border-[#0E0E10]/5 text-[10px] font-mono text-[#6B6964] flex items-center justify-between">
-                  <span>{curator.conditionStandard}</span>
-                  <span className="font-bold text-[#0E0E10]">{curator.productCount} pcs</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Dunusa 1-of-1 Item Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {products.filter((p) => p.isThrift).map((item) => (
-              <div
-                key={item.id}
-                className="group bg-white border border-[#0E0E10]/10 flex flex-col justify-between hover:shadow-xl transition-all"
-              >
-                <div className="relative aspect-square overflow-hidden bg-[#F2EDE4]">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute top-2.5 left-2.5 bg-[#0E0E10] text-[#FAF7F2] text-[9px] font-mono uppercase px-2 py-1 tracking-widest font-bold">
-                    1-OF-1 GRAIL
-                  </div>
-                  <div className="absolute bottom-2.5 left-2.5 right-2.5 bg-black/80 backdrop-blur-sm text-[#FAF7F2] text-[9px] font-mono px-2 py-1">
-                    {item.measurements}
-                  </div>
+              <div className="flex flex-wrap items-center gap-3 text-xs">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[#6B7280]">Origin:</span>
+                  <select
+                    value={selectedCity}
+                    onChange={(e) => setSelectedCity(e.target.value)}
+                    className="bg-[#F3F4F6] border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 font-medium text-[#111827] focus:outline-none"
+                  >
+                    <option value="ALL">All Cities</option>
+                    <option value="Pretoria">Pretoria (012)</option>
+                    <option value="Soweto">Soweto</option>
+                    <option value="Johannesburg">Johannesburg</option>
+                    <option value="Durban">Durban</option>
+                  </select>
                 </div>
 
-                <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
-                  <div>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-[#C88A35] block">
-                      {item.brand} · {item.origin}
-                    </span>
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-[#0E0E10] mt-1 line-clamp-1">
-                      {item.title}
-                    </h3>
-                    <p className="text-[11px] text-[#6B6964] font-mono mt-1">
-                      {item.condition}
-                    </p>
-                  </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[#6B7280]">Sort:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="bg-[#F3F4F6] border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 font-medium text-[#111827] focus:outline-none"
+                  >
+                    <option value="featured">Featured</option>
+                    <option value="newest">Newest Drops</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                  </select>
+                </div>
+              </div>
+            </div>
 
-                  <div className="pt-2 border-t border-[#0E0E10]/5 flex items-center justify-between">
-                    <div>
-                      <span className="text-sm font-serif font-bold text-[#0E0E10]">{formatPrice(item.price)}</span>
-                      {item.originalPrice && (
-                        <span className="text-[10px] text-[#6B6964] line-through ml-1.5">
-                          {formatPrice(item.originalPrice)}
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => addToCart(item, item.sizes[0])}
-                      className="bg-[#0E0E10] text-[#FAF7F2] px-3 py-1.5 text-[10px] uppercase font-mono tracking-widest hover:bg-[#C88A35] transition-colors"
+            {/* Product Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {filteredProducts.map((product) => {
+                const isSaved = wishlist.includes(product.id);
+                const discountPercent = product.originalPrice
+                  ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+                  : null;
+
+                return (
+                  <div
+                    key={product.id}
+                    className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all"
+                  >
+                    <div
+                      className="relative aspect-3/4 bg-[#F3F4F6] overflow-hidden cursor-pointer"
+                      onClick={() => setQuickViewProduct(product)}
                     >
-                      Add 1-of-1 to Bag
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+                      <img
+                        src={product.image}
+                        alt={product.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <img
+                        src={product.secondaryImage}
+                        alt={`${product.title} Detail`}
+                        className="w-full h-full object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      />
 
-      {/* 6. MAIN MULTI-BRAND CATALOG */}
-      <section id="catalog" className="py-16 max-w-7xl mx-auto px-6">
-        <div className="space-y-6 mb-10">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#C88A35] block">
-                CURATED MULTI-BRAND DISCOVERY
-              </span>
-              <h2 className="text-3xl font-serif tracking-tight text-[#0E0E10]">
-                Streetwear & Apparel Catalog
-              </h2>
-            </div>
+                      <div className="absolute top-2.5 left-2.5 flex flex-col gap-1">
+                        {product.city === "Pretoria" && (
+                          <span className="bg-[#FEF3C7] text-[#92400E] text-[9px] font-bold px-2 py-0.5 rounded font-mono">
+                            012 PRETORIA
+                          </span>
+                        )}
+                        {product.isThrift && (
+                          <span className="bg-[#111827] text-white text-[9px] font-bold px-2 py-0.5 rounded font-mono">
+                            1-OF-1 VINTAGE
+                          </span>
+                        )}
+                        {discountPercent && (
+                          <span className="bg-[#DC2626] text-white text-[9px] font-bold px-2 py-0.5 rounded font-mono">
+                            -{discountPercent}%
+                          </span>
+                        )}
+                      </div>
 
-            {/* City / Hub Quick Filter */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-mono">
-              <span className="text-[#6B6964] uppercase text-[10px]">Filter Origin:</span>
-              {["ALL", "Pretoria", "Soweto", "Johannesburg", "Durban"].map((city) => (
-                <button
-                  key={city}
-                  onClick={() => setSelectedCity(city)}
-                  className={`px-3 py-1 uppercase tracking-wider text-[11px] transition-colors ${
-                    selectedCity === city
-                      ? "bg-[#0E0E10] text-[#FAF7F2] font-semibold"
-                      : "bg-white border border-[#0E0E10]/15 text-[#6B6964] hover:text-[#0E0E10]"
-                  }`}
-                >
-                  {city === "Pretoria" ? "Pretoria (012)" : city}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Department Category Pills */}
-          <div className="flex flex-wrap gap-2 pt-2 border-b border-[#0E0E10]/10 pb-4 text-[11px] uppercase tracking-[0.16em] font-medium">
-            {[
-              { id: "all", label: "All Drops" },
-              { id: "pretoria", label: "⚡ Pretoria Streetwear (012)" },
-              { id: "thrift", label: "1-of-1 Vintage Archive" },
-              { id: "outerwear", label: "Hoodies & Jackets" },
-              { id: "workwear", label: "Denim & Workwear" },
-              { id: "kicks", label: "Footwear & Sneakers" },
-              { id: "accessories", label: "Accessories" },
-            ].map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id as Category)}
-                className={`px-4 py-2 transition-all ${
-                  selectedCategory === cat.id
-                    ? "bg-[#0E0E10] text-[#FAF7F2] font-semibold shadow-sm"
-                    : "bg-white border border-[#0E0E10]/10 text-[#6B6964] hover:border-[#0E0E10]"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7">
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="group bg-white border border-[#0E0E10]/10 flex flex-col justify-between hover:shadow-2xl transition-all"
-            >
-              {/* Product Visual Container */}
-              <div className="relative aspect-[4/5] product-image-container cursor-pointer" onClick={() => setQuickViewProduct(product)}>
-                <img
-                  src={product.image}
-                  alt={product.title}
-                  className="w-full h-full object-cover main-img"
-                />
-                <img
-                  src={product.secondaryImage}
-                  alt={`${product.title} Detail`}
-                  className="w-full h-full object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                />
-
-                {/* Badges */}
-                <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-                  <span className="bg-[#0E0E10] text-[#FAF7F2] text-[9px] font-mono px-2 py-0.5 uppercase tracking-widest font-bold">
-                    {product.badge}
-                  </span>
-                  {product.city === "Pretoria" && (
-                    <span className="bg-[#C88A35] text-white text-[9px] font-mono px-2 py-0.5 uppercase tracking-wider font-bold">
-                      012 PRIDE
-                    </span>
-                  )}
-                  {product.isThrift && (
-                    <span className="bg-[#C45434] text-white text-[9px] font-mono px-2 py-0.5 uppercase tracking-wider font-bold">
-                      1-OF-1 PIECE
-                    </span>
-                  )}
-                </div>
-
-                {/* Quick Size Overlay on Hover */}
-                <div className="absolute inset-x-0 bottom-0 bg-white/95 backdrop-blur-md p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 border-t border-[#0E0E10]/10">
-                  <span className="text-[9px] uppercase font-mono tracking-widest text-[#6B6964] block mb-1.5 text-center">
-                    Select Size to Bag:
-                  </span>
-                  <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                    {product.sizes.map((sz) => (
                       <button
-                        key={sz}
                         onClick={(e) => {
                           e.stopPropagation();
-                          addToCart(product, sz);
+                          toggleWishlist(product.id);
                         }}
-                        className="border border-[#0E0E10]/20 px-2 py-1 text-[10px] font-mono uppercase hover:bg-[#0E0E10] hover:text-[#FAF7F2] transition-colors"
+                        className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-[#111827] hover:bg-white shadow-xs transition-transform active:scale-90"
+                        aria-label="Save to Wishlist"
                       >
-                        {sz}
+                        <svg className="w-4 h-4" fill={isSaved ? "#EF4444" : "none"} stroke={isSaved ? "#EF4444" : "currentColor"} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
                       </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
 
-              {/* Product Info */}
-              <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-[10px] font-mono text-[#6B6964]">
-                    <span className="text-[#C88A35] font-semibold uppercase">{product.brand}</span>
-                    <span>{product.origin}</span>
-                  </div>
-                  <h3
-                    className="font-serif text-sm font-semibold tracking-tight text-[#0E0E10] mt-1 group-hover:text-[#C88A35] transition-colors cursor-pointer"
-                    onClick={() => setQuickViewProduct(product)}
-                  >
-                    {product.title}
-                  </h3>
-                  <p className="text-[11px] text-[#6B6964] line-clamp-1 mt-0.5 font-light">
-                    {product.fabric}
-                  </p>
-                </div>
-
-                <div className="pt-3 border-t border-[#0E0E10]/5">
-                  <div className="flex items-baseline justify-between">
-                    <div>
-                      <span className="text-base font-serif font-bold text-[#0E0E10]">
-                        {formatPrice(product.price)}
-                      </span>
-                      {product.originalPrice && (
-                        <span className="text-xs text-[#6B6964] line-through ml-2">
-                          {formatPrice(product.originalPrice)}
+                      <div className="absolute inset-x-0 bottom-0 bg-white/95 backdrop-blur-xs p-2.5 translate-y-full group-hover:translate-y-0 transition-transform duration-200 border-t border-[#E5E7EB]">
+                        <span className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider block text-center mb-1">
+                          Select Size to Bag:
                         </span>
-                      )}
+                        <div className="flex items-center justify-center gap-1 flex-wrap">
+                          {product.sizes.map((sz) => (
+                            <button
+                              key={sz}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addToCart(product, sz);
+                              }}
+                              className="bg-white border border-[#D1D5DB] hover:border-[#111827] hover:bg-[#111827] hover:text-white px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-colors"
+                            >
+                              {sz}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-[10px] font-mono text-[#6B6964]">
-                      Or 4x {formatPrice(Math.round(product.price / 4))} Payflex
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
-      {/* 7. PRIVATE CLIENT CAPSULE — "THE COMMUTER UNIFORM" (THE COMPLETE LOOK) */}
-      <section className="py-16 bg-[#0E0E10] text-[#FAF7F2]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-6 space-y-6">
-              <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#C88A35] block">
-                CURATED CAPSULE BUNDLE
+                    <div className="p-3.5 space-y-1.5 flex-1 flex flex-col justify-between">
+                      <div>
+                        <a
+                          href={`#/brand/${product.brandSlug}`}
+                          className="text-[10px] font-bold uppercase tracking-wider text-[#C88A35] block truncate hover:underline"
+                        >
+                          {product.brand} →
+                        </a>
+                        <h3
+                          className="text-xs font-semibold text-[#111827] hover:underline cursor-pointer line-clamp-2 leading-snug mt-0.5"
+                          onClick={() => setQuickViewProduct(product)}
+                        >
+                          {product.title}
+                        </h3>
+                      </div>
+
+                      <div className="pt-2 border-t border-[#F3F4F6] space-y-1">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-sm font-bold text-[#111827]">
+                            {formatPrice(product.price)}
+                          </span>
+                          {product.originalPrice && (
+                            <span className="text-xs text-[#9CA3AF] line-through">
+                              {formatPrice(product.originalPrice)}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[10px] text-[#6B7280] font-mono">
+                          Pay 4x {formatPrice(Math.round(product.price / 4))} with Payflex
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </main>
+      )}
+
+      {/* 5. SMART LOCKERS & LOGISTICS NETWORK */}
+      <section id="lockers" className="max-w-7xl mx-auto px-4 sm:px-8 py-12">
+        <div className="bg-[#111827] text-white rounded-2xl p-6 sm:p-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-6 space-y-4">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#C88A35] block">
+                Frictionless Commuter Logistics
               </span>
-              <h2 className="text-3xl sm:text-5xl font-serif font-light leading-tight">
-                The Commuter Uniform.
-                <br />
-                <span className="italic font-normal text-[#C88A35]">The Complete 3-Piece Look</span>.
+              <h2 className="text-2xl sm:text-4xl font-bold tracking-tight">
+                1,400+ Smart Lockers & Collection Hubs.
               </h2>
-              <p className="text-sm sm:text-base text-[#FAF7F2]/70 font-light leading-relaxed">
-                Save R 350 when acquiring the full 3-piece uniform: The Soweto Raw Selvage Denim Jacket, Lesupa Commuter Waxed Tote, and Soweto Double-Pleated Tailored Chinos.
+              <p className="text-xs sm:text-sm text-[#D1D5DB] leading-relaxed">
+                Powered by Bob Go courier aggregation (The Courier Guy, Pargo, PEP Paxi). Collect your drops on your daily commute at transit stations, spaza counters, and retail plazas.
               </p>
 
-              <div className="space-y-3 font-mono text-xs border-y border-white/10 py-4">
-                <div className="flex justify-between">
-                  <span>1. Soweto Raw Selvage Denim Jacket (14oz)</span>
-                  <span className="text-[#C88A35]">R 1,280</span>
+              <div className="grid grid-cols-2 gap-3 pt-2 font-mono text-xs">
+                <div className="bg-white/5 border border-white/10 p-3 rounded-lg">
+                  <span className="text-[#C88A35] font-bold block">48-Hour SLA</span>
+                  <span className="text-[10px] text-[#9CA3AF]">Direct brand dispatch</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>2. Soweto Double-Pleated Chinos (High-Rise)</span>
-                  <span className="text-[#C88A35]">R 950</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>3. Lesupa Minimalist Commuter Waxed Tote (18L)</span>
-                  <span className="text-[#C88A35]">R 450</span>
-                </div>
-                <div className="flex justify-between font-bold pt-2 border-t border-white/10 text-sm">
-                  <span>Bundle Price (Save R 350):</span>
-                  <span className="text-[#25D366]">R 2,330</span>
+                <div className="bg-white/5 border border-white/10 p-3 rounded-lg">
+                  <span className="text-[#C88A35] font-bold block">WhatsApp PIN</span>
+                  <span className="text-[10px] text-[#9CA3AF]">Contactless locker access</span>
                 </div>
               </div>
+            </div>
 
+            <div className="lg:col-span-6 bg-white text-[#111827] rounded-xl p-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-2">
+                <span className="text-xs font-bold uppercase">Current Collection Hub:</span>
+                <span className="text-xs font-bold text-[#059669]">Free over R 650</span>
+              </div>
+              <div className="p-3 bg-[#F3F4F6] rounded-lg">
+                <span className="text-xs font-bold block">{selectedStation.name}</span>
+                <span className="text-[11px] text-[#6B6964] block">{selectedStation.address}</span>
+                <span className="text-[10px] font-mono text-[#C88A35] block mt-1">{selectedStation.commuterTag}</span>
+              </div>
               <button
-                onClick={() => {
-                  addToCart(products[3], "L");
-                  addToCart(products[11], "32");
-                  addToCart(products[12], "One Size");
-                }}
-                className="bg-[#C88A35] text-black px-8 py-4 text-xs font-mono uppercase tracking-[0.2em] font-bold hover:bg-white transition-colors block text-center"
+                onClick={() => setIsLockerPickerOpen(true)}
+                className="w-full bg-[#111827] text-white py-2.5 rounded-lg text-xs font-bold hover:bg-black transition-colors"
               >
-                + Add Complete 3-Piece Look to Bag (Save R 350)
+                Change Locker Location ({lockerStations.length} Hubs Available)
               </button>
             </div>
-
-            <div className="lg:col-span-6 grid grid-cols-2 gap-4">
-              <img
-                src="https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=800&q=80"
-                alt="Denim detail"
-                className="w-full aspect-[4/5] object-cover border border-white/10"
-              />
-              <img
-                src="https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=800&q=80"
-                alt="Chinos detail"
-                className="w-full aspect-[4/5] object-cover border border-white/10 mt-8"
-              />
-            </div>
           </div>
         </div>
       </section>
 
-      {/* 8. FOUNDING BRANDS & ATELIERS DIRECTORY */}
-      <section id="vendors" className="py-16 max-w-7xl mx-auto px-6 border-b border-[#0E0E10]/10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-6 border-b border-[#0E0E10]/10 gap-4">
-          <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#C88A35] block">
-              SUPPLY-SIDE ROSTER
-            </span>
-            <h2 className="text-3xl font-serif tracking-tight text-[#0E0E10]">
-              Founding Brands & Curators
-            </h2>
-          </div>
-
-          <div className="flex items-center gap-2 text-xs font-mono">
-            {[
-              { id: "all", label: `All (${vendors.length})` },
-              { id: "pretoria", label: "Pretoria 012 Labels (3)" },
-              { id: "streetwear", label: "New Streetwear (6)" },
-              { id: "thrift", label: "Dunusa Curators (4)" },
-            ].map((f) => (
-              <button
-                key={f.id}
-                onClick={() => setVendorFilter(f.id as any)}
-                className={`px-3 py-1.5 transition-colors ${
-                  vendorFilter === f.id
-                    ? "bg-[#0E0E10] text-[#FAF7F2] font-semibold"
-                    : "bg-white border border-[#0E0E10]/10 text-[#6B6964] hover:text-[#0E0E10]"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredVendors.map((vendor) => (
-            <div
-              key={vendor.id}
-              className="bg-white border border-[#0E0E10]/10 p-6 flex flex-col justify-between space-y-4 hover:border-[#0E0E10] transition-colors"
-            >
-              <div>
-                <div className="flex items-center justify-between text-[10px] font-mono">
-                  <span className="text-[#C88A35] font-semibold uppercase">{vendor.origin}</span>
-                  <span className="text-[#6B6964]">{vendor.coordinates}</span>
-                </div>
-                <h3 className="text-xl font-serif font-bold text-[#0E0E10] mt-2">{vendor.name}</h3>
-                <p className="text-xs text-[#6B6964] mt-1.5 leading-relaxed font-light">
-                  {vendor.tagline}
-                </p>
-                {vendor.specialty && (
-                  <div className="mt-3 bg-[#FAF7F2] p-2 text-[10px] font-mono text-[#0E0E10] border-l-2 border-[#C88A35]">
-                    Specialty: {vendor.specialty}
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-4 border-t border-[#0E0E10]/10 flex items-center justify-between text-[11px] font-mono">
-                <span className="text-[#6B6964]">Price: {vendor.priceRange}</span>
-                <span className="font-semibold text-[#0E0E10]">{vendor.productCount} active styles</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 9. SMART LOCKER & LOGISTICS AGGREGATOR (BOB GO + SPAZA HUBS) */}
-      <section id="lockers" className="py-16 bg-[#F2EDE4] border-b border-[#0E0E10]/10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-            <div className="lg:col-span-5 space-y-5">
-              <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#C88A35] block font-semibold">
-                LOGISTICS & ORDER FULFILMENT
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-serif tracking-tight text-[#0E0E10]">
-                1,400+ Smart Lockers & Pick-Up Hubs.
-              </h2>
-              <p className="text-sm text-[#6B6964] font-light leading-relaxed">
-                Aggregated via **Bob Go** (The Courier Guy, Pargo, PEP Paxi) with decentralized vendor dispatch. Pick up your drops on your daily commute with zero home-delivery stress.
-              </p>
-
-              <div className="space-y-2.5 font-mono text-xs pt-2">
-                <div className="flex items-center gap-3 bg-white p-3 border border-[#0E0E10]/10">
-                  <span className="text-lg">⚡</span>
-                  <div>
-                    <span className="font-bold block">48-Hour Dispatch SLA</span>
-                    <span className="text-[#6B6964] text-[11px]">Vendors must hand over to Bob Go courier within 48h.</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 bg-white p-3 border border-[#0E0E10]/10">
-                  <span className="text-lg">📲</span>
-                  <div>
-                    <span className="font-bold block">WhatsApp Pickup PIN</span>
-                    <span className="text-[#6B6964] text-[11px]">Locker one-time PIN and QR code delivered via WhatsApp.</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 bg-white p-3 border border-[#0E0E10]/10">
-                  <span className="text-lg">🏪</span>
-                  <div>
-                    <span className="font-bold block">Transit & Retail Location Network</span>
-                    <span className="text-[#6B6964] text-[11px]">Convenient collection lockers at transit centers, malls, and neighborhood hubs.</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Interactive Station Selector */}
-            <div className="lg:col-span-7 bg-white p-6 border border-[#0E0E10]/15 space-y-4">
-              <div className="flex items-center justify-between border-b border-[#0E0E10]/10 pb-3">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider">
-                  Select Your Pickup Hub:
-                </span>
-                <span className="text-[11px] font-mono text-[#C88A35]">
-                  Selected: {selectedStation.name}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-1">
-                {lockerStations.map((st) => (
-                  <div
-                    key={st.id}
-                    onClick={() => setSelectedStation(st)}
-                    className={`p-3.5 border cursor-pointer transition-all ${
-                      selectedStation.id === st.id
-                        ? "border-[#0E0E10] bg-[#FAF7F2] ring-1 ring-[#0E0E10]"
-                        : "border-[#0E0E10]/10 hover:border-[#C88A35]"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between text-[10px] font-mono text-[#6B6964]">
-                      <span className="font-bold text-[#C88A35]">{st.city}</span>
-                      <span>{st.distance}</span>
-                    </div>
-                    <h4 className="font-serif font-bold text-sm text-[#0E0E10] mt-1">{st.name}</h4>
-                    <p className="text-[11px] text-[#6B6964] mt-0.5 line-clamp-1">{st.address}</p>
-                    <div className="mt-2 text-[10px] font-mono text-[#0E0E10] bg-white p-1.5 border border-[#0E0E10]/5">
-                      {st.commuterTag}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-3 border-t border-[#0E0E10]/10 flex items-center justify-between font-mono text-xs text-[#6B6964]">
-                <span>✓ Locker selection saved to your cart</span>
-                <span className="font-bold text-[#0E0E10]">Free over R 650</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 10. VENDOR ONBOARDING CALLOUT — "SELL WITH US (13% COMMISSION)" */}
-      <section className="py-16 bg-[#0E0E10] text-[#FAF7F2] border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-6 text-center space-y-6">
-          <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#C88A35] block">
-            FOR RISING PRETORIA & GAUTENG STREETWEAR LABELS
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-serif tracking-tight max-w-3xl mx-auto">
-            Stop Fighting for Visibility Alone in the DMs.
-          </h2>
-          <p className="text-sm sm:text-base text-[#FAF7F2]/75 font-light max-w-2xl mx-auto leading-relaxed">
-            List your brand alongside Lesupa, Mokasi, and Soweto Threads. A clean 13% commission model, no upfront listing fees, professional photography support, and weekly automated payouts.
-          </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-4 text-left font-mono text-xs">
-            <div className="bg-white/5 p-4 border border-white/10">
-              <span className="block text-[#C88A35] font-bold text-base">12–15%</span>
-              <span className="text-[11px] text-[#FAF7F2]/70">Pure commission. We only make money when you sell.</span>
-            </div>
-            <div className="bg-white/5 p-4 border border-white/10">
-              <span className="block text-[#C88A35] font-bold text-base">R 0</span>
-              <span className="text-[11px] text-[#FAF7F2]/70">Zero flat listing or sign-up fees for founding brands.</span>
-            </div>
-            <div className="bg-white/5 p-4 border border-white/10">
-              <span className="block text-[#C88A35] font-bold text-base">Weekly</span>
-              <span className="text-[11px] text-[#FAF7F2]/70">Automated payouts net of commission directly to bank.</span>
-            </div>
-            <div className="bg-white/5 p-4 border border-white/10">
-              <span className="block text-[#C88A35] font-bold text-base">Shared Traffic</span>
-              <span className="text-[11px] text-[#FAF7F2]/70">Cheaper per-brand acquisition with culture-first buyers.</span>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setIsVendorModalOpen(true)}
-            className="bg-[#C88A35] text-black px-8 py-3.5 text-xs font-mono uppercase tracking-[0.2em] font-bold hover:bg-white transition-colors"
-          >
-            Apply to Join as a Founding Brand →
-          </button>
-        </div>
-      </section>
-
-      {/* 11. FOOTER — LOCAL SOUTH AFRICAN VERNACULAR & PAYMENT RAILS */}
-      <footer className="bg-[#FAF7F2] border-t border-[#0E0E10]/10 py-16 text-[#0E0E10]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-[#0E0E10]/10">
+      {/* 6. BASH FOOTER */}
+      <footer className="bg-white border-t border-[#E5E7EB] pt-12 pb-24 md:pb-12 text-[#111827]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-[#E5E7EB]">
             <div className="space-y-3">
-              <h3 className="font-serif text-2xl font-bold uppercase tracking-wider">Le Benkeleng</h3>
-              <p className="text-xs text-[#6B6964] font-light leading-relaxed">
-                The home for Pretoria & Gauteng local streetwear labels and 1-of-1 Dunusa vintage archives.
+              <h3 className="font-display text-2xl font-black uppercase">Le Benkeleng</h3>
+              <p className="text-xs text-[#6B7280] leading-relaxed">
+                The multi-vendor home for Pretoria and Gauteng's independent streetwear labels and 1-of-1 curated vintage archives.
               </p>
-              <div className="text-[11px] font-mono text-[#C88A35]">
-                Pitori · Soweto · Braam · Durban
+              <div className="text-xs font-mono text-[#C88A35] font-semibold">
+                Pretoria (012) · Soweto · Johannesburg · Durban
               </div>
             </div>
 
-            <div className="space-y-2.5 text-xs font-mono">
-              <span className="font-bold text-[#0E0E10] uppercase tracking-wider block">Platform</span>
-              <a href="#catalog" className="block text-[#6B6964] hover:text-[#0E0E10]">Streetwear Catalog</a>
-              <a href="#dunusa-vault" className="block text-[#6B6964] hover:text-[#0E0E10]">The Dunusa Vault (1-of-1)</a>
-              <a href="#drop-calendar" className="block text-[#6B6964] hover:text-[#0E0E10]">Hype Drop Calendar</a>
-              <a href="#lockers" className="block text-[#6B6964] hover:text-[#0E0E10]">Locker & Spaza Hubs</a>
+            <div className="space-y-2 text-xs">
+              <span className="font-bold uppercase tracking-wider text-[#111827] block">Shop by Brand</span>
+              <a href="#/brand/lesupa-atelier" className="block text-[#6B7280] hover:text-[#111827]">Lesupa Atelier (Pretoria 012)</a>
+              <a href="#/brand/mokasi" className="block text-[#6B7280] hover:text-[#111827]">Mokasi Streetwear (Pretoria)</a>
+              <a href="#/brand/galxboy" className="block text-[#6B7280] hover:text-[#111827]">Galxboy Heritage (Pretoria)</a>
+              <a href="#/brand/soweto-threads" className="block text-[#6B7280] hover:text-[#111827]">Soweto Threads (Soweto)</a>
+              <a href="#/brands" className="block text-[#C88A35] font-bold hover:underline">View All Brands A–Z →</a>
             </div>
 
-            <div className="space-y-2.5 text-xs font-mono">
-              <span className="font-bold text-[#0E0E10] uppercase tracking-wider block">Founding Labels</span>
-              <span className="block text-[#6B6964]">Lesupa Atelier (Pretoria 012)</span>
-              <span className="block text-[#6B6964]">Mokasi Streetwear (Pitori)</span>
-              <span className="block text-[#6B6964]">Soweto Threads (Orlando West)</span>
-              <span className="block text-[#6B6964]">Braam District (JHB)</span>
-              <span className="block text-[#6B6964]">Dunusa Archive Co. (Small St)</span>
+            <div className="space-y-2 text-xs">
+              <span className="font-bold uppercase tracking-wider text-[#111827] block">Customer Service</span>
+              <button onClick={() => setIsTrackingModalOpen(true)} className="block text-[#6B7280] hover:text-[#111827]">Track Your Order</button>
+              <button onClick={() => setIsLockerPickerOpen(true)} className="block text-[#6B7280] hover:text-[#111827]">Locker Stations & Spaza Hubs</button>
+              <button onClick={() => setIsVendorModalOpen(true)} className="block text-[#6B7280] hover:text-[#111827]">Sell With Us (13% Commission)</button>
+              <span className="block text-[#6B7280]">Dispatch SLA: 48 Hours</span>
             </div>
 
             <div className="space-y-3">
-              <span className="font-bold text-xs font-mono text-[#0E0E10] uppercase tracking-wider block">
-                Mzansi Payment Rails
+              <span className="font-bold text-xs uppercase tracking-wider text-[#111827] block">
+                Secure South African Payment
               </span>
-              <p className="text-xs text-[#6B6964] font-light">
-                Capitec 1-Tap QR, Payflex 4-part 0% interest, Ozow Instant EFT, SnapScan, and Cards.
+              <p className="text-xs text-[#6B6964]">
+                Capitec 1-Tap QR, Payflex 4-part 0% interest installments, Ozow Instant EFT, and Cards.
               </p>
-              <div className="flex flex-wrap gap-2 text-[10px] font-mono text-[#0E0E10]">
-                <span className="bg-white border border-[#0E0E10]/15 px-2 py-1 font-bold">CAPITEC</span>
-                <span className="bg-white border border-[#0E0E10]/15 px-2 py-1 font-bold">PAYFLEX</span>
-                <span className="bg-white border border-[#0E0E10]/15 px-2 py-1 font-bold">OZOW</span>
-                <span className="bg-white border border-[#0E0E10]/15 px-2 py-1 font-bold">SNAPSCAN</span>
+              <div className="flex flex-wrap gap-2 text-[10px] font-mono font-bold">
+                <span className="bg-[#F3F4F6] border border-[#E5E7EB] px-2 py-1 rounded">CAPITEC</span>
+                <span className="bg-[#F3F4F6] border border-[#E5E7EB] px-2 py-1 rounded">PAYFLEX</span>
+                <span className="bg-[#F3F4F6] border border-[#E5E7EB] px-2 py-1 rounded">OZOW</span>
+                <span className="bg-[#F3F4F6] border border-[#E5E7EB] px-2 py-1 rounded">VISA/MC</span>
               </div>
             </div>
           </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-[#6B6964] gap-4">
-            <span>© 2026 LE BENKELENG™ · ALL RIGHTS RESERVED · FICA & POPIA COMPLIANT</span>
-            <span>DESIGNED WITH SOUTH AFRICAN SARTORIAL PRIDE</span>
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#9CA3AF] gap-4">
+            <span>© 2026 LE BENKELENG™ · MULTI-VENDOR MARKETPLACE · FICA & POPIA COMPLIANT</span>
+            <span>PROUDLY BUILT FOR SOUTH AFRICAN STREETWEAR CULTURE</span>
           </div>
         </div>
       </footer>
 
-      {/* 12. SLIDE-OUT SHOPPING BAG DRAWER */}
+      {/* 7. MOBILE STICKY BOTTOM NAVIGATION BAR */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-[#E5E7EB] z-40 py-2 px-6 flex items-center justify-between text-xs font-semibold text-[#6B7280] shadow-lg">
+        <button
+          onClick={() => {
+            setSelectedCategory("all");
+            setSelectedBrand(null);
+            navigateTo("#/");
+          }}
+          className="flex flex-col items-center gap-1 hover:text-[#111827]"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <span className="text-[10px]">Home</span>
+        </button>
+
+        <a
+          href="#/brands"
+          className="flex flex-col items-center gap-1 hover:text-[#111827]"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+          <span className="text-[10px]">Brands</span>
+        </a>
+
+        <a
+          href="#/vault"
+          className="flex flex-col items-center gap-1 hover:text-[#111827]"
+        >
+          <span className="text-base">⚡</span>
+          <span className="text-[10px]">Vault</span>
+        </a>
+
+        <button
+          onClick={() => setIsWishlistOpen(true)}
+          className="flex flex-col items-center gap-1 hover:text-[#111827] relative"
+        >
+          <svg className="w-5 h-5" fill={wishlist.length > 0 ? "#EF4444" : "none"} stroke={wishlist.length > 0 ? "#EF4444" : "currentColor"} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+          <span className="text-[10px]">Saved</span>
+          {wishlist.length > 0 && (
+            <span className="absolute -top-1 right-2 bg-[#EF4444] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+              {wishlist.length}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setIsCartOpen(true)}
+          className="flex flex-col items-center gap-1 hover:text-[#111827] relative"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          <span className="text-[10px]">Bag</span>
+          {cart.length > 0 && (
+            <span className="absolute -top-1 right-2 bg-[#111827] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+              {cart.reduce((acc, item) => acc + item.quantity, 0)}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* 8. SLIDE-OUT SHOPPING BAG DRAWER */}
       {isCartOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setIsCartOpen(false)} />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity" onClick={() => setIsCartOpen(false)} />
           <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-            <div className="w-screen max-w-md bg-white border-l border-[#0E0E10]/15 shadow-2xl flex flex-col justify-between">
-              {/* Cart Header */}
-              <div className="p-6 border-b border-[#0E0E10]/10 flex items-center justify-between">
+            <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between">
+              <div className="p-5 border-b border-[#E5E7EB] flex items-center justify-between">
                 <div>
-                  <h3 className="font-serif text-xl font-bold uppercase tracking-wider text-[#0E0E10]">
-                    Shopping Bag
-                  </h3>
-                  <span className="text-[11px] font-mono text-[#6B6964]">
-                    {cart.reduce((acc, item) => acc + item.quantity, 0)} Items across South African Labels
+                  <h3 className="text-lg font-bold text-[#111827]">Shopping Bag</h3>
+                  <span className="text-xs text-[#6B7280]">
+                    {cart.reduce((acc, item) => acc + item.quantity, 0)} items in your basket
                   </span>
                 </div>
-                <button
-                  onClick={() => setIsCartOpen(false)}
-                  className="p-2 text-[#6B6964] hover:text-[#0E0E10]"
-                >
+                <button onClick={() => setIsCartOpen(false)} className="p-2 text-[#6B7280] hover:text-[#111827]">
                   ✕
                 </button>
               </div>
 
-              {/* Cart Items List */}
-              <div className="p-6 overflow-y-auto flex-1 space-y-4">
+              <div className="p-5 overflow-y-auto flex-1 space-y-4">
                 {cart.length === 0 ? (
-                  <div className="py-16 text-center space-y-3">
+                  <div className="py-20 text-center space-y-3">
                     <span className="text-3xl">🛍️</span>
-                    <h4 className="font-serif text-lg font-bold text-[#0E0E10]">Your Bag is Empty</h4>
-                    <p className="text-xs text-[#6B6964] font-light max-w-xs mx-auto">
-                      Explore independent streetwear from Lesupa, Mokasi, or 1-of-1 vintage pieces.
+                    <h4 className="font-bold text-base text-[#111827]">Your Bag is Empty</h4>
+                    <p className="text-xs text-[#6B7280]">
+                      Discover Pretoria streetwear from Lesupa & Mokasi or unique 1-of-1 vintage pieces.
                     </p>
-                    <button
-                      onClick={() => setIsCartOpen(false)}
-                      className="mt-2 bg-[#0E0E10] text-[#FAF7F2] px-6 py-2.5 text-xs uppercase font-mono tracking-wider"
-                    >
-                      Start Shopping
-                    </button>
                   </div>
                 ) : (
                   cart.map((item, idx) => (
-                    <div key={`${item.product.id}-${item.size}-${idx}`} className="flex gap-4 pb-4 border-b border-[#0E0E10]/5">
+                    <div key={`${item.product.id}-${item.size}-${idx}`} className="flex gap-3 pb-4 border-b border-[#F3F4F6]">
                       <img
                         src={item.product.image}
                         alt={item.product.title}
-                        className="w-16 h-20 object-cover bg-[#F2EDE4] border border-[#0E0E10]/10 flex-shrink-0"
+                        className="w-16 h-20 object-cover bg-[#F3F4F6] rounded-md shrink-0"
                       />
                       <div className="flex-1 flex flex-col justify-between">
                         <div>
                           <div className="flex justify-between items-start">
-                            <h4 className="text-xs font-semibold uppercase tracking-wider text-[#0E0E10] line-clamp-1">
-                              {item.product.title}
-                            </h4>
-                            <button
-                              onClick={() => removeFromCart(item.product.id, item.size)}
-                              className="text-[10px] text-[#6B6964] hover:text-[#C45434] ml-2"
-                            >
+                            <h4 className="text-xs font-bold text-[#111827] line-clamp-1">{item.product.title}</h4>
+                            <button onClick={() => removeFromCart(item.product.id, item.size)} className="text-xs text-[#9CA3AF] hover:text-[#DC2626]">
                               ✕
                             </button>
                           </div>
-                          <span className="text-[10px] font-mono text-[#C88A35] block">
-                            {item.product.brand} · Size {item.size}
+                          <span className="text-[11px] font-mono text-[#C88A35] block">
+                            {item.product.brand} · Size: {item.size}
                           </span>
-                          {item.product.isThrift && (
-                            <span className="text-[9px] font-mono text-[#C45434] block font-bold">
-                              1-of-1 Single Piece
-                            </span>
-                          )}
                         </div>
 
-                        <div className="flex items-center justify-between pt-2">
-                          <div className="flex items-center border border-[#0E0E10]/20 font-mono text-xs">
-                            <button
-                              onClick={() => updateQuantity(item.product.id, item.size, -1)}
-                              className="px-2 py-0.5 hover:bg-gray-100"
-                            >
-                              -
-                            </button>
-                            <span className="px-2 py-0.5 font-bold">{item.quantity}</span>
-                            <button
-                              onClick={() => updateQuantity(item.product.id, item.size, 1)}
-                              className="px-2 py-0.5 hover:bg-gray-100"
-                            >
-                              +
-                            </button>
+                        <div className="flex items-center justify-between pt-1">
+                          <div className="flex items-center border border-[#E5E7EB] rounded text-xs font-mono">
+                            <button onClick={() => updateQuantity(item.product.id, item.size, -1)} className="px-2 py-0.5 hover:bg-gray-100">-</button>
+                            <span className="px-2 font-bold">{item.quantity}</span>
+                            <button onClick={() => updateQuantity(item.product.id, item.size, 1)} className="px-2 py-0.5 hover:bg-gray-100">+</button>
                           </div>
-                          <span className="font-serif font-bold text-sm text-[#0E0E10]">
+                          <span className="font-bold text-xs text-[#111827]">
                             {formatPrice(item.product.price * item.quantity)}
                           </span>
                         </div>
@@ -1785,74 +1202,61 @@ export default function App() {
                 )}
               </div>
 
-              {/* Cart Footer */}
               {cart.length > 0 && (
-                <div className="p-6 bg-[#FAF7F2] border-t border-[#0E0E10]/10 space-y-4">
-                  {/* Selected Locker Summary */}
-                  <div className="bg-white p-3 border border-[#0E0E10]/10 text-xs font-mono space-y-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[#6B6964] text-[10px] uppercase">Locker Destination:</span>
-                      <a href="#lockers" onClick={() => setIsCartOpen(false)} className="text-[#C88A35] text-[10px] underline">
-                        Change
-                      </a>
+                <div className="p-5 bg-[#F9FAFB] border-t border-[#E5E7EB] space-y-3 text-xs">
+                  <div className="bg-white p-3 rounded-lg border border-[#E5E7EB] flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-[#6B7280] uppercase block">Pick-Up Hub:</span>
+                      <span className="font-bold text-[#111827] block truncate max-w-56">{selectedStation.name}</span>
                     </div>
-                    <span className="font-bold text-[#0E0E10] block">{selectedStation.name}</span>
-                    <span className="text-[10px] text-[#6B6964] block">{selectedStation.commuterTag}</span>
+                    <button onClick={() => { setIsCartOpen(false); setIsLockerPickerOpen(true); }} className="text-[#C88A35] font-bold underline text-[11px]">
+                      Change
+                    </button>
                   </div>
 
-                  {/* Voucher Input */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={voucherCode}
                         onChange={(e) => setVoucherCode(e.target.value)}
-                        placeholder="Voucher Code (SWENKA10, DUNUSA, PITORI)"
-                        className="bg-white border border-[#0E0E10]/20 text-xs px-3 py-1.5 flex-1 font-mono uppercase focus:outline-none focus:border-[#C88A35]"
+                        placeholder="Voucher Code (LOCAL10, VINTAGE15)"
+                        className="bg-white border border-[#D1D5DB] rounded-lg px-3 py-1.5 flex-1 font-mono uppercase focus:outline-none focus:border-[#111827]"
                       />
-                      <button
-                        onClick={() => applyVoucher(voucherCode)}
-                        className="bg-[#0E0E10] text-[#FAF7F2] text-[10px] uppercase font-mono px-3 py-1.5 hover:bg-[#C88A35] transition-colors"
-                      >
+                      <button onClick={() => applyVoucher(voucherCode)} className="bg-[#111827] text-white px-3 py-1.5 rounded-lg font-bold">
                         Apply
                       </button>
                     </div>
-                    {voucherMessage && (
-                      <span className={`text-[10px] font-mono block ${voucherMessage.startsWith("✓") ? "text-[#25D366]" : "text-[#C45434]"}`}>
-                        {voucherMessage}
-                      </span>
-                    )}
+                    {voucherMessage && <span className="text-[10px] font-mono block text-[#059669]">{voucherMessage}</span>}
                   </div>
 
-                  {/* Subtotal / Shipping / Total */}
-                  <div className="space-y-1.5 font-mono text-xs pt-2 border-t border-[#0E0E10]/10">
-                    <div className="flex justify-between text-[#6B6964]">
+                  <div className="space-y-1 pt-2 border-t border-[#E5E7EB] font-mono">
+                    <div className="flex justify-between text-[#6B7280]">
                       <span>Subtotal</span>
                       <span>{formatPrice(subtotal)}</span>
                     </div>
                     {appliedDiscount > 0 && (
-                      <div className="flex justify-between text-[#25D366]">
+                      <div className="flex justify-between text-[#059669]">
                         <span>Discount ({appliedDiscount}%)</span>
                         <span>-{formatPrice(discountAmount)}</span>
                       </div>
                     )}
-                    <div className="flex justify-between text-[#6B6964]">
-                      <span>Locker Dispatch</span>
+                    <div className="flex justify-between text-[#6B7280]">
+                      <span>Locker Delivery</span>
                       <span>{shippingCost === 0 ? "FREE" : formatPrice(shippingCost)}</span>
                     </div>
-                    <div className="flex justify-between text-base font-serif font-bold text-[#0E0E10] pt-1.5 border-t border-[#0E0E10]/10">
+                    <div className="flex justify-between text-base font-bold text-[#111827] pt-2 border-t border-[#E5E7EB]">
                       <span>Total Due</span>
                       <span>{formatPrice(total)}</span>
                     </div>
                   </div>
 
-                  {/* Checkout Button */}
                   <button
                     onClick={() => {
                       setIsCartOpen(false);
                       setIsCheckoutModalOpen(true);
                     }}
-                    className="w-full bg-[#0E0E10] text-[#FAF7F2] py-3.5 text-xs uppercase font-mono tracking-[0.2em] font-bold hover:bg-[#C88A35] transition-colors"
+                    className="w-full bg-[#111827] text-white py-3.5 rounded-full font-bold hover:bg-black transition-colors"
                   >
                     Proceed to Secure Checkout →
                   </button>
@@ -1863,14 +1267,221 @@ export default function App() {
         </div>
       )}
 
-      {/* 13. QUICK VIEW / PRODUCT DETAILS MODAL */}
-      {quickViewProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white max-w-2xl w-full border border-[#0E0E10]/15 shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setQuickViewProduct(null)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-black font-mono text-sm"
+      {/* 9. SLIDE-OUT WISHLIST DRAWER */}
+      {isWishlistOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity" onClick={() => setIsWishlistOpen(false)} />
+          <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
+            <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between">
+              <div className="p-5 border-b border-[#E5E7EB] flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-[#111827]">Saved Items ({wishlist.length})</h3>
+                  <span className="text-xs text-[#6B7280]">Your personalized wishlist</span>
+                </div>
+                <button onClick={() => setIsWishlistOpen(false)} className="p-2 text-[#6B6964] hover:text-[#111827]">
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-5 overflow-y-auto flex-1 space-y-4">
+                {wishlist.length === 0 ? (
+                  <div className="py-20 text-center space-y-3">
+                    <span className="text-3xl">🤍</span>
+                    <h4 className="font-bold text-base text-[#111827]">No saved items yet</h4>
+                    <p className="text-xs text-[#6B7280]">
+                      Tap the heart icon on any piece in the catalog to save it for later.
+                    </p>
+                  </div>
+                ) : (
+                  products.filter((p) => wishlist.includes(p.id)).map((product) => (
+                    <div key={product.id} className="flex gap-3 pb-4 border-b border-[#F3F4F6] items-center">
+                      <img
+                        src={product.image}
+                        alt={product.title}
+                        className="w-16 h-20 object-cover bg-[#F3F4F6] rounded-md shrink-0"
+                      />
+                      <div className="flex-1">
+                        <span className="text-[10px] font-bold text-[#C88A35] uppercase">{product.brand}</span>
+                        <h4 className="text-xs font-bold text-[#111827] line-clamp-1">{product.title}</h4>
+                        <span className="text-xs font-bold text-[#111827] block mt-1">{formatPrice(product.price)}</span>
+                        <div className="flex items-center gap-2 mt-2">
+                          <button
+                            onClick={() => {
+                              addToCart(product, product.sizes[0]);
+                              toggleWishlist(product.id);
+                            }}
+                            className="bg-[#111827] text-white text-[10px] font-bold px-3 py-1 rounded-full hover:bg-black"
+                          >
+                            + Move to Bag
+                          </button>
+                          <button
+                            onClick={() => toggleWishlist(product.id)}
+                            className="text-[10px] text-[#DC2626] font-semibold"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 10. ORDER TRACKING MODAL */}
+      {isTrackingModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white max-w-md w-full rounded-2xl shadow-2xl p-6 relative">
+            <button onClick={() => { setIsTrackingModalOpen(false); setTrackingResult(null); }} className="absolute top-4 right-4 text-[#6B7280] hover:text-[#111827]">
+              ✕
+            </button>
+
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#C88A35] block">
+              Bob Go Aggregator Tracker
+            </span>
+            <h3 className="text-xl font-bold text-[#111827] mt-0.5">Track Your Locker Delivery</h3>
+            <p className="text-xs text-[#6B7280] mt-1">
+              Enter your Bob Go waybill number or mobile number to track status.
+            </p>
+
+            <form onSubmit={handleTrackOrder} className="mt-4 flex gap-2">
+              <input
+                type="text"
+                value={trackingInput}
+                onChange={(e) => setTrackingInput(e.target.value)}
+                placeholder="e.g. BOB-GO-849201 or 082..."
+                className="bg-[#F3F4F6] border border-[#E5E7EB] rounded-lg px-3 py-2 text-xs flex-1 font-mono focus:outline-none focus:border-[#111827]"
+              />
+              <button type="submit" className="bg-[#111827] text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-black">
+                Track
+              </button>
+            </form>
+
+            {trackingResult && (
+              <div className="mt-5 p-4 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB] space-y-3 text-xs">
+                <div className="flex justify-between items-center border-b border-[#E5E7EB] pb-2 font-mono">
+                  <span className="font-bold text-[#111827]">{trackingResult.waybill}</span>
+                  <span className="text-[#059669] font-bold bg-[#DCFCE7] px-2 py-0.5 rounded">Active</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-[#6B7280] block">Destination Hub:</span>
+                  <span className="font-bold text-[#111827]">{trackingResult.destination}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-[#6B7280] block">Estimated Arrival:</span>
+                  <span className="font-bold text-[#111827]">{trackingResult.eta}</span>
+                </div>
+                <div className="bg-white p-2.5 rounded border border-[#E5E7EB] font-mono text-[11px] text-[#C88A35]">
+                  Locker PIN Code: <span className="font-bold text-[#111827]">{trackingResult.pin}</span> (Sent via WhatsApp)
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 11. LOCKER PICKER MODAL */}
+      {isLockerPickerOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white max-w-xl w-full rounded-2xl shadow-2xl p-6 relative max-h-[85vh] overflow-y-auto">
+            <button onClick={() => setIsLockerPickerOpen(false)} className="absolute top-4 right-4 text-[#6B7280] hover:text-[#111827]">
+              ✕
+            </button>
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#C88A35] block">
+              1,400+ Smart Lockers & Spaza Hubs
+            </span>
+            <h3 className="text-xl font-bold text-[#111827] mt-0.5">Select Your Preferred Pickup Hub</h3>
+            <p className="text-xs text-[#6B7280] mt-1">
+              Select a secure pickup point along your transit or campus route.
+            </p>
+
+            <div className="mt-4 space-y-2.5">
+              {lockerStations.map((station) => (
+                <div
+                  key={station.id}
+                  onClick={() => {
+                    setSelectedStation(station);
+                    setIsLockerPickerOpen(false);
+                  }}
+                  className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    selectedStation.id === station.id
+                      ? "border-[#111827] bg-[#F9FAFB] ring-1 ring-[#111827]"
+                      : "border-[#E5E7EB] hover:border-[#9CA3AF] bg-white"
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-[11px] font-mono">
+                    <span className="font-bold text-[#C88A35]">{station.city}</span>
+                    <span className="text-[#6B7280]">{station.distance}</span>
+                  </div>
+                  <h4 className="font-bold text-sm text-[#111827] mt-0.5">{station.name}</h4>
+                  <p className="text-xs text-[#6B7280] mt-0.5">{station.address}</p>
+                  <div className="mt-2 text-[10px] font-mono text-[#111827] bg-[#F3F4F6] p-1.5 rounded">
+                    {station.commuterTag}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 12. VENDOR ONBOARDING MODAL ("SELL WITH US") */}
+      {isVendorModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white max-w-lg w-full rounded-2xl shadow-2xl p-6 sm:p-8 relative">
+            <button onClick={() => setIsVendorModalOpen(false)} className="absolute top-4 right-4 text-[#6B7280] hover:text-[#111827]">
+              ✕
+            </button>
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#C88A35] block">
+              Multi-Vendor Marketplace
+            </span>
+            <h3 className="text-2xl font-bold text-[#111827] mt-0.5">List Your Label on Le Benkeleng</h3>
+            <p className="text-xs text-[#6B7280] mt-1 leading-relaxed">
+              Join Lesupa Atelier, Mokasi, and Soweto Threads. 13% commission model, zero upfront listing fees, professional photography support, and weekly automated payouts.
+            </p>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                alert("Thank you! Your brand application has been received. Our curator team will review your catalogue within 24 hours.");
+                setIsVendorModalOpen(false);
+              }}
+              className="mt-5 space-y-3 text-xs"
             >
+              <div>
+                <label className="block text-[#111827] font-bold uppercase text-[10px] mb-1">Brand Name *</label>
+                <input required type="text" placeholder="e.g. Pretoria Heavy Co." className="w-full border border-[#D1D5DB] rounded-lg p-2.5 focus:outline-none focus:border-[#111827]" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[#111827] font-bold uppercase text-[10px] mb-1">City / Township *</label>
+                  <input required type="text" placeholder="Pretoria (012), Soweto" className="w-full border border-[#D1D5DB] rounded-lg p-2.5 focus:outline-none focus:border-[#111827]" />
+                </div>
+                <div>
+                  <label className="block text-[#111827] font-bold uppercase text-[10px] mb-1">Instagram Handle *</label>
+                  <input required type="text" placeholder="@yourbrand" className="w-full border border-[#D1D5DB] rounded-lg p-2.5 focus:outline-none focus:border-[#111827]" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[#111827] font-bold uppercase text-[10px] mb-1">Founder WhatsApp Number *</label>
+                <input required type="tel" placeholder="+27 82 000 0000" className="w-full border border-[#D1D5DB] rounded-lg p-2.5 focus:outline-none focus:border-[#111827]" />
+              </div>
+              <button type="submit" className="w-full bg-[#111827] text-white py-3 rounded-full font-bold hover:bg-black transition-colors mt-2">
+                Submit Brand for Curation Review →
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 13. QUICK VIEW PRODUCT MODAL */}
+      {quickViewProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white max-w-2xl w-full rounded-2xl shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onClick={() => setQuickViewProduct(null)} className="absolute top-4 right-4 text-[#6B7280] hover:text-[#111827]">
               ✕
             </button>
 
@@ -1879,46 +1490,32 @@ export default function App() {
                 <img
                   src={quickViewProduct.image}
                   alt={quickViewProduct.title}
-                  className="w-full aspect-[4/5] object-cover bg-[#F2EDE4] border border-[#0E0E10]/10"
-                />
-                <img
-                  src={quickViewProduct.secondaryImage}
-                  alt="Detail"
-                  className="w-full aspect-[4/3] object-cover bg-[#F2EDE4] border border-[#0E0E10]/10"
+                  className="w-full aspect-3/4 object-cover rounded-xl bg-[#F3F4F6]"
                 />
               </div>
 
               <div className="space-y-4 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center gap-2 text-[10px] font-mono text-[#C88A35] uppercase">
-                    <span>{quickViewProduct.brand}</span>
-                    <span>•</span>
-                    <span>{quickViewProduct.origin}</span>
-                  </div>
-                  <h3 className="font-serif text-2xl font-bold text-[#0E0E10] mt-1">{quickViewProduct.title}</h3>
-                  <div className="text-lg font-serif font-bold text-[#0E0E10] mt-2">
-                    {formatPrice(quickViewProduct.price)}
-                  </div>
-                  <p className="text-xs text-[#6B6964] mt-3 leading-relaxed font-light">
-                    {quickViewProduct.description}
-                  </p>
-
-                  <div className="mt-4 bg-[#FAF7F2] p-3 border border-[#0E0E10]/10 font-mono text-[11px] space-y-1">
+                  <a
+                    href={`#/brand/${quickViewProduct.brandSlug}`}
+                    onClick={() => setQuickViewProduct(null)}
+                    className="text-xs font-bold text-[#C88A35] uppercase hover:underline block"
+                  >
+                    {quickViewProduct.brand} · {quickViewProduct.origin} →
+                  </a>
+                  <h3 className="text-xl font-bold text-[#111827] mt-1">{quickViewProduct.title}</h3>
+                  <div className="text-xl font-bold text-[#111827] mt-2">{formatPrice(quickViewProduct.price)}</div>
+                  <p className="text-xs text-[#6B7280] mt-3 leading-relaxed">{quickViewProduct.description}</p>
+                  <div className="mt-4 p-3 bg-[#F9FAFB] rounded-lg text-xs font-mono space-y-1">
                     <div><span className="font-bold">Fabric:</span> {quickViewProduct.fabric}</div>
-                    {quickViewProduct.measurements && (
-                      <div><span className="font-bold text-[#C45434]">Pit-to-Pit:</span> {quickViewProduct.measurements}</div>
-                    )}
-                    {quickViewProduct.condition && (
-                      <div><span className="font-bold">Condition:</span> {quickViewProduct.condition}</div>
-                    )}
+                    {quickViewProduct.measurements && <div><span className="font-bold text-[#DC2626]">Measurements:</span> {quickViewProduct.measurements}</div>}
+                    {quickViewProduct.condition && <div><span className="font-bold">Condition:</span> {quickViewProduct.condition}</div>}
                   </div>
                 </div>
 
-                <div className="space-y-3 pt-4 border-t border-[#0E0E10]/10">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#6B6964] block">
-                    Available Sizes:
-                  </span>
-                  <div className="flex gap-2 flex-wrap">
+                <div className="space-y-3 pt-3 border-t border-[#E5E7EB]">
+                  <span className="text-xs font-bold text-[#6B7280] block">Select Size:</span>
+                  <div className="flex gap-1.5 flex-wrap">
                     {quickViewProduct.sizes.map((s) => (
                       <button
                         key={s}
@@ -1926,24 +1523,12 @@ export default function App() {
                           addToCart(quickViewProduct, s);
                           setQuickViewProduct(null);
                         }}
-                        className="border border-[#0E0E10] px-3 py-1.5 text-xs font-mono uppercase hover:bg-[#0E0E10] hover:text-[#FAF7F2] transition-colors"
+                        className="border border-[#111827] px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-[#111827] hover:text-white transition-colors"
                       >
                         Add {s} to Bag
                       </button>
                     ))}
                   </div>
-
-                  <button
-                    onClick={() => {
-                      const text = encodeURIComponent(
-                        `Yo! Check out this ${quickViewProduct.title} on Le Benkeleng: ${window.location.origin}`
-                      );
-                      window.open(`https://wa.me/?text=${text}`, "_blank");
-                    }}
-                    className="w-full flex items-center justify-center gap-2 border border-[#25D366] text-[#25D366] py-2 text-xs font-mono uppercase tracking-wider hover:bg-[#25D366] hover:text-black transition-colors"
-                  >
-                    <span>💬</span> Share via WhatsApp
-                  </button>
                 </div>
               </div>
             </div>
@@ -1951,171 +1536,59 @@ export default function App() {
         </div>
       )}
 
-      {/* 14. VENDOR ONBOARDING MODAL ("SELL WITH US") */}
-      {isVendorModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-white max-w-xl w-full border border-[#0E0E10]/20 shadow-2xl p-6 sm:p-8 relative">
-            <button
-              onClick={() => setIsVendorModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-black font-mono text-sm"
-            >
-              ✕
-            </button>
-
-            <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#C88A35] block">
-              SUPPLY-SIDE ONBOARDING
-            </span>
-            <h3 className="font-serif text-2xl font-bold text-[#0E0E10] mt-1">
-              List Your Label on Le Benkeleng
-            </h3>
-            <p className="text-xs text-[#6B6964] mt-1.5 font-light leading-relaxed">
-              We operate on a transparent 13% commission model. No upfront listing fees, free inclusion in our shared marketing drops, and weekly automated payouts.
-            </p>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                alert("Thank you! Your brand application has been received. Our curator team will review your lookbook and catalogue within 24 hours.");
-                setIsVendorModalOpen(false);
-              }}
-              className="mt-6 space-y-3.5 font-mono text-xs"
-            >
-              <div>
-                <label className="block text-[#0E0E10] uppercase text-[10px] font-bold mb-1">
-                  Brand / Label Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Pretoria Heavy Co."
-                  className="w-full border border-[#0E0E10]/20 p-2.5 focus:outline-none focus:border-[#C88A35]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[#0E0E10] uppercase text-[10px] font-bold mb-1">
-                    City / Township *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Pretoria (012), Soweto"
-                    className="w-full border border-[#0E0E10]/20 p-2.5 focus:outline-none focus:border-[#C88A35]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[#0E0E10] uppercase text-[10px] font-bold mb-1">
-                    Instagram Handle / Website *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="@yourbrand"
-                    className="w-full border border-[#0E0E10]/20 p-2.5 focus:outline-none focus:border-[#C88A35]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[#0E0E10] uppercase text-[10px] font-bold mb-1">
-                  Founder WhatsApp Contact *
-                </label>
-                <input
-                  type="tel"
-                  required
-                  placeholder="+27 82 000 0000"
-                  className="w-full border border-[#0E0E10]/20 p-2.5 focus:outline-none focus:border-[#C88A35]"
-                />
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  className="w-full bg-[#0E0E10] text-[#FAF7F2] py-3 text-xs uppercase font-mono tracking-[0.2em] font-bold hover:bg-[#C88A35] transition-colors"
-                >
-                  Submit Brand for Curation Review →
-                </button>
-              </div>
-
-              <span className="text-[10px] text-[#6B6964] block text-center">
-                Strict quality vetting: We evaluate fabric GSM, stitching, and product photography standards.
-              </span>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* 15. CHECKOUT & MZANSI PAYMENT MODAL */}
+      {/* 14. CHECKOUT MODAL */}
       {isCheckoutModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-white max-w-lg w-full border border-[#0E0E10]/20 shadow-2xl p-6 sm:p-8 relative">
-            <button
-              onClick={() => setIsCheckoutModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-black font-mono text-sm"
-            >
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white max-w-md w-full rounded-2xl shadow-2xl p-6 sm:p-8 relative">
+            <button onClick={() => setIsCheckoutModalOpen(false)} className="absolute top-4 right-4 text-[#6B7280] hover:text-[#111827]">
               ✕
             </button>
-
-            <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#C88A35] block font-semibold">
-              SECURE MZANSI CHECKOUT
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#C88A35] block">
+              Secure South African Checkout
             </span>
-            <h3 className="font-serif text-2xl font-bold text-[#0E0E10] mt-1">
-              Select Payment Method
-            </h3>
-            <p className="text-xs text-[#6B6964] mt-1 font-light">
-              Total Order Value: <span className="font-bold text-[#0E0E10]">{formatPrice(total)}</span> · Dispatched to <span className="text-[#C88A35]">{selectedStation.name}</span>
+            <h3 className="text-2xl font-bold text-[#111827] mt-0.5">Payment Method</h3>
+            <p className="text-xs text-[#6B7280] mt-1">
+              Order Total: <span className="font-bold text-[#111827]">{formatPrice(total)}</span> · Dispatched to <span className="text-[#C88A35] font-semibold">{selectedStation.name}</span>
             </p>
 
-            <div className="mt-5 space-y-3 font-mono text-xs">
-              {/* Capitec 1-Tap */}
-              <div className="p-3.5 border border-[#0E0E10]/20 hover:border-[#0E0E10] cursor-pointer flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="w-3.5 h-3.5 rounded-full border-2 border-[#0E0E10]"></span>
+            <div className="mt-5 space-y-2.5 text-xs">
+              <div className="p-3.5 border border-[#111827] rounded-xl flex items-center justify-between cursor-pointer bg-[#F9FAFB]">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-3.5 h-3.5 rounded-full border-2 border-[#111827]"></span>
                   <div>
-                    <span className="font-bold block text-sm">Capitec 1-Tap Pay</span>
-                    <span className="text-[10px] text-[#6B6964]">Scan QR with Capitec Banking App or enter Cell Number</span>
+                    <span className="font-bold block">Capitec 1-Tap Pay</span>
+                    <span className="text-[10px] text-[#6B7280]">Instant QR code scan via Capitec App</span>
                   </div>
                 </div>
-                <span className="text-[10px] bg-[#0E0E10] text-white px-2 py-0.5">INSTANT</span>
+                <span className="text-[10px] font-bold bg-[#111827] text-white px-2 py-0.5 rounded">INSTANT</span>
               </div>
 
-              {/* Payflex BNPL */}
-              <div className="p-3.5 border border-[#0E0E10]/20 hover:border-[#0E0E10] cursor-pointer flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="p-3.5 border border-[#E5E7EB] hover:border-[#111827] rounded-xl flex items-center justify-between cursor-pointer">
+                <div className="flex items-center gap-2.5">
                   <span className="w-3.5 h-3.5 rounded-full border-2 border-gray-300"></span>
                   <div>
-                    <span className="font-bold block text-sm">Payflex (Pay in 4)</span>
-                    <span className="text-[10px] text-[#6B6964]">4 equal interest-free installments of {formatPrice(Math.round(total / 4))}</span>
+                    <span className="font-bold block">Payflex (Pay in 4)</span>
+                    <span className="text-[10px] text-[#6B7280]">4 equal interest-free installments of {formatPrice(Math.round(total / 4))}</span>
                   </div>
                 </div>
-                <span className="text-[10px] bg-[#C88A35] text-white px-2 py-0.5">0% INTEREST</span>
+                <span className="text-[10px] font-bold bg-[#C88A35] text-white px-2 py-0.5 rounded">0% INTEREST</span>
               </div>
 
-              {/* Ozow Instant EFT */}
-              <div className="p-3.5 border border-[#0E0E10]/20 hover:border-[#0E0E10] cursor-pointer flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="p-3.5 border border-[#E5E7EB] hover:border-[#111827] rounded-xl flex items-center justify-between cursor-pointer">
+                <div className="flex items-center gap-2.5">
                   <span className="w-3.5 h-3.5 rounded-full border-2 border-gray-300"></span>
                   <div>
-                    <span className="font-bold block text-sm">Ozow Instant EFT</span>
-                    <span className="text-[10px] text-[#6B6964]">FNB, Standard Bank, Nedbank, Absa, Capitec, TymeBank</span>
+                    <span className="font-bold block">Ozow Instant EFT</span>
+                    <span className="text-[10px] text-[#6B7280]">All major South African banks</span>
                   </div>
                 </div>
-                <span className="text-[10px] text-[#6B6964]">ZERO FEES</span>
+                <span className="text-[10px] text-[#6B7280]">ZERO FEES</span>
               </div>
 
-              {/* WhatsApp Notification Checkbox */}
               <div className="pt-2">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={whatsappUpdates}
-                    onChange={(e) => setWhatsappUpdates(e.target.checked)}
-                    className="accent-[#0E0E10]"
-                  />
-                  <span className="text-[11px] text-[#0E0E10]">
-                    Send dispatch updates and locker collection PIN to WhatsApp
-                  </span>
+                  <input type="checkbox" checked={whatsappUpdates} onChange={(e) => setWhatsappUpdates(e.target.checked)} className="accent-[#111827]" />
+                  <span className="text-xs text-[#111827]">Send dispatch updates & collection PIN to WhatsApp</span>
                 </label>
                 {whatsappUpdates && (
                   <input
@@ -2123,26 +1596,24 @@ export default function App() {
                     value={buyerPhone}
                     onChange={(e) => setBuyerPhone(e.target.value)}
                     placeholder="+27 82 123 4567"
-                    className="mt-2 w-full border border-[#0E0E10]/20 p-2 text-xs font-mono focus:outline-none focus:border-[#C88A35]"
+                    className="mt-2 w-full border border-[#D1D5DB] rounded-lg p-2 text-xs font-mono focus:outline-none"
                   />
                 )}
               </div>
 
-              <div className="pt-3">
-                <button
-                  onClick={() => {
-                    const pin = Math.floor(100000 + Math.random() * 900000);
-                    alert(
-                      `Order Confirmed!\n\nWaybill: BOB-GO-${Math.floor(100000 + Math.random() * 900000)}\nDestination: ${selectedStation.name}\nLocker PIN: ${pin}\n\nThank you for supporting independent South African streetwear labels.`
-                    );
-                    setCart([]);
-                    setIsCheckoutModalOpen(false);
-                  }}
-                  className="w-full bg-[#0E0E10] text-[#FAF7F2] py-3.5 text-xs uppercase font-mono tracking-[0.2em] font-bold hover:bg-[#C88A35] transition-colors"
-                >
-                  Confirm & Pay {formatPrice(total)} →
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  const pin = Math.floor(100000 + Math.random() * 900000);
+                  alert(
+                    `Order Confirmed!\n\nWaybill: BOB-GO-${Math.floor(100000 + Math.random() * 900000)}\nDestination: ${selectedStation.name}\nLocker PIN: ${pin}\n\nThank you for supporting independent South African streetwear labels.`
+                  );
+                  setCart([]);
+                  setIsCheckoutModalOpen(false);
+                }}
+                className="w-full bg-[#111827] text-white py-3.5 rounded-full font-bold hover:bg-black transition-colors mt-3"
+              >
+                Confirm & Pay {formatPrice(total)} →
+              </button>
             </div>
           </div>
         </div>

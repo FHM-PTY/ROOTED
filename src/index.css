@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@300;400;500;600;700;900&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Libre Baskerville', serif;
+  --font-sans: 'Work Sans', sans-serif;
+
+  --color-background: #F4EFE4;
+  --color-foreground: #0A0A0A;
+  --color-card: #FFFDF7;
+  --color-card-foreground: #0A0A0A;
+  --color-primary: #0A0A0A;
+  --color-primary-foreground: #F4EFE4;
+  --color-secondary: #1A1A1A;
+  --color-secondary-foreground: #F4EFE4;
+  --color-muted: #E0D9CC;
+  --color-muted-foreground: #5A5045;
+  --color-accent: #D42B0A;
+  --color-accent-foreground: #FFFDF7;
+  --color-border: #0A0A0A;
+  --color-ring: #D42B0A;
+}
+
+html, body, #root {
+  height: 100%;
+  background-color: #F4EFE4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Work Sans', sans-serif;
+  color: #0A0A0A;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; opacity: 0; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #0A0A0A; }
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  animation: marquee 28s linear infinite;
+}

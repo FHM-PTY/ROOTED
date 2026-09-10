@@ -1,4 +1,4 @@
-import { Vendor, Product, LockerStation } from "../types";
+import { Vendor, Product, LockerStation, VendorOrder } from "../types"
 
 export const lockerStations: LockerStation[] = [
   {
@@ -61,7 +61,7 @@ export const lockerStations: LockerStation[] = [
     city: "Durban",
     commuterTag: "⚡ Smart Locker • 🚕 Mega City Rank 2",
   },
-];
+]
 
 export const vendors: Vendor[] = [
   // 1. Pretoria (012) Streetwear Labels
@@ -70,7 +70,8 @@ export const vendors: Vendor[] = [
     slug: "lesupa-atelier",
     name: "Lesupa Atelier",
     letter: "L",
-    tagline: "Pretoria minimalist luxury, 280 GSM heavyweight tees & architectural embroidery",
+    tagline:
+      "Pretoria minimalist luxury, 280 GSM heavyweight tees & architectural embroidery",
     origin: "Arcadia / Hatfield, Pretoria",
     city: "Pretoria",
     gender: ["UNISEX", "MEN", "WOMEN"],
@@ -78,12 +79,14 @@ export const vendors: Vendor[] = [
     priceRange: "R 450 - R 1,400",
     featured: true,
     color: "#C88A35",
-    coverImage: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=1600&q=85",
+    coverImage:
+      "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=1600&q=85",
     productCount: 42,
     coordinates: "25.7479° S, 28.2293° E",
     isThrift: false,
     specialty: "High-GSM Combed Cotton & Minimalist Boxy Cut",
-    aboutStory: "Founded in Hatfield, Pretoria, Lesupa Atelier bridges Scandinavian architectural restraint with unapologetic South African street presence. Every garment is crafted from custom-milled 280 GSM ring-spun cotton with dropped shoulder seams and tone-on-tone embroidery, built for the discerning capital city tastemaker.",
+    aboutStory:
+      "Founded in Hatfield, Pretoria, Lesupa Atelier bridges Scandinavian architectural restraint with unapologetic South African street presence. Every garment is crafted from custom-milled 280 GSM ring-spun cotton with dropped shoulder seams and tone-on-tone embroidery, built for the discerning capital city tastemaker.",
     establishedYear: "2021",
     dispatchHub: "Pretoria Hatfield Hub (Bob Go Couriers)",
   },
@@ -92,7 +95,8 @@ export const vendors: Vendor[] = [
     slug: "mokasi",
     name: "Mokasi Streetwear",
     letter: "M",
-    tagline: "Pretoria urban silhouettes, oversized double-knit tracksuits & bold streetwear prints",
+    tagline:
+      "Pretoria urban silhouettes, oversized double-knit tracksuits & bold streetwear prints",
     origin: "Mamelodi & Soshanguve, Pretoria",
     city: "Pretoria",
     gender: ["UNISEX", "MEN", "WOMEN"],
@@ -100,12 +104,14 @@ export const vendors: Vendor[] = [
     priceRange: "R 650 - R 1,650",
     featured: true,
     color: "#111827",
-    coverImage: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1600&q=85",
+    coverImage:
+      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1600&q=85",
     productCount: 38,
     coordinates: "25.7069° S, 28.3275° E",
     isThrift: false,
     specialty: "Oversized Streetwear Cuts & Heavy Cotton Interlock",
-    aboutStory: "Born from the vibrant streets of Mamelodi and Soshanguve, Mokasi represents the raw, dynamic energy of Pretoria youth culture. Known for extreme volume through the sleeves, heavyweight 420 GSM double-knit tracksuits, and deep cultural graphics, Mokasi has become a hallmark of Pretoria streetwear pride.",
+    aboutStory:
+      "Born from the vibrant streets of Mamelodi and Soshanguve, Mokasi represents the raw, dynamic energy of Pretoria youth culture. Known for extreme volume through the sleeves, heavyweight 420 GSM double-knit tracksuits, and deep cultural graphics, Mokasi has become a hallmark of Pretoria streetwear pride.",
     establishedYear: "2019",
     dispatchHub: "Pretoria Central Distribution (Bob Go Couriers)",
   },
@@ -114,7 +120,8 @@ export const vendors: Vendor[] = [
     slug: "galxboy",
     name: "Galxboy Heritage Drop",
     letter: "G",
-    tagline: "Pretoria's pioneer streetwear legacy — iconic graphic silhouettes & statement headwear",
+    tagline:
+      "Pretoria's pioneer streetwear legacy — iconic graphic silhouettes & statement headwear",
     origin: "Menlyn / Pretoria, 012",
     city: "Pretoria",
     gender: ["UNISEX", "MEN", "WOMEN"],
@@ -122,12 +129,14 @@ export const vendors: Vendor[] = [
     priceRange: "R 450 - R 1,950",
     featured: true,
     color: "#C88A35",
-    coverImage: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=1600&q=85",
+    coverImage:
+      "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=1600&q=85",
     productCount: 56,
     coordinates: "25.7825° S, 28.2755° E",
     isThrift: false,
     specialty: "Iconic SA Pop Culture & Heavy Melton Varsity Jackets",
-    aboutStory: "Starting as a humble T-shirt brand in Pretoria and evolving into a national cultural juggernaut, Galxboy paved the way for modern South African urban fashion. This curated heritage drop features premium varsity outerwear, heavyweight chenille patches, and archival collector items.",
+    aboutStory:
+      "Starting as a humble T-shirt brand in Pretoria and evolving into a national cultural juggernaut, Galxboy paved the way for modern South African urban fashion. This curated heritage drop features premium varsity outerwear, heavyweight chenille patches, and archival collector items.",
     establishedYear: "2008",
     dispatchHub: "Menlyn Retail Logistics Hub",
   },
@@ -138,7 +147,8 @@ export const vendors: Vendor[] = [
     slug: "soweto-threads",
     name: "Soweto Threads",
     letter: "S",
-    tagline: "Heritage raw selvage denim, chainstitched tailoring & formal pleats",
+    tagline:
+      "Heritage raw selvage denim, chainstitched tailoring & formal pleats",
     origin: "Orlando West, Soweto",
     city: "Soweto",
     gender: ["MEN", "WOMEN", "UNISEX"],
@@ -146,12 +156,14 @@ export const vendors: Vendor[] = [
     priceRange: "R 780 - R 1,800",
     featured: true,
     color: "#1E3A8A",
-    coverImage: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=1600&q=85",
+    coverImage:
+      "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=1600&q=85",
     productCount: 48,
     coordinates: "26.2415° S, 27.9157° E",
     isThrift: false,
     specialty: "14oz Raw Red-Line Selvage Denim & Chainstitching",
-    aboutStory: "Handcrafted in an Orlando West studio just blocks from Vilakazi Street, Soweto Threads pays homage to historic township tailoring and the refined Swenka aesthetic. Utilizing Japanese shuttle-loom shuttle selvage denim, every jacket and trouser is built to develop a singular patina personal to the wearer.",
+    aboutStory:
+      "Handcrafted in an Orlando West studio just blocks from Vilakazi Street, Soweto Threads pays homage to historic township tailoring and the refined Swenka aesthetic. Utilizing Japanese shuttle-loom shuttle selvage denim, every jacket and trouser is built to develop a singular patina personal to the wearer.",
     establishedYear: "2018",
     dispatchHub: "Soweto Diepkloof Spaza Station (Bob Go)",
   },
@@ -168,12 +180,14 @@ export const vendors: Vendor[] = [
     priceRange: "R 520 - R 1,200",
     featured: true,
     color: "#111827",
-    coverImage: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=1600&q=85",
+    coverImage:
+      "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=1600&q=85",
     productCount: 64,
     coordinates: "26.1929° S, 28.0345° E",
     isThrift: false,
     specialty: "Heavy Cotton & Tactile Cargo Details",
-    aboutStory: "Braam District is the uniform of Johannesburg's creative core. Designed steps from Park Station and the Nelson Mandela Bridge, their gear focuses on ultra-heavyweight 480 GSM French terry fleece, waterproof Cordura accessories, and thermal layering tailored for Highveld winters.",
+    aboutStory:
+      "Braam District is the uniform of Johannesburg's creative core. Designed steps from Park Station and the Nelson Mandela Bridge, their gear focuses on ultra-heavyweight 480 GSM French terry fleece, waterproof Cordura accessories, and thermal layering tailored for Highveld winters.",
     establishedYear: "2020",
     dispatchHub: "Braamfontein Juta Smart Locker",
   },
@@ -182,7 +196,8 @@ export const vendors: Vendor[] = [
     slug: "gusheshe-classics",
     name: "Gusheshe Classics",
     letter: "G",
-    tagline: "Vulcanized footwear inspired by South African motorsport & spinning heritage",
+    tagline:
+      "Vulcanized footwear inspired by South African motorsport & spinning heritage",
     origin: "Pinetown, KwaZulu-Natal",
     city: "Durban",
     gender: ["UNISEX", "MEN"],
@@ -190,12 +205,14 @@ export const vendors: Vendor[] = [
     priceRange: "R 1,450 - R 2,200",
     featured: true,
     color: "#C88A35",
-    coverImage: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=1600&q=85",
+    coverImage:
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=1600&q=85",
     productCount: 32,
     coordinates: "29.8167° S, 30.8500° E",
     isThrift: false,
     specialty: "Vulcanized Waffle Sole & Suede Motorsport Overlays",
-    aboutStory: "Engineered in Pinetown, KwaZulu-Natal, Gusheshe Classics translates South Africa's legendary BMW E30 325i spinning and motorsport culture into vulcanized sneaker architecture. Featuring tire-tread gum rubber outsoles, reinforced double toe-caps, and memory foam insoles built for longevity.",
+    aboutStory:
+      "Engineered in Pinetown, KwaZulu-Natal, Gusheshe Classics translates South Africa's legendary BMW E30 325i spinning and motorsport culture into vulcanized sneaker architecture. Featuring tire-tread gum rubber outsoles, reinforced double toe-caps, and memory foam insoles built for longevity.",
     establishedYear: "2022",
     dispatchHub: "Durban Central Pargo Station",
   },
@@ -206,7 +223,8 @@ export const vendors: Vendor[] = [
     slug: "dunusa-archive",
     name: "Dunusa Archive Co.",
     letter: "D",
-    tagline: "Curated 1-of-1 90s sportswear, crinkle nylon windbreakers & motorsport track tops",
+    tagline:
+      "Curated 1-of-1 90s sportswear, crinkle nylon windbreakers & motorsport track tops",
     origin: "Small Street CBD, Johannesburg",
     city: "Johannesburg",
     gender: ["UNISEX", "MEN", "WOMEN"],
@@ -214,13 +232,15 @@ export const vendors: Vendor[] = [
     priceRange: "R 380 - R 890",
     featured: true,
     color: "#059669",
-    coverImage: "https://images.unsplash.com/photo-1548883354-7622d03aca27?auto=format&fit=crop&w=1600&q=85",
+    coverImage:
+      "https://images.unsplash.com/photo-1548883354-7622d03aca27?auto=format&fit=crop&w=1600&q=85",
     productCount: 26,
     coordinates: "26.2023° S, 28.0471° E",
     isThrift: true,
     specialty: "90s Sportswear & Technical Windbreakers",
     conditionStandard: "Grade A+ Flawless Mint (Steam Cleaned)",
-    aboutStory: "Scouting daily across the labyrinthine wholesale bales of Small Street CBD, Dunusa Archive Co. hand-picks the rarest 1990s Italian and American technical windbreakers, racing jackets, and motorsport track tops. Every piece is triple steam-cleaned, measured to the centimeter, and guaranteed 1-of-1.",
+    aboutStory:
+      "Scouting daily across the labyrinthine wholesale bales of Small Street CBD, Dunusa Archive Co. hand-picks the rarest 1990s Italian and American technical windbreakers, racing jackets, and motorsport track tops. Every piece is triple steam-cleaned, measured to the centimeter, and guaranteed 1-of-1.",
     establishedYear: "2017",
     dispatchHub: "Johannesburg CBD Vault",
   },
@@ -229,7 +249,8 @@ export const vendors: Vendor[] = [
     slug: "kasi-vintage-vault",
     name: "Kasi Vintage Vault",
     letter: "K",
-    tagline: "Sophiatown heavy leather flight jackets, vintage knit polos & pleated trousers",
+    tagline:
+      "Sophiatown heavy leather flight jackets, vintage knit polos & pleated trousers",
     origin: "Diepkloof Zone 2, Soweto",
     city: "Soweto",
     gender: ["MEN", "UNISEX"],
@@ -237,13 +258,15 @@ export const vendors: Vendor[] = [
     priceRange: "R 380 - R 1,450",
     featured: true,
     color: "#B45309",
-    coverImage: "https://images.unsplash.com/photo-1520975954732-35dd22299614?auto=format&fit=crop&w=1600&q=85",
+    coverImage:
+      "https://images.unsplash.com/photo-1520975954732-35dd22299614?auto=format&fit=crop&w=1600&q=85",
     productCount: 19,
     coordinates: "26.2482° S, 27.9401° E",
     isThrift: true,
     specialty: "Heavy Leathers & 70s Sophiatown Knits",
     conditionStandard: "Grade A Mint (Conditioned Leather)",
-    aboutStory: "Preserving the legendary style of Sophiatown jazz pioneers and Soweto sartorialists, Kasi Vintage Vault unearths archival heavyweight shearling leather jackets, fine wool knits, and hand-tooled brass-buckle belts. Deeply conditioned with organic oils to last decades.",
+    aboutStory:
+      "Preserving the legendary style of Sophiatown jazz pioneers and Soweto sartorialists, Kasi Vintage Vault unearths archival heavyweight shearling leather jackets, fine wool knits, and hand-tooled brass-buckle belts. Deeply conditioned with organic oils to last decades.",
     establishedYear: "2016",
     dispatchHub: "Diepkloof Zone 4 Spaza Hub",
   },
@@ -252,7 +275,8 @@ export const vendors: Vendor[] = [
     slug: "bree-st-reworks",
     name: "Bree St. Reworks",
     letter: "B",
-    tagline: "1-of-1 upcycled workwear vests, patched raw denim & commuter canvas gear",
+    tagline:
+      "1-of-1 upcycled workwear vests, patched raw denim & commuter canvas gear",
     origin: "Bree Taxi Interchange, Johannesburg",
     city: "Johannesburg",
     gender: ["UNISEX", "MEN", "WOMEN"],
@@ -260,13 +284,15 @@ export const vendors: Vendor[] = [
     priceRange: "R 480 - R 920",
     featured: true,
     color: "#4B5563",
-    coverImage: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=1600&q=85",
+    coverImage:
+      "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=1600&q=85",
     productCount: 22,
     coordinates: "26.1989° S, 28.0380° E",
     isThrift: true,
     specialty: "Reworked Duck Canvas & Patchwork",
     conditionStandard: "Upcycled Heritage Grade (Triple Reinforced)",
-    aboutStory: "Situated at the pulsing heart of Johannesburg transit, Bree St. Reworks deconstructs decommissioned transit overalls, heavy duck canvas jackets, and mining uniforms into functional modern streetwear vests and carryalls with brass D-rings and industrial stitching.",
+    aboutStory:
+      "Situated at the pulsing heart of Johannesburg transit, Bree St. Reworks deconstructs decommissioned transit overalls, heavy duck canvas jackets, and mining uniforms into functional modern streetwear vests and carryalls with brass D-rings and industrial stitching.",
     establishedYear: "2021",
     dispatchHub: "Bree Taxi Interchange Station",
   },
@@ -275,7 +301,8 @@ export const vendors: Vendor[] = [
     slug: "south-beach-retro",
     name: "South Beach Retro",
     letter: "S",
-    tagline: "Coastal 90s washed corduroy overshirts, graphic tees & vintage surf wear",
+    tagline:
+      "Coastal 90s washed corduroy overshirts, graphic tees & vintage surf wear",
     origin: "The Workshop / South Beach, Durban",
     city: "Durban",
     gender: ["UNISEX", "MEN", "WOMEN"],
@@ -283,17 +310,19 @@ export const vendors: Vendor[] = [
     priceRange: "R 350 - R 750",
     featured: true,
     color: "#D97706",
-    coverImage: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=1600&q=85",
+    coverImage:
+      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=1600&q=85",
     productCount: 17,
     coordinates: "29.8587° S, 31.0218° E",
     isThrift: true,
     specialty: "Sun-Drenched Corduroys & 90s Graphic Tees",
     conditionStandard: "Grade A+ Vintage Mint (Pre-shrunk & Washed)",
-    aboutStory: "Curating sun-bleached coastal nostalgia from Durban's surf arcades and beachfront bazaars. Specializing in washed 8-wale corduroy overshirts, rare vintage tour tees, and relaxed warm-climate layering.",
+    aboutStory:
+      "Curating sun-bleached coastal nostalgia from Durban's surf arcades and beachfront bazaars. Specializing in washed 8-wale corduroy overshirts, rare vintage tour tees, and relaxed warm-climate layering.",
     establishedYear: "2019",
     dispatchHub: "Umlazi Mega City Station",
   },
-];
+]
 
 export const products: Product[] = [
   // Pretoria (012) Labels
@@ -307,15 +336,21 @@ export const products: Product[] = [
     gender: ["UNISEX", "MEN", "WOMEN"],
     price: 620,
     originalPrice: 750,
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=80",
     badge: "PRETORIA 012",
     origin: "Arcadia, Pretoria",
     fabric: "280 GSM Combed Ring-Spun Cotton",
     sizes: ["S", "M", "L", "XL"],
-    description: "Architecturally cut with a high ribbed collar, dropped shoulder seams, and subtle tone-on-tone embroidery. Designed for the modern South African streetwear enthusiast.",
+    description:
+      "Architecturally cut with a high ribbed collar, dropped shoulder seams, and subtle tone-on-tone embroidery. Designed for the modern South African streetwear enthusiast.",
     isNew: true,
     isPretoria: true,
+    stock: 24,
+    stockPerSize: { S: 5, M: 8, L: 7, XL: 4 },
+    status: "active",
   },
   {
     id: 2,
@@ -327,15 +362,21 @@ export const products: Product[] = [
     gender: ["UNISEX", "MEN"],
     price: 1450,
     originalPrice: 1750,
-    image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?auto=format&fit=crop&w=900&q=80",
     badge: "PRETORIA CUT",
     origin: "Mamelodi, Pretoria",
     fabric: "420 GSM Double-Knit Cotton Interlock",
     sizes: ["M", "L", "XL"],
-    description: "Cut with extreme volume through the sleeve and stacked hem trousers. Embroidered with Mokasi's signature brand stamp in antique ochre thread.",
+    description:
+      "Cut with extreme volume through the sleeve and stacked hem trousers. Embroidered with Mokasi's signature brand stamp in antique ochre thread.",
     isNew: true,
     isPretoria: true,
+    stock: 14,
+    stockPerSize: { M: 4, L: 6, XL: 4 },
+    status: "active",
   },
   {
     id: 3,
@@ -347,14 +388,20 @@ export const products: Product[] = [
     gender: ["UNISEX", "MEN", "WOMEN"],
     price: 1850,
     originalPrice: null,
-    image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=900&q=80",
     badge: "HERITAGE ARCHIVE",
     origin: "Menlyn, Pretoria",
     fabric: "Heavy Melton Wool & Contrast Vegan Leather Sleeves",
     sizes: ["S", "M", "L", "XL"],
-    description: "An archival tribute to Pretoria's greatest streetwear pioneer. Heavyweight chenille patch branding with ribbed striped trim.",
+    description:
+      "An archival tribute to Pretoria's greatest streetwear pioneer. Heavyweight chenille patch branding with ribbed striped trim.",
     isPretoria: true,
+    stock: 8,
+    stockPerSize: { S: 2, M: 2, L: 3, XL: 1 },
+    status: "active",
   },
 
   // Soweto & Johannesburg Ateliers
@@ -368,14 +415,20 @@ export const products: Product[] = [
     gender: ["MEN", "UNISEX"],
     price: 1280,
     originalPrice: 1450,
-    image: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=900&q=80",
     badge: "SOWETO CUT",
     origin: "Orlando West, Soweto",
     fabric: "14oz Unwashed Red-Line Selvage Denim",
     sizes: ["S", "M", "L", "XL"],
-    description: "Handcrafted in Orlando West using Japanese shuttle-loom shuttle selvage. Unwashed, deep indigo with copper hardware that patinas uniquely over time.",
+    description:
+      "Handcrafted in Orlando West using Japanese shuttle-loom shuttle selvage. Unwashed, deep indigo with copper hardware that patinas uniquely over time.",
     isNew: true,
+    stock: 12,
+    stockPerSize: { S: 3, M: 4, L: 3, XL: 2 },
+    status: "active",
   },
   {
     id: 5,
@@ -387,14 +440,20 @@ export const products: Product[] = [
     gender: ["UNISEX", "MEN", "WOMEN"],
     price: 890,
     originalPrice: null,
-    image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=900&q=80",
     badge: "BRAAM EXCLUSIVE",
     origin: "Braamfontein, JHB",
     fabric: "480 GSM Heavy French Terry Cotton",
     sizes: ["XS", "S", "M", "L", "XL"],
-    description: "Cut with a boxy, dropped-shoulder silhouette built for chilly Highveld evenings and early morning metro commutes.",
+    description:
+      "Cut with a boxy, dropped-shoulder silhouette built for chilly Highveld evenings and early morning metro commutes.",
     isNew: true,
+    stock: 18,
+    stockPerSize: { XS: 2, S: 4, M: 6, L: 4, XL: 2 },
+    status: "active",
   },
   {
     id: 6,
@@ -406,14 +465,28 @@ export const products: Product[] = [
     gender: ["UNISEX", "MEN"],
     price: 1650,
     originalPrice: 1950,
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=900&q=80",
     badge: "SPINNING HERITAGE",
     origin: "Pinetown, KZN",
-    fabric: "Full-Grain Cowhide Leather & High-Density Vulcanized Waffle Rubber",
+    fabric:
+      "Full-Grain Cowhide Leather & High-Density Vulcanized Waffle Rubber",
     sizes: ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
-    description: "Inspired by South Africa's motorsport culture. Double-stitched toe cap, custom tire-tread outsole, and memory-foam insole.",
+    description:
+      "Inspired by South Africa's motorsport culture. Double-stitched toe cap, custom tire-tread outsole, and memory-foam insole.",
     isSale: true,
+    stock: 16,
+    stockPerSize: {
+      "UK 6": 2,
+      "UK 7": 3,
+      "UK 8": 4,
+      "UK 9": 4,
+      "UK 10": 2,
+      "UK 11": 1,
+    },
+    status: "active",
   },
 
   // Dunusa 1-of-1 Vault (South African Curated Vintage)
@@ -427,17 +500,23 @@ export const products: Product[] = [
     gender: ["UNISEX"],
     price: 480,
     originalPrice: 650,
-    image: "https://images.unsplash.com/photo-1548883354-7622d03aca27?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1548883354-7622d03aca27?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=900&q=80",
     badge: "1-OF-1 VINTAGE",
     origin: "Small Street CBD, JHB",
     fabric: "Crinkle Taslan Nylon & Mesh Lining",
     sizes: ["L (Boxy 90s Fit)"],
-    description: "Hand-picked from Small Street CBD wholesale stashes. Vibrant turquoise and cadmium orange blocking with brass YKK pulls. Steam-cleaned & sanitized.",
+    description:
+      "Hand-picked from Small Street CBD wholesale stashes. Vibrant turquoise and cadmium orange blocking with brass YKK pulls. Steam-cleaned & sanitized.",
     isThrift: true,
     condition: "★ Grade A+ Flawless Mint",
     measurements: "Pit-to-Pit: 62cm | Length: 70cm | Raglan Sleeve",
     rarity: "Unique Single Item",
+    stock: 1,
+    stockPerSize: { "L (Boxy 90s Fit)": 1 },
+    status: "active",
   },
   {
     id: 8,
@@ -449,17 +528,23 @@ export const products: Product[] = [
     gender: ["MEN", "UNISEX"],
     price: 1350,
     originalPrice: 1800,
-    image: "https://images.unsplash.com/photo-1520975954732-35dd22299614?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1520975954732-35dd22299614?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=80",
     badge: "1-OF-1 VINTAGE",
     origin: "Diepkloof Zone 2, Soweto",
     fabric: "Heavy Aniline Calfskin Leather & Quilted Lining",
     sizes: ["XL (Tailored Boxy Fit)"],
-    description: "Authentic Sophiatown jazz-era silhouette. Deep aged espresso patina with original shearling collar and heavy Talon zipper. Triple conditioned.",
+    description:
+      "Authentic Sophiatown jazz-era silhouette. Deep aged espresso patina with original shearling collar and heavy Talon zipper. Triple conditioned.",
     isThrift: true,
     condition: "★ Grade A (Rich Natural Patina)",
     measurements: "Pit-to-Pit: 64cm | Shoulder: 52cm | Length: 68cm",
     rarity: "Unique Single Item",
+    stock: 1,
+    stockPerSize: { "XL (Tailored Boxy Fit)": 1 },
+    status: "active",
   },
   {
     id: 9,
@@ -471,17 +556,23 @@ export const products: Product[] = [
     gender: ["UNISEX", "MEN", "WOMEN"],
     price: 820,
     originalPrice: null,
-    image: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=900&q=80",
     badge: "1-OF-1 VINTAGE",
     origin: "Bree Taxi Interchange, JHB",
     fabric: "16oz Repurposed Carhartt Duck Canvas",
     sizes: ["M / L Adjustable"],
-    description: "Reconstructed from decommissioned South African transit overalls and workwear jackets. Multi-pocket commuter layout with brass D-rings.",
+    description:
+      "Reconstructed from decommissioned South African transit overalls and workwear jackets. Multi-pocket commuter layout with brass D-rings.",
     isThrift: true,
     condition: "★ Upcycled Grade (Triple Stitched)",
     measurements: "Pit-to-Pit: 58cm | Length: 64cm",
     rarity: "Unique Single Item",
+    stock: 1,
+    stockPerSize: { "M / L Adjustable": 1 },
+    status: "active",
   },
   {
     id: 10,
@@ -493,17 +584,23 @@ export const products: Product[] = [
     gender: ["UNISEX", "MEN", "WOMEN"],
     price: 420,
     originalPrice: 550,
-    image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=80",
     badge: "1-OF-1 VINTAGE",
     origin: "South Beach, Durban",
     fabric: "100% Cotton 8-Wale Vintage Corduroy",
     sizes: ["L (Relaxed Fit)"],
-    description: "Sun-drenched honey corduroy from Durban's 90s coastal surf era. Features tortoise-shell buttons and dual flap pockets. Sanitized and steam-ironed.",
+    description:
+      "Sun-drenched honey corduroy from Durban's 90s coastal surf era. Features tortoise-shell buttons and dual flap pockets. Sanitized and steam-ironed.",
     isThrift: true,
     condition: "★ Grade A+ Mint",
     measurements: "Pit-to-Pit: 60cm | Shoulder: 49cm | Length: 74cm",
     rarity: "Unique Single Item",
+    stock: 1,
+    stockPerSize: { "L (Relaxed Fit)": 1 },
+    status: "active",
   },
   {
     id: 11,
@@ -515,17 +612,23 @@ export const products: Product[] = [
     gender: ["UNISEX"],
     price: 560,
     originalPrice: null,
-    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1548883354-7622d03aca27?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1548883354-7622d03aca27?auto=format&fit=crop&w=900&q=80",
     badge: "1-OF-1 VINTAGE",
     origin: "Small Street CBD, JHB",
     fabric: "Brushed Tricot Poly-Cotton Blend",
     sizes: ["M (Slim Vintage Track Cut)"],
-    description: "Sourced from a private collector in Turffontein. Embroidered chest insignia with gold piping along the raglan sleeves. Mint original condition.",
+    description:
+      "Sourced from a private collector in Turffontein. Embroidered chest insignia with gold piping along the raglan sleeves. Mint original condition.",
     isThrift: true,
     condition: "★ Grade A+ Mint",
     measurements: "Pit-to-Pit: 54cm | Length: 67cm",
     rarity: "Unique Single Item",
+    stock: 1,
+    stockPerSize: { "M (Slim Vintage Track Cut)": 1 },
+    status: "active",
   },
   {
     id: 12,
@@ -537,13 +640,19 @@ export const products: Product[] = [
     gender: ["MEN", "UNISEX"],
     price: 950,
     originalPrice: 1100,
-    image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=900&q=80",
     badge: "TAILORED FORMAL",
     origin: "Orlando West, Soweto",
     fabric: "100% Heavy Twill Cotton (320 GSM)",
     sizes: ["30", "32", "34", "36"],
-    description: "Engineered with deep double front pleats, high-rise waistband with side tab adjusters, and a clean tapered break.",
+    description:
+      "Engineered with deep double front pleats, high-rise waistband with side tab adjusters, and a clean tapered break.",
+    stock: 14,
+    stockPerSize: { "30": 3, "32": 5, "34": 4, "36": 2 },
+    status: "active",
   },
   {
     id: 13,
@@ -555,14 +664,20 @@ export const products: Product[] = [
     gender: ["UNISEX"],
     price: 450,
     originalPrice: null,
-    image: "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
     badge: "PRETORIA 012",
     origin: "Hatfield, Pretoria",
     fabric: "16oz Waxed Canvas & Full Grain Leather Handles",
     sizes: ["One Size (18L)"],
-    description: "Clean architectural carryall engineered for laptop commuting between Hatfield, Menlyn, and Johannesburg. Weather-resistant finish.",
+    description:
+      "Clean architectural carryall engineered for laptop commuting between Hatfield, Menlyn, and Johannesburg. Weather-resistant finish.",
     isPretoria: true,
+    stock: 9,
+    stockPerSize: { "One Size (18L)": 9 },
+    status: "active",
   },
   {
     id: 14,
@@ -574,13 +689,19 @@ export const products: Product[] = [
     gender: ["UNISEX"],
     price: 520,
     originalPrice: null,
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=900&q=80",
     badge: "COMMUTER GEAR",
     origin: "Braamfontein, JHB",
     fabric: "1000D Ballistic Cordura Nylon & Fidlock Magnetic Buckle",
     sizes: ["One Size (5L)"],
-    description: "Built for hands-free mobility across the Nelson Mandela Bridge and MetroRail carriages. Rapid magnetic release clasp.",
+    description:
+      "Built for hands-free mobility across the Nelson Mandela Bridge and MetroRail carriages. Rapid magnetic release clasp.",
+    stock: 11,
+    stockPerSize: { "One Size (5L)": 11 },
+    status: "active",
   },
   {
     id: 15,
@@ -592,13 +713,19 @@ export const products: Product[] = [
     gender: ["MEN", "UNISEX"],
     price: 380,
     originalPrice: null,
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1520975954732-35dd22299614?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1520975954732-35dd22299614?auto=format&fit=crop&w=900&q=80",
     badge: "SOLID BRASS",
     origin: "Diepkloof, Soweto",
     fabric: "Vegetable-Tanned Saddle Leather & Solid Brass Hardware",
     sizes: ["32", "34", "36", "38"],
-    description: "Hand-burnished edges with custom brass buckle. Built to last a lifetime, softening with every wear.",
+    description:
+      "Hand-burnished edges with custom brass buckle. Built to last a lifetime, softening with every wear.",
+    stock: 8,
+    stockPerSize: { "32": 2, "34": 3, "36": 2, "38": 1 },
+    status: "active",
   },
   {
     id: 16,
@@ -610,13 +737,168 @@ export const products: Product[] = [
     gender: ["UNISEX", "MEN"],
     price: 1890,
     originalPrice: 2200,
-    image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=900&q=80",
-    secondaryImage: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=900&q=80",
+    image:
+      "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=900&q=80",
     badge: "LIMITED RUN",
     origin: "Pinetown, KZN",
     fabric: "Perforated Suede, Padded Collar & Gum Rubber Outsole",
     sizes: ["UK 7", "UK 8", "UK 9", "UK 10"],
-    description: "High-top ankle support built with reinforced heel counter and authentic motorsport race striping.",
+    description:
+      "High-top ankle support built with reinforced heel counter and authentic motorsport race striping.",
     isSale: true,
+    stock: 7,
+    stockPerSize: { "UK 7": 1, "UK 8": 3, "UK 9": 2, "UK 10": 1 },
+    status: "active",
   },
-];
+]
+
+export const initialProducts = products
+export const initialVendors = vendors
+
+// Curated high-resolution South African streetwear photography presets for new clothing items
+export const streetwearImagePresets = [
+  {
+    label: "Heavyweight Boxy Hoodie",
+    category: "outerwear" as const,
+    image:
+      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    label: "Tactical Utility Vest",
+    category: "workwear" as const,
+    image:
+      "https://images.unsplash.com/photo-1509551388413-e18d0ac5d495?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    label: "Oversized Heavy Graphic Tee",
+    category: "pretoria" as const,
+    image:
+      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    label: "Heavy Canvas Work Jacket",
+    category: "workwear" as const,
+    image:
+      "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1495105787522-5334e3ffa0ef?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    label: "Retro Street High-Tops",
+    category: "kicks" as const,
+    image:
+      "https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    label: "Tactical Crossbody Sling Bag",
+    category: "accessories" as const,
+    image:
+      "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    label: "1-of-1 Distressed Denim Jacket",
+    category: "thrift" as const,
+    image:
+      "https://images.unsplash.com/photo-1527082395-e939b847da0d?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1543087903-1ac2ec7aa8c5?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    label: "Vintage Varsity Bomber",
+    category: "thrift" as const,
+    image:
+      "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=80",
+    secondaryImage:
+      "https://images.unsplash.com/photo-1509551388413-e18d0ac5d495?auto=format&fit=crop&w=900&q=80",
+  },
+]
+
+export const initialVendorOrders: VendorOrder[] = [
+  {
+    id: "ord-101",
+    orderNumber: "LB-84920",
+    customerName: "Thabo Molefe",
+    customerCity: "Pretoria",
+    lockerStation: "Hatfield Plaza Smart Vault (012)",
+    items: [
+      {
+        productId: 1,
+        productTitle: "Lesupa 280 GSM Boxy Heavyweight Tee",
+        size: "L",
+        quantity: 1,
+        price: 620,
+        image:
+          "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
+      },
+    ],
+    totalAmount: 620,
+    commissionAmount: 80.6,
+    payoutAmount: 539.4,
+    status: "pending_pack",
+    createdAt: "Today, 14:20",
+    waybillNumber: "BG-84920-PTA",
+    brandSlug: "lesupa-atelier",
+  },
+  {
+    id: "ord-102",
+    orderNumber: "LB-84881",
+    customerName: "Kagiso Dlamini",
+    customerCity: "Johannesburg",
+    lockerStation: "Braamfontein Juta Smart Locker",
+    items: [
+      {
+        productId: 2,
+        productTitle: "Mokasi Pitori Signature Oversized Tracksuit",
+        size: "M",
+        quantity: 1,
+        price: 1450,
+        image:
+          "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=900&q=80",
+      },
+    ],
+    totalAmount: 1450,
+    commissionAmount: 188.5,
+    payoutAmount: 1261.5,
+    status: "dispatched_to_locker",
+    createdAt: "Yesterday, 11:45",
+    waybillNumber: "BG-84881-JHB",
+    brandSlug: "mokasi",
+  },
+  {
+    id: "ord-103",
+    orderNumber: "LB-84732",
+    customerName: "Nandi Khumalo",
+    customerCity: "Pretoria",
+    lockerStation: "Hatfield Plaza Smart Vault (012)",
+    items: [
+      {
+        productId: 13,
+        productTitle: "Lesupa Minimalist Commuter Waxed Tote",
+        size: "One Size (18L)",
+        quantity: 1,
+        price: 450,
+        image:
+          "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=900&q=80",
+      },
+    ],
+    totalAmount: 450,
+    commissionAmount: 58.5,
+    payoutAmount: 391.5,
+    status: "in_transit",
+    createdAt: "08 Sep, 09:30",
+    waybillNumber: "BG-84732-PTA",
+    brandSlug: "lesupa-atelier",
+  },
+]

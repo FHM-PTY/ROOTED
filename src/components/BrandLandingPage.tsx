@@ -1,18 +1,18 @@
-import React, { useState, useMemo } from "react";
-import { Vendor, Product } from "../types";
+import React, { useState, useMemo } from "react"
+import { Vendor, Product } from "../types"
 
 interface BrandLandingPageProps {
-  vendor: Vendor;
-  allProducts: Product[];
-  allVendors: Vendor[];
-  wishlist: number[];
-  currency: "ZAR" | "USD" | "EUR";
-  formatPrice: (amount: number) => string;
-  onAddToCart: (product: Product, size: string) => void;
-  onToggleWishlist: (productId: number) => void;
-  onSelectProduct: (product: Product) => void;
-  onNavigateHome: () => void;
-  onNavigateBrand: (slug: string) => void;
+  vendor: Vendor
+  allProducts: Product[]
+  allVendors: Vendor[]
+  wishlist: number[]
+  currency: "ZAR" | "USD" | "EUR"
+  formatPrice: (amount: number) => string
+  onAddToCart: (product: Product, size: string) => void
+  onToggleWishlist: (productId: number) => void
+  onSelectProduct: (product: Product) => void
+  onNavigateHome: () => void
+  onNavigateBrand: (slug: string) => void
 }
 
 export default function BrandLandingPage({
@@ -27,30 +27,40 @@ export default function BrandLandingPage({
   onNavigateHome,
   onNavigateBrand,
 }: BrandLandingPageProps) {
-  const [selectedSubCategory, setSelectedSubCategory] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<"featured" | "price-low" | "price-high">("featured");
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>("all")
+  const [sortBy, setSortBy] = useState<"featured" | "price-low" | "price-high">(
+    "featured",
+  )
 
   // Products belonging to this brand
   const brandProducts = useMemo(() => {
-    let list = allProducts.filter((p) => p.brandSlug === vendor.slug || p.brand === vendor.name);
+    let list = allProducts.filter(
+      (p) => p.brandSlug === vendor.slug || p.brand === vendor.name,
+    )
 
     if (selectedSubCategory !== "all") {
-      list = list.filter((p) => p.category === selectedSubCategory);
+      list = list.filter((p) => p.category === selectedSubCategory)
     }
 
     if (sortBy === "price-low") {
-      list.sort((a, b) => a.price - b.price);
+      list.sort((a, b) => a.price - b.price)
     } else if (sortBy === "price-high") {
-      list.sort((a, b) => b.price - a.price);
+      list.sort((a, b) => b.price - a.price)
     }
 
-    return list;
-  }, [allProducts, vendor, selectedSubCategory, sortBy]);
+    return list
+  }, [allProducts, vendor, selectedSubCategory, sortBy])
 
   // Other brands from same city / region
   const relatedVendors = useMemo(() => {
-    return allVendors.filter((v) => v.id !== vendor.id && (v.city === vendor.city || v.isThrift === vendor.isThrift)).slice(0, 3);
-  }, [allVendors, vendor]);
+    return allVendors
+      .filter(
+        (v) =>
+          v.id !== vendor.id &&
+          (v.city === vendor.city || v.isThrift === vendor.isThrift),
+      )
+      .slice(0, 3)
+  }, [allVendors, vendor])
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] text-[#111827]">
@@ -58,7 +68,10 @@ export default function BrandLandingPage({
       <div className="bg-white border-b border-[#E5E7EB] px-4 sm:px-8 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs">
           <div className="flex items-center gap-2 text-[#6B7280]">
-            <button onClick={onNavigateHome} className="hover:text-[#111827] font-medium">
+            <button
+              onClick={onNavigateHome}
+              className="hover:text-[#111827] font-medium"
+            >
               Home
             </button>
             <span>/</span>
@@ -133,9 +146,9 @@ export default function BrandLandingPage({
               <button
                 onClick={() => {
                   const text = encodeURIComponent(
-                    `Hello ${vendor.name}, I am browsing your collection on Le Benkeleng: ${window.location.href}`
-                  );
-                  window.open(`https://wa.me/?text=${text}`, "_blank");
+                    `Hello ${vendor.name}, I am browsing your collection on Le Benkeleng: ${window.location.href}`,
+                  )
+                  window.open(`https://wa.me/?text=${text}`, "_blank")
                 }}
                 className="bg-[#25D366] text-black text-xs font-bold px-5 py-2.5 rounded-full hover:bg-[#20ba5a] transition-colors flex items-center gap-2"
               >
@@ -143,8 +156,8 @@ export default function BrandLandingPage({
               </button>
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  alert(`Copied link to ${vendor.name} store!`);
+                  navigator.clipboard.writeText(window.location.href)
+                  alert(`Copied link to ${vendor.name} store!`)
                 }}
                 className="border border-white/30 text-white text-xs font-bold px-5 py-2.5 rounded-full hover:bg-white/10 transition-colors"
               >
@@ -159,27 +172,49 @@ export default function BrandLandingPage({
       <section className="bg-white border-b border-[#E5E7EB] py-4 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono">
           <div className="p-3 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB]">
-            <span className="text-[#6B7280] text-[10px] uppercase block">Dispatch SLA:</span>
+            <span className="text-[#6B7280] text-[10px] uppercase block">
+              Dispatch SLA:
+            </span>
             <span className="font-bold text-[#111827] text-sm">48 Hours</span>
-            <span className="text-[10px] text-[#059669] block">✓ Handed over to Bob Go</span>
+            <span className="text-[10px] text-[#059669] block">
+              ✓ Handed over to Bob Go
+            </span>
           </div>
 
           <div className="p-3 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB]">
-            <span className="text-[#6B7280] text-[10px] uppercase block">Fulfillment Hub:</span>
-            <span className="font-bold text-[#111827] text-xs truncate block">{vendor.dispatchHub}</span>
-            <span className="text-[10px] text-[#6B7280] block">Smart Locker Dispatched</span>
+            <span className="text-[#6B7280] text-[10px] uppercase block">
+              Fulfillment Hub:
+            </span>
+            <span className="font-bold text-[#111827] text-xs truncate block">
+              {vendor.dispatchHub}
+            </span>
+            <span className="text-[10px] text-[#6B7280] block">
+              Smart Locker Dispatched
+            </span>
           </div>
 
           <div className="p-3 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB]">
-            <span className="text-[#6B7280] text-[10px] uppercase block">Price Range:</span>
-            <span className="font-bold text-[#111827] text-sm">{vendor.priceRange}</span>
-            <span className="text-[10px] text-[#6B7280] block">Payflex 4x Available</span>
+            <span className="text-[#6B7280] text-[10px] uppercase block">
+              Price Range:
+            </span>
+            <span className="font-bold text-[#111827] text-sm">
+              {vendor.priceRange}
+            </span>
+            <span className="text-[10px] text-[#6B7280] block">
+              Payflex 4x Available
+            </span>
           </div>
 
           <div className="p-3 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB]">
-            <span className="text-[#6B7280] text-[10px] uppercase block">Curation Quality:</span>
-            <span className="font-bold text-[#C88A35] text-sm">4.9 / 5.0 ★</span>
-            <span className="text-[10px] text-[#059669] block">100% Verified Craft</span>
+            <span className="text-[#6B7280] text-[10px] uppercase block">
+              Curation Quality:
+            </span>
+            <span className="font-bold text-[#C88A35] text-sm">
+              4.9 / 5.0 ★
+            </span>
+            <span className="text-[10px] text-[#059669] block">
+              100% Verified Craft
+            </span>
           </div>
         </div>
       </section>
@@ -235,7 +270,9 @@ export default function BrandLandingPage({
         {brandProducts.length === 0 ? (
           <div className="bg-white border border-[#E5E7EB] rounded-xl py-16 text-center space-y-3">
             <span className="text-3xl">📦</span>
-            <h4 className="font-bold text-[#111827]">No active pieces found in this category</h4>
+            <h4 className="font-bold text-[#111827]">
+              No active pieces found in this category
+            </h4>
             <button
               onClick={() => setSelectedSubCategory("all")}
               className="bg-[#111827] text-white px-4 py-2 rounded-full text-xs font-bold"
@@ -246,10 +283,14 @@ export default function BrandLandingPage({
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {brandProducts.map((product) => {
-              const isSaved = wishlist.includes(product.id);
+              const isSaved = wishlist.includes(product.id)
               const discountPercent = product.originalPrice
-                ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-                : null;
+                ? Math.round(
+                    ((product.originalPrice - product.price) /
+                      product.originalPrice) *
+                      100,
+                  )
+                : null
 
               return (
                 <div
@@ -282,41 +323,108 @@ export default function BrandLandingPage({
                           -{discountPercent}%
                         </span>
                       )}
+                      {(() => {
+                        const totalStock =
+                          product.stock ??
+                          (product.stockPerSize
+                            ? Object.values(product.stockPerSize).reduce(
+                                (a, b) => a + b,
+                                0,
+                              )
+                            : 0)
+                        if (totalStock === 0 || product.status === "sold_out") {
+                          return (
+                            <span className="bg-red-600 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">
+                              SOLD OUT
+                            </span>
+                          )
+                        }
+                        if (totalStock <= 4) {
+                          return (
+                            <span className="bg-amber-500 text-black text-[9px] font-mono font-bold px-2 py-0.5 rounded">
+                              LOW STOCK ({totalStock})
+                            </span>
+                          )
+                        }
+                        return null
+                      })()}
                     </div>
 
                     {/* Wishlist Button */}
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleWishlist(product.id);
+                        e.stopPropagation()
+                        onToggleWishlist(product.id)
                       }}
                       className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-[#111827] hover:bg-white shadow-xs transition-transform active:scale-90"
                       aria-label="Save to Wishlist"
                     >
-                      <svg className="w-4 h-4" fill={isSaved ? "#EF4444" : "none"} stroke={isSaved ? "#EF4444" : "currentColor"} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      <svg
+                        className="w-4 h-4"
+                        fill={isSaved ? "#EF4444" : "none"}
+                        stroke={isSaved ? "#EF4444" : "currentColor"}
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                        />
                       </svg>
                     </button>
 
                     {/* Size Selector on Hover */}
                     <div className="absolute inset-x-0 bottom-0 bg-white/95 backdrop-blur-xs p-2.5 translate-y-full group-hover:translate-y-0 transition-transform duration-200 border-t border-[#E5E7EB]">
-                      <span className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider block text-center mb-1">
-                        Select Size to Bag:
-                      </span>
-                      <div className="flex items-center justify-center gap-1 flex-wrap">
-                        {product.sizes.map((sz) => (
-                          <button
-                            key={sz}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onAddToCart(product, sz);
-                            }}
-                            className="bg-white border border-[#D1D5DB] hover:border-[#111827] hover:bg-[#111827] hover:text-white px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-colors"
-                          >
-                            {sz}
-                          </button>
-                        ))}
-                      </div>
+                      {(() => {
+                        const totalStock =
+                          product.stock ??
+                          (product.stockPerSize
+                            ? Object.values(product.stockPerSize).reduce(
+                                (a, b) => a + b,
+                                0,
+                              )
+                            : 0)
+                        if (totalStock === 0 || product.status === "sold_out") {
+                          return (
+                            <div className="text-center text-[10px] font-mono font-bold text-red-600 py-1">
+                              OUT OF STOCK
+                            </div>
+                          )
+                        }
+                        return (
+                          <>
+                            <span className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider block text-center mb-1">
+                              Select Size to Bag:
+                            </span>
+                            <div className="flex items-center justify-center gap-1 flex-wrap">
+                              {product.sizes.map((sz) => {
+                                const sizeStock =
+                                  product.stockPerSize?.[sz] ??
+                                  (product.isThrift ? 1 : 5)
+                                const isSizeOut = sizeStock === 0
+                                return (
+                                  <button
+                                    key={sz}
+                                    disabled={isSizeOut}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      if (!isSizeOut) onAddToCart(product, sz)
+                                    }}
+                                    className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-colors ${
+                                      isSizeOut
+                                        ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed line-through"
+                                        : "bg-white border border-[#D1D5DB] hover:border-[#111827] hover:bg-[#111827] hover:text-white"
+                                    }`}
+                                  >
+                                    {sz}
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          </>
+                        )
+                      })()}
                     </div>
                   </div>
 
@@ -349,12 +457,13 @@ export default function BrandLandingPage({
                         )}
                       </div>
                       <div className="text-[10px] text-[#6B6964] font-mono">
-                        Pay 4x {formatPrice(Math.round(product.price / 4))} with Payflex
+                        Pay 4x {formatPrice(Math.round(product.price / 4))} with
+                        Payflex
                       </div>
                     </div>
                   </div>
                 </div>
-              );
+              )
             })}
           </div>
         )}
@@ -372,7 +481,10 @@ export default function BrandLandingPage({
                 Other Independent Streetwear Labels
               </h3>
             </div>
-            <a href="#/brands" className="text-xs font-bold text-[#111827] hover:underline">
+            <a
+              href="#/brands"
+              className="text-xs font-bold text-[#111827] hover:underline"
+            >
               View All Brands A–Z →
             </a>
           </div>
@@ -382,8 +494,8 @@ export default function BrandLandingPage({
               <div
                 key={rel.id}
                 onClick={() => {
-                  onNavigateBrand(rel.slug);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  onNavigateBrand(rel.slug)
+                  window.scrollTo({ top: 0, behavior: "smooth" })
                 }}
                 className="bg-white border border-[#E5E7EB] rounded-xl p-4 cursor-pointer hover:border-[#111827] transition-all flex items-center gap-3.5 shadow-xs"
               >
@@ -394,9 +506,15 @@ export default function BrandLandingPage({
                   {rel.letter}
                 </div>
                 <div className="overflow-hidden">
-                  <h4 className="text-xs font-bold text-[#111827] truncate">{rel.name}</h4>
-                  <span className="text-[10px] font-mono text-[#C88A35] block">{rel.origin}</span>
-                  <span className="text-[10px] text-[#6B6964] block">{rel.productCount} active styles</span>
+                  <h4 className="text-xs font-bold text-[#111827] truncate">
+                    {rel.name}
+                  </h4>
+                  <span className="text-[10px] font-mono text-[#C88A35] block">
+                    {rel.origin}
+                  </span>
+                  <span className="text-[10px] text-[#6B6964] block">
+                    {rel.productCount} active styles
+                  </span>
                 </div>
               </div>
             ))}
@@ -404,5 +522,5 @@ export default function BrandLandingPage({
         </div>
       </section>
     </div>
-  );
+  )
 }

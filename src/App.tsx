@@ -1639,123 +1639,333 @@ export default function App() {
         </div>
       </section>
 
-      {/* 6. BASH FOOTER */}
-      <footer className="bg-white border-t border-[#E5E7EB] pt-12 pb-24 md:pb-12 text-[#111827]">
+      {/* 6. BASH-INSPIRED MARKETPLACE FOOTER */}
+      <footer className="bg-white border-t border-[#E5E7EB] pt-14 pb-24 md:pb-12 text-[#111827]">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-[#E5E7EB]">
-            <div className="space-y-3">
-              <h3 className="font-display text-2xl font-black uppercase">
-                Le Benkeleng
-              </h3>
-              <p className="text-xs text-[#6B7280] leading-relaxed">
-                The multi-vendor home for Pretoria and Gauteng's independent
-                streetwear labels and 1-of-1 curated vintage archives.
-              </p>
-              <div className="text-xs font-mono text-[#C88A35] font-semibold">
-                Pretoria (012) · Soweto · Johannesburg · Durban
+          {/* Main 4-Column Grid directly matching Bash layout */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 pb-12 border-b border-[#E5E7EB]">
+            {/* Column 1: Quick Action Utility List with Icons & Dividers */}
+            <div className="lg:col-span-4 space-y-0 divide-y divide-[#E5E7EB]">
+              {/* Row 1: Pay online */}
+              <div
+                onClick={() => {
+                  alert("Pay online with Capitec 1-Tap QR, Payflex 4x 0% installments, Ozow Instant EFT, or Visa/Mastercard at checkout.")
+                }}
+                className="py-3.5 first:pt-0 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-[#C88A35] cursor-pointer transition-colors group"
+              >
+                <svg
+                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:text-[#C88A35] transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  viewBox="0 0 24 24"
+                >
+                  <rect x="2" y="5" width="20" height="14" rx="2" />
+                  <line x1="2" y1="10" x2="22" y2="10" />
+                </svg>
+                <span>Pay your order online</span>
               </div>
-            </div>
 
-            <div className="space-y-2 text-xs">
-              <span className="font-bold uppercase tracking-wider text-[#111827] block">
-                Shop by Brand
-              </span>
-              <a
-                href="#/brand/lesupa-atelier"
-                className="block text-[#6B7280] hover:text-[#111827]"
-              >
-                Lesupa Atelier (Pretoria 012)
-              </a>
-              <a
-                href="#/brand/mokasi"
-                className="block text-[#6B7280] hover:text-[#111827]"
-              >
-                Mokasi Streetwear (Pretoria)
-              </a>
-              <a
-                href="#/brand/galxboy"
-                className="block text-[#6B7280] hover:text-[#111827]"
-              >
-                Galxboy Heritage (Pretoria)
-              </a>
-              <a
-                href="#/brand/soweto-threads"
-                className="block text-[#6B7280] hover:text-[#111827]"
-              >
-                Soweto Threads (Soweto)
-              </a>
-              <a
-                href="#/brands"
-                className="block text-[#C88A35] font-bold hover:underline"
-              >
-                View All Brands A–Z →
-              </a>
-            </div>
-
-            <div className="space-y-2 text-xs">
-              <span className="font-bold uppercase tracking-wider text-[#111827] block">
-                Customer Service
-              </span>
-              <button
+              {/* Row 2: Track order */}
+              <div
                 onClick={() => setIsTrackingModalOpen(true)}
-                className="block text-[#6B7280] hover:text-[#111827]"
+                className="py-3.5 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-[#C88A35] cursor-pointer transition-colors group"
               >
-                Track Your Order
-              </button>
-              <button
+                <svg
+                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:text-[#C88A35] transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"
+                  />
+                </svg>
+                <span>Track your order</span>
+              </div>
+
+              {/* Row 3: Log a return */}
+              <div
+                onClick={() => {
+                  alert("Returns & Exchanges: Independent labels offer 7-day unworn returns and size exchanges. Log directly via WhatsApp or your order tracking code.")
+                }}
+                className="py-3.5 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-[#C88A35] cursor-pointer transition-colors group"
+              >
+                <svg
+                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:text-[#C88A35] transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 10h10a5 5 0 015 5v2m0 0l-4-4m4 4l4-4M3 10l4-4M3 10l4 4"
+                  />
+                </svg>
+                <span>Log a return</span>
+              </div>
+
+              {/* Row 4: Find nearest locker or store */}
+              <div
                 onClick={() => setIsLockerPickerOpen(true)}
-                className="block text-[#6B7280] hover:text-[#111827]"
+                className="py-3.5 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-[#C88A35] cursor-pointer transition-colors group"
               >
-                Locker Stations & Spaza Hubs
-              </button>
-              <button
-                onClick={() => setIsVendorModalOpen(true)}
-                className="block text-[#6B7280] hover:text-[#111827]"
+                <svg
+                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:text-[#C88A35] transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                <span>Find your nearest store or locker</span>
+              </div>
+
+              {/* Row 5: Get the app */}
+              <div
+                onClick={() => {
+                  alert("Le Benkeleng Mobile PWA is optimized for all iOS & Android browsers! Tap Share > 'Add to Home Screen' for instant drop notifications.")
+                }}
+                className="py-3.5 flex items-center gap-3.5 text-sm font-bold text-[#111827] hover:text-[#C88A35] cursor-pointer transition-colors group"
               >
-                Sell With Us (13% Commission)
-              </button>
-              <a
-                href="#/vendor"
-                className="block text-[#6B7280] hover:text-[#C88A35] transition-colors"
-              >
-                🔒 Atelier Studio Login
-              </a>
-              <span className="block text-[#6B7280]">
-                Dispatch SLA: 48 Hours
-              </span>
+                <svg
+                  className="w-5 h-5 shrink-0 text-[#111827] group-hover:text-[#C88A35] transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  viewBox="0 0 24 24"
+                >
+                  <rect x="5" y="2" width="14" height="20" rx="3" />
+                  <line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                <span>Get the Le Benkeleng app</span>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <span className="font-bold text-xs uppercase tracking-wider text-[#111827] block">
-                Secure South African Payment
-              </span>
-              <p className="text-xs text-[#6B6964]">
-                Capitec 1-Tap QR, Payflex 4-part 0% interest installments, Ozow
-                Instant EFT, and Cards.
-              </p>
-              <div className="flex flex-wrap gap-2 text-[10px] font-mono font-bold">
-                <span className="bg-[#F3F4F6] border border-[#E5E7EB] px-2 py-1 rounded">
-                  CAPITEC
-                </span>
-                <span className="bg-[#F3F4F6] border border-[#E5E7EB] px-2 py-1 rounded">
-                  PAYFLEX
-                </span>
-                <span className="bg-[#F3F4F6] border border-[#E5E7EB] px-2 py-1 rounded">
-                  OZOW
-                </span>
-                <span className="bg-[#F3F4F6] border border-[#E5E7EB] px-2 py-1 rounded">
-                  VISA/MC
-                </span>
-              </div>
+            {/* Column 2: Le Benkeleng Help (mirrors Bash Help) */}
+            <div className="lg:col-span-3 space-y-3">
+              <h3 className="font-bold text-sm text-[#111827]">
+                Le Benkeleng Help
+              </h3>
+              <ul className="space-y-2.5 text-xs text-[#6B7280]">
+                <li>
+                  <a
+                    href="#/"
+                    onClick={() => {
+                      setSelectedCategory("all")
+                      setSelectedDepartment("ALL")
+                      navigateTo("#/")
+                    }}
+                    className="hover:text-[#111827] hover:underline"
+                  >
+                    Bash Help home
+                  </a>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setIsLockerPickerOpen(true)}
+                    className="hover:text-[#111827] hover:underline text-left cursor-pointer"
+                  >
+                    Collect and Deliver
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setIsTrackingModalOpen(true)}
+                    className="hover:text-[#111827] hover:underline text-left cursor-pointer"
+                  >
+                    Returns and Refunds
+                  </button>
+                </li>
+                <li>
+                  <a
+                    href="#/vendor"
+                    className="hover:text-[#111827] hover:underline"
+                  >
+                    Profile and Login
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#/brands"
+                    className="hover:text-[#111827] hover:underline"
+                  >
+                    How to shop online
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#/vault"
+                    className="hover:text-[#111827] hover:underline"
+                  >
+                    Airtime, data & vouchers
+                  </a>
+                </li>
+                <li>
+                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
+                    Terms & Conditions
+                  </span>
+                </li>
+                <li>
+                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
+                    Contact us
+                  </span>
+                </li>
+                <li>
+                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
+                    Knowledge Hub
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 3: Marketplace services (mirrors TFG services) */}
+            <div className="lg:col-span-3 space-y-3">
+              <h3 className="font-bold text-sm text-[#111827]">
+                TFG services
+              </h3>
+              <ul className="space-y-2.5 text-xs text-[#6B7280]">
+                <li>
+                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
+                    TFG Financial Services
+                  </span>
+                </li>
+                <li>
+                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
+                    TFG Money account
+                  </span>
+                </li>
+                <li>
+                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
+                    TFG Rewards
+                  </span>
+                </li>
+                <li>
+                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
+                    TFG Insurance
+                  </span>
+                </li>
+                <li>
+                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
+                    TFG Connect airtime & data
+                  </span>
+                </li>
+                <li>
+                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
+                    TFG Media
+                  </span>
+                </li>
+                <li>
+                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
+                    Repairs, valuation & ring sizing
+                  </span>
+                </li>
+                <li>
+                  <a
+                    href="#/vendor"
+                    className="hover:text-[#C88A35] hover:underline font-semibold flex items-center gap-1"
+                  >
+                    <span>🔒</span> Atelier Studio & Merchant Portal
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 4: Company (mirrors Company) */}
+            <div className="lg:col-span-2 space-y-3">
+              <h3 className="font-bold text-sm text-[#111827]">Company</h3>
+              <ul className="space-y-2.5 text-xs text-[#6B7280]">
+                <li>
+                  <button
+                    onClick={() => setIsLockerPickerOpen(true)}
+                    className="hover:text-[#111827] hover:underline text-left cursor-pointer"
+                  >
+                    Store finder
+                  </button>
+                </li>
+                <li>
+                  <a
+                    href="#/brands"
+                    className="hover:text-[#111827] hover:underline"
+                  >
+                    About Bash
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#/brand/lesupa-atelier"
+                    className="hover:text-[#111827] hover:underline"
+                  >
+                    About TFG - The Foschini Group Ltd.
+                  </a>
+                </li>
+                <li>
+                  <span className="cursor-pointer hover:text-[#111827] hover:underline">
+                    Sustainability, CSI, BEE
+                  </span>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setIsVendorModalOpen(true)}
+                    className="hover:text-[#111827] hover:underline text-left cursor-pointer"
+                  >
+                    Bash Careers
+                  </button>
+                </li>
+              </ul>
             </div>
           </div>
 
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#9CA3AF] gap-4">
-            <span>
-              © 2026 LE BENKELENG™ · MULTI-VENDOR MARKETPLACE · FICA & POPIA
-              COMPLIANT
-            </span>
-            <span>PROUDLY BUILT FOR SOUTH AFRICAN STREETWEAR CULTURE</span>
+          {/* South African Payment Badges & Legal Bottom Row */}
+          <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#9CA3AF]">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-medium text-[#6B7280] mr-1">
+                Accepted Payments:
+              </span>
+              <span className="bg-[#F3F4F6] border border-[#E5E7EB] text-[#111827] px-2 py-0.5 rounded text-[10px] font-mono font-bold">
+                CAPITEC
+              </span>
+              <span className="bg-[#F3F4F6] border border-[#E5E7EB] text-[#111827] px-2 py-0.5 rounded text-[10px] font-mono font-bold">
+                PAYFLEX
+              </span>
+              <span className="bg-[#F3F4F6] border border-[#E5E7EB] text-[#111827] px-2 py-0.5 rounded text-[10px] font-mono font-bold">
+                OZOW
+              </span>
+              <span className="bg-[#F3F4F6] border border-[#E5E7EB] text-[#111827] px-2 py-0.5 rounded text-[10px] font-mono font-bold">
+                VISA/MASTERCARD
+              </span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-right">
+              <span>
+                © 2026 LE BENKELENG™ · MULTI-VENDOR MARKETPLACE · FICA & POPIA
+                COMPLIANT
+              </span>
+              <span className="hidden sm:inline text-[#D1D5DB]">|</span>
+              <span className="font-semibold text-[#6B7280]">
+                PROUDLY BUILT FOR SOUTH AFRICAN STREETWEAR CULTURE
+              </span>
+            </div>
           </div>
         </div>
       </footer>

@@ -477,9 +477,10 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#F9FAFB] text-[#111827] font-sans antialiased pb-16 md:pb-0">
       {/* 1. BASH-STYLE TOP UTILITY BAR */}
+      {/* 1. TOP LOGISTICS & ANNOUNCEMENT BAR */}
       <aside
         aria-label="Utility bar"
-        className="bg-[#111827] text-[#F3F4F6] text-[11px] font-medium border-b border-[#374151] px-4 sm:px-8 py-2"
+        className="bg-[#0B0B0B] text-[#9CA3AF] text-[11px] font-medium border-b border-[#1C1E22] px-4 sm:px-8 py-1.5 hidden md:block"
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div
@@ -487,19 +488,19 @@ export default function App() {
             className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors group"
           >
             <span className="text-[#C88A35]">📍</span>
-            <span className="text-[#9CA3AF]">Deliver to:</span>
+            <span>Deliver to:</span>
             <span className="font-semibold text-white underline decoration-dotted underline-offset-4 group-hover:text-[#C88A35]">
               {selectedStation.name}
             </span>
             <span className="text-[9px] text-[#9CA3AF]">(Change)</span>
           </div>
 
-          <div className="hidden md:flex items-center gap-2 text-center text-[#D1D5DB]">
+          <div className="flex items-center gap-2 text-center text-[#D1D5DB]">
             <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
             <span>
               Free Smart Locker & Pick-Up Hub Delivery on Orders Over R 650
             </span>
-            <span className="text-[#6B7280]">|</span>
+            <span className="text-[#374151]">|</span>
             <span className="text-[#C88A35] font-semibold">
               48h Vendor Dispatch SLA
             </span>
@@ -508,7 +509,7 @@ export default function App() {
           <div className="flex items-center gap-4 text-[#D1D5DB]">
             <button
               onClick={() => setIsTrackingModalOpen(true)}
-              className="hover:text-white transition-colors flex items-center gap-1"
+              className="hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
             >
               <span>📦</span> Track Order
             </button>
@@ -526,7 +527,7 @@ export default function App() {
                 <button
                   key={curr}
                   onClick={() => setCurrency(curr)}
-                  className={`px-1 rounded ${
+                  className={`px-1 rounded cursor-pointer ${
                     currency === curr
                       ? "bg-[#374151] text-white font-bold"
                       : "text-[#9CA3AF] hover:text-white"
@@ -540,86 +541,62 @@ export default function App() {
         </div>
       </aside>
 
-      {/* 2. MAIN STICKY NAVIGATION BAR */}
-      <header className="sticky top-0 z-40 bg-white border-b border-[#E5E7EB] shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between gap-6">
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="md:hidden p-2 text-[#111827] hover:bg-gray-100 rounded-md"
-            aria-label="Open Mobile Menu"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+      {/* 2. MAIN BASH-INSPIRED STICKY NAVIGATION BAR */}
+      <header className="sticky top-0 z-40 bg-black text-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 flex items-center justify-between gap-3 sm:gap-6">
+          {/* Left: Hamburger & Logo */}
+          <div className="flex items-center gap-3 sm:gap-5 shrink-0">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-1 -ml-1 text-white hover:text-gray-300 transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
+              aria-label="Open Navigation Menu"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
                 strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
-
-          {/* Brand Identity */}
-          <div
-            className="flex flex-col cursor-pointer shrink-0"
-            onClick={() => {
-              setSelectedCategory("all")
-              setSelectedBrand(null)
-              setSelectedDepartment("ALL")
-              setSearchQuery("")
-              navigateTo("#/")
-            }}
-          >
-            <span className="text-2xl sm:text-3xl font-black tracking-tight uppercase text-[#111827] font-display">
-              LE BENKELENG
-            </span>
-            <span className="text-[9px] font-mono font-bold tracking-[0.25em] text-[#C88A35] -mt-0.5 uppercase">
-              Pretoria & Gauteng Streetwear
-            </span>
-          </div>
-
-          {/* Department Tabs (Desktop) */}
-          <div className="hidden xl:flex items-center gap-1 bg-[#F3F4F6] p-1 rounded-lg text-xs font-semibold text-[#4B5563]">
-            {(["ALL", "MEN", "WOMEN", "VINTAGE"] as const).map((dept) => (
-              <button
-                key={dept}
-                onClick={() => {
-                  setSelectedDepartment(dept)
-                  if (dept === "VINTAGE") {
-                    navigateTo("#/vault")
-                  } else if (currentRoute.type !== "home") {
-                    navigateTo("#/")
-                  }
-                }}
-                className={`px-3 py-1.5 rounded-md transition-all ${
-                  selectedDepartment === dept
-                    ? "bg-white text-[#111827] shadow-xs font-bold"
-                    : "hover:text-[#111827]"
-                }`}
+                viewBox="0 0 24 24"
               >
-                {dept === "VINTAGE" ? "1-OF-1 VINTAGE" : dept}
-              </button>
-            ))}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+
+            {/* Brand Logo (lowercase bold sans-serif, matching bash inspo) */}
+            <div
+              className="cursor-pointer select-none shrink-0"
+              onClick={() => {
+                setSelectedCategory("all")
+                setSelectedBrand(null)
+                setSelectedDepartment("ALL")
+                setSearchQuery("")
+                navigateTo("#/")
+              }}
+            >
+              <span className="text-2xl sm:text-3xl font-black tracking-tight lowercase text-white font-sans">
+                le benkeleng
+              </span>
+            </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-xl hidden md:block relative">
+          {/* Middle: Rounded Charcoal Pill Search Bar */}
+          <div className="flex-1 max-w-2xl mx-1 sm:mx-4">
             <div className="relative flex items-center">
-              <span className="absolute left-3.5 text-[#9CA3AF] pointer-events-none">
+              <span className="absolute left-3.5 sm:left-4 text-gray-400 pointer-events-none flex items-center">
                 <svg
-                  className="w-4 h-4"
+                  className="w-4 h-4 sm:w-4.5 sm:h-4.5"
                   fill="none"
                   stroke="currentColor"
+                  strokeWidth="2"
                   viewBox="0 0 24 24"
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth="2"
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
                 </svg>
@@ -631,13 +608,13 @@ export default function App() {
                   setSearchQuery(e.target.value)
                   if (currentRoute.type !== "home") navigateTo("#/")
                 }}
-                placeholder="Search brands (Lesupa, Mokasi), sneakers, 1-of-1 vintage..."
-                className="w-full bg-[#F3F4F6] border border-transparent focus:border-[#111827] focus:bg-white rounded-full py-2.5 pl-10 pr-10 text-xs text-[#111827] placeholder-[#9CA3AF] focus:outline-none transition-all"
+                placeholder="Search products, stores or brands"
+                className="w-full bg-[#27292D] focus:bg-[#1E2024] border border-transparent focus:border-[#4B5563] text-white placeholder-gray-400 text-xs sm:text-sm rounded-full py-2 sm:py-2.5 pl-10 sm:pl-11 pr-8 focus:outline-none transition-all"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 text-xs text-[#9CA3AF] hover:text-[#111827]"
+                  className="absolute right-3 text-xs text-gray-400 hover:text-white cursor-pointer"
                 >
                   ✕
                 </button>
@@ -645,160 +622,259 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right Action Utilities */}
-          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+          {/* Right: 3 White Icons (Location Pin, User Account, Shopping Cart) */}
+          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+            {/* 1. Location Pin (Locker Stations & Pickup Hubs) */}
             <button
-              onClick={() => setIsWishlistOpen(true)}
-              className="relative p-2 text-[#111827] hover:bg-gray-100 rounded-full transition-colors flex items-center gap-1.5"
-              aria-label="Wishlist"
+              onClick={() => setIsLockerPickerOpen(true)}
+              className="p-2 text-white hover:text-[#C88A35] transition-colors relative cursor-pointer"
+              title={`Deliver to: ${selectedStation.name}`}
+              aria-label="Smart Locker & Pickup Locations"
             >
               <svg
-                className="w-5 h-5"
-                fill={wishlist.length > 0 ? "#EF4444" : "none"}
-                stroke={wishlist.length > 0 ? "#EF4444" : "currentColor"}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-              <span className="hidden lg:inline text-xs font-semibold">
-                Saved
-              </span>
-              {wishlist.length > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-[#EF4444] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {wishlist.length}
-                </span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="bg-[#111827] text-white hover:bg-black px-4 py-2 rounded-full flex items-center gap-2.5 transition-colors shadow-xs"
-              aria-label="View Shopping Bag"
-            >
-              <svg
-                className="w-4 h-4"
+                className="w-5 h-5 sm:w-6 sm:h-6"
                 fill="none"
                 stroke="currentColor"
+                strokeWidth="1.75"
                 viewBox="0 0 24 24"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
-              <span className="text-xs font-bold hidden sm:inline">Bag</span>
-              <span className="bg-white text-[#111827] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                {cart.reduce((acc, item) => acc + item.quantity, 0)}
-              </span>
+            </button>
+
+            {/* 2. User Profile (Order Tracking & Account) */}
+            <button
+              onClick={() => setIsTrackingModalOpen(true)}
+              className="p-2 text-white hover:text-[#C88A35] transition-colors relative cursor-pointer"
+              title="Track Orders & Account"
+              aria-label="Account and Order Tracking"
+            >
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </button>
+
+            {/* 3. Shopping Cart (Bag) */}
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="p-2 text-white hover:text-[#C88A35] transition-colors relative cursor-pointer"
+              title="Shopping Cart"
+              aria-label="Shopping Cart"
+            >
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+              {cart.reduce((acc, item) => acc + item.quantity, 0) > 0 && (
+                <span className="absolute 0 top-0.5 right-0.5 bg-[#C88A35] text-black text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
+                  {cart.reduce((acc, item) => acc + item.quantity, 0)}
+                </span>
+              )}
             </button>
           </div>
         </div>
 
-        {/* 3. BASH CATEGORY SUB-NAV STRIP */}
-        <nav className="border-t border-[#E5E7EB] bg-white px-4 sm:px-8">
-          <div className="max-w-7xl mx-auto flex items-center gap-6 overflow-x-auto no-scrollbar py-2 text-xs font-semibold whitespace-nowrap text-[#4B5563]">
-            <a
-              href="#/brands"
-              className={`flex items-center gap-1.5 transition-colors ${
-                currentRoute.type === "brands"
-                  ? "text-[#111827] font-bold"
-                  : "text-[#C88A35] hover:text-[#111827]"
-              }`}
-            >
-              <span>⚡</span> Brands A–Z
-            </a>
+        {/* 3. BASH CATEGORY SUB-NAV STRIP: Pure White with Active Black Pill */}
+        <nav className="border-t border-black bg-white px-4 sm:px-8 py-2.5 shadow-2xs">
+          <div className="max-w-7xl mx-auto flex items-center gap-3 sm:gap-6 overflow-x-auto no-scrollbar whitespace-nowrap text-xs sm:text-sm font-semibold">
+            {/* All */}
             <button
               onClick={() => {
-                setSelectedCategory("pretoria")
+                setSelectedCategory("all")
+                setSelectedDepartment("ALL")
+                setSelectedBrand(null)
+                setSearchQuery("")
+                navigateTo("#/")
+              }}
+              className={`rounded-full transition-all shrink-0 cursor-pointer ${
+                selectedCategory === "all" &&
+                selectedDepartment === "ALL" &&
+                currentRoute.type === "home"
+                  ? "bg-black text-white px-4 py-1.5 font-bold shadow-xs"
+                  : "text-[#4B5563] hover:text-black font-semibold px-2 py-1"
+              }`}
+            >
+              All
+            </button>
+
+            {/* Women */}
+            <button
+              onClick={() => {
+                setSelectedDepartment("WOMEN")
+                setSelectedCategory("all")
                 setSelectedBrand(null)
                 navigateTo("#/")
               }}
-              className={`hover:text-[#111827] transition-colors ${
-                selectedCategory === "pretoria" && currentRoute.type === "home"
-                  ? "text-[#111827] font-bold"
-                  : ""
+              className={`rounded-full transition-all shrink-0 cursor-pointer ${
+                selectedDepartment === "WOMEN" &&
+                selectedCategory === "all" &&
+                currentRoute.type === "home"
+                  ? "bg-black text-white px-4 py-1.5 font-bold shadow-xs"
+                  : "text-[#4B5563] hover:text-black font-semibold px-2 py-1"
               }`}
             >
-              Pretoria (012)
+              Women
             </button>
-            <a
-              href="#/vault"
-              className={`hover:text-[#111827] transition-colors ${
-                currentRoute.type === "vault" ? "text-[#111827] font-bold" : ""
+
+            {/* Men */}
+            <button
+              onClick={() => {
+                setSelectedDepartment("MEN")
+                setSelectedCategory("all")
+                setSelectedBrand(null)
+                navigateTo("#/")
+              }}
+              className={`rounded-full transition-all shrink-0 cursor-pointer ${
+                selectedDepartment === "MEN" &&
+                selectedCategory === "all" &&
+                currentRoute.type === "home"
+                  ? "bg-black text-white px-4 py-1.5 font-bold shadow-xs"
+                  : "text-[#4B5563] hover:text-black font-semibold px-2 py-1"
               }`}
             >
-              The Dunusa Vault (1-of-1)
-            </a>
+              Men
+            </button>
+
+            {/* Hoodies & Sweats */}
             <button
               onClick={() => {
                 setSelectedCategory("outerwear")
                 setSelectedBrand(null)
                 navigateTo("#/")
               }}
-              className={`hover:text-[#111827] transition-colors ${
+              className={`rounded-full transition-all shrink-0 cursor-pointer ${
                 selectedCategory === "outerwear" && currentRoute.type === "home"
-                  ? "text-[#111827] font-bold"
-                  : ""
+                  ? "bg-black text-white px-4 py-1.5 font-bold shadow-xs"
+                  : "text-[#4B5563] hover:text-black font-semibold px-2 py-1"
               }`}
             >
               Hoodies & Sweats
             </button>
+
+            {/* Denim & Workwear */}
             <button
               onClick={() => {
                 setSelectedCategory("workwear")
                 setSelectedBrand(null)
                 navigateTo("#/")
               }}
-              className={`hover:text-[#111827] transition-colors ${
+              className={`rounded-full transition-all shrink-0 cursor-pointer ${
                 selectedCategory === "workwear" && currentRoute.type === "home"
-                  ? "text-[#111827] font-bold"
-                  : ""
+                  ? "bg-black text-white px-4 py-1.5 font-bold shadow-xs"
+                  : "text-[#4B5563] hover:text-black font-semibold px-2 py-1"
               }`}
             >
               Denim & Workwear
             </button>
+
+            {/* Footwear & Sneakers */}
             <button
               onClick={() => {
                 setSelectedCategory("kicks")
                 setSelectedBrand(null)
                 navigateTo("#/")
               }}
-              className={`hover:text-[#111827] transition-colors ${
+              className={`rounded-full transition-all shrink-0 cursor-pointer ${
                 selectedCategory === "kicks" && currentRoute.type === "home"
-                  ? "text-[#111827] font-bold"
-                  : ""
+                  ? "bg-black text-white px-4 py-1.5 font-bold shadow-xs"
+                  : "text-[#4B5563] hover:text-black font-semibold px-2 py-1"
               }`}
             >
-              Footwear & Sneakers
+              Sneakers
             </button>
+
+            {/* Accessories */}
             <button
               onClick={() => {
                 setSelectedCategory("accessories")
                 setSelectedBrand(null)
                 navigateTo("#/")
               }}
-              className={`hover:text-[#111827] transition-colors ${
+              className={`rounded-full transition-all shrink-0 cursor-pointer ${
                 selectedCategory === "accessories" &&
                 currentRoute.type === "home"
-                  ? "text-[#111827] font-bold"
-                  : ""
+                  ? "bg-black text-white px-4 py-1.5 font-bold shadow-xs"
+                  : "text-[#4B5563] hover:text-black font-semibold px-2 py-1"
               }`}
             >
               Accessories
             </button>
+
+            {/* Pretoria (012) */}
+            <button
+              onClick={() => {
+                setSelectedCategory("pretoria")
+                setSelectedBrand(null)
+                navigateTo("#/")
+              }}
+              className={`rounded-full transition-all shrink-0 cursor-pointer ${
+                selectedCategory === "pretoria" && currentRoute.type === "home"
+                  ? "bg-black text-white px-4 py-1.5 font-bold shadow-xs"
+                  : "text-[#4B5563] hover:text-black font-semibold px-2 py-1"
+              }`}
+            >
+              Pretoria (012)
+            </button>
+
+            {/* Brands A–Z */}
             <a
-              href="#lockers"
-              className="hover:text-[#111827] transition-colors text-[#6B7280]"
+              href="#/brands"
+              className={`rounded-full transition-all shrink-0 ${
+                currentRoute.type === "brands"
+                  ? "bg-black text-white px-4 py-1.5 font-bold shadow-xs"
+                  : "text-[#4B5563] hover:text-black font-semibold px-2 py-1"
+              }`}
+            >
+              Brands
+            </a>
+
+            {/* The Dunusa Vault */}
+            <a
+              href="#/vault"
+              className={`rounded-full transition-all shrink-0 ${
+                currentRoute.type === "vault"
+                  ? "bg-black text-white px-4 py-1.5 font-bold shadow-xs"
+                  : "text-[#4B5563] hover:text-black font-semibold px-2 py-1"
+              }`}
+            >
+              The Vault (1-of-1)
+            </a>
+
+            {/* Locker Stations */}
+            <button
+              onClick={() => setIsLockerPickerOpen(true)}
+              className="text-[#4B5563] hover:text-black font-semibold px-2 py-1 rounded-full transition-all shrink-0 cursor-pointer"
             >
               Locker Stations
-            </a>
+            </button>
           </div>
         </nav>
       </header>
@@ -1802,7 +1878,248 @@ export default function App() {
         </button>
       </div>
 
-      {/* 8. SLIDE-OUT SHOPPING BAG DRAWER */}
+      {/* 8. BASH-STYLE SLIDE-OUT NAVIGATION DRAWER */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity cursor-pointer"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          <div className="fixed inset-y-0 left-0 max-w-full flex pr-10">
+            <div className="w-screen max-w-sm bg-white shadow-2xl flex flex-col justify-between overflow-y-auto">
+              <div>
+                {/* Drawer Header */}
+                <div className="bg-black text-white px-6 py-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl font-black lowercase tracking-tight font-sans">
+                      le benkeleng
+                    </span>
+                    <span className="text-[10px] font-mono text-[#C88A35] font-bold uppercase tracking-wider">
+                      012 Heat
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="p-1.5 text-gray-400 hover:text-white transition-colors cursor-pointer"
+                    aria-label="Close menu"
+                  >
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Delivery Location bar */}
+                <div
+                  onClick={() => {
+                    setIsMobileMenuOpen(false)
+                    setIsLockerPickerOpen(true)
+                  }}
+                  className="bg-[#F9FAFB] border-b border-[#E5E7EB] px-6 py-3 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="text-base">📍</span>
+                    <div>
+                      <span className="text-gray-500 block text-[10px] uppercase font-bold tracking-wider">
+                        Collection Point
+                      </span>
+                      <span className="font-semibold text-gray-900">
+                        {selectedStation.name}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-xs text-[#C88A35] font-bold">
+                    Change →
+                  </span>
+                </div>
+
+                {/* Navigation Sections */}
+                <div className="p-6 space-y-6">
+                  {/* Shop by Department */}
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 block mb-2">
+                      Departments
+                    </span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedDepartment("ALL")
+                          setSelectedCategory("all")
+                          setIsMobileMenuOpen(false)
+                          navigateTo("#/")
+                        }}
+                        className="text-left px-3 py-2 rounded-lg bg-gray-50 hover:bg-black hover:text-white text-xs font-bold transition-all cursor-pointer"
+                      >
+                        All Streetwear
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedDepartment("MEN")
+                          setSelectedCategory("all")
+                          setIsMobileMenuOpen(false)
+                          navigateTo("#/")
+                        }}
+                        className="text-left px-3 py-2 rounded-lg bg-gray-50 hover:bg-black hover:text-white text-xs font-bold transition-all cursor-pointer"
+                      >
+                        "Men's Heat"
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedDepartment("WOMEN")
+                          setSelectedCategory("all")
+                          setIsMobileMenuOpen(false)
+                          navigateTo("#/")
+                        }}
+                        className="text-left px-3 py-2 rounded-lg bg-gray-50 hover:bg-black hover:text-white text-xs font-bold transition-all cursor-pointer"
+                      >
+                        "Women's Styles"
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsMobileMenuOpen(false)
+                          navigateTo("#/vault")
+                        }}
+                        className="text-left px-3 py-2 rounded-lg bg-amber-50 text-amber-900 hover:bg-amber-900 hover:text-white text-xs font-bold transition-all cursor-pointer"
+                      >
+                        1-of-1 Vault ⚡
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Categories */}
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 block mb-2">
+                      Categories
+                    </span>
+                    <div className="space-y-1 text-sm font-medium">
+                      <button
+                        onClick={() => {
+                          setSelectedCategory("outerwear")
+                          setIsMobileMenuOpen(false)
+                          navigateTo("#/")
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center justify-between text-gray-700 hover:text-black transition-colors cursor-pointer"
+                      >
+                        <span>🧥 Hoodies & Sweats</span>
+                        <span className="text-xs text-gray-400">→</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedCategory("workwear")
+                          setIsMobileMenuOpen(false)
+                          navigateTo("#/")
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center justify-between text-gray-700 hover:text-black transition-colors cursor-pointer"
+                      >
+                        <span>👖 Denim & Workwear</span>
+                        <span className="text-xs text-gray-400">→</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedCategory("kicks")
+                          setIsMobileMenuOpen(false)
+                          navigateTo("#/")
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center justify-between text-gray-700 hover:text-black transition-colors cursor-pointer"
+                      >
+                        <span>👟 Footwear & Sneakers</span>
+                        <span className="text-xs text-gray-400">→</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedCategory("accessories")
+                          setIsMobileMenuOpen(false)
+                          navigateTo("#/")
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center justify-between text-gray-700 hover:text-black transition-colors cursor-pointer"
+                      >
+                        <span>🧢 Headwear & Accessories</span>
+                        <span className="text-xs text-gray-400">→</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedCategory("pretoria")
+                          setIsMobileMenuOpen(false)
+                          navigateTo("#/")
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center justify-between text-gray-700 hover:text-black transition-colors cursor-pointer"
+                      >
+                        <span>🇿🇦 Pretoria (012) Streetwear</span>
+                        <span className="text-xs text-gray-400">→</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Independent Brands Directory */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                        Featured Labels
+                      </span>
+                      <a
+                        href="#/brands"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-xs font-bold text-[#C88A35] hover:underline"
+                      >
+                        All Brands A–Z →
+                      </a>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      {vendors.slice(0, 6).map((v) => (
+                        <a
+                          key={v.slug}
+                          href={`#/brand/${v.slug}`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="px-2.5 py-1.5 rounded border border-gray-200 hover:border-black text-gray-700 hover:text-black truncate transition-colors font-medium"
+                        >
+                          {v.name}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="p-6 border-t border-gray-100 bg-gray-50 space-y-3 text-xs">
+                <div className="flex items-center justify-between text-gray-600">
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false)
+                      setIsTrackingModalOpen(true)
+                    }}
+                    className="flex items-center gap-1.5 hover:text-black font-semibold cursor-pointer"
+                  >
+                    <span>📦</span> Track Order
+                  </button>
+                  <a
+                    href="#/vendor"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-1.5 text-gray-600 hover:text-[#C88A35] font-semibold"
+                  >
+                    <span>🔒</span> Atelier Studio
+                  </a>
+                </div>
+                <div className="text-[10px] text-gray-400 pt-2 border-t border-gray-200">
+                  "Le Benkeleng™ · FICA & POPIA Compliant"
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 9. SLIDE-OUT SHOPPING BAG DRAWER */}
       {isCartOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
           <div

@@ -1,59 +1,61 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&family=Syne:wght@600;700;800&display=swap');
 @import 'tailwindcss';
 
 @theme {
-  --font-serif: 'Cormorant Garamond', 'Libre Baskerville', serif;
-  --font-display: 'Cormorant Garamond', serif;
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-display: 'Syne', sans-serif;
   --font-sans: 'Plus Jakarta Sans', sans-serif;
   --font-mono: 'Space Mono', monospace;
 
-  --color-delvaux-black: #1D1D1B;
-  --color-delvaux-paper: #FFFFFF;
-  --color-delvaux-ivory: #FBF9F5;
-  --color-delvaux-sand: #F4F0E8;
-  --color-delvaux-gold: #C59B63;
-  --color-delvaux-brass: #E2B170;
-  --color-delvaux-hairline: rgba(29, 29, 27, 0.09);
-  --color-delvaux-muted: #787774;
+  --color-kasi-black: #0E0E10;
+  --color-kasi-cream: #FAF7F2;
+  --color-kasi-sand: #F2EDE4;
+  --color-kasi-gold: #C88A35;
+  --color-kasi-brass: #D49B4B;
+  --color-kasi-terracotta: #C45434;
+  --color-kasi-orange: #FF5500;
+  --color-kasi-hairline: rgba(14, 14, 16, 0.09);
+  --color-kasi-muted: #6B6964;
 
-  --color-background: #FBF9F5;
-  --color-foreground: #1D1D1B;
+  --color-background: #FAF7F2;
+  --color-foreground: #0E0E10;
   --color-card: #FFFFFF;
-  --color-card-foreground: #1D1D1B;
-  --color-border: rgba(29, 29, 27, 0.09);
+  --color-card-foreground: #0E0E10;
+  --color-border: rgba(14, 14, 16, 0.09);
 }
 
 ::selection {
-  background-color: #1D1D1B;
-  color: #FBF9F5;
+  background-color: #0E0E10;
+  color: #FAF7F2;
 }
 
-.border-delvaux {
-  border-color: rgba(29, 29, 27, 0.09);
+.border-kasi {
+  border-color: rgba(14, 14, 16, 0.09);
 }
 
 .product-image-container {
   background-color: #FFFFFF;
   position: relative;
+  overflow: hidden;
 }
 
 .product-image-container img {
-  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease-in-out;
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease-in-out;
 }
 
 .product-image-container:hover img.main-img {
-  transform: scale(1.035);
+  transform: scale(1.04);
 }
 
 ::-webkit-scrollbar {
-  width: 3px;
-  height: 3px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #FBF9F5;
+  background: #FAF7F2;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1D1D1B;
+  background: #0E0E10;
 }
 
 @keyframes marquee {
@@ -62,24 +64,33 @@
 }
 
 .marquee-track {
-  animation: marquee 32s linear infinite;
+  animation: marquee 28s linear infinite;
 }
 
-@keyframes brass-ping {
+@keyframes beacon-ping {
   0% {
-    transform: scale(0.92);
-    box-shadow: 0 0 0 0 rgba(197, 155, 99, 0.65);
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(200, 138, 53, 0.7);
   }
   70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 8px rgba(197, 155, 99, 0);
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(200, 138, 53, 0);
   }
   100% {
-    transform: scale(0.92);
-    box-shadow: 0 0 0 0 rgba(197, 155, 99, 0);
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(200, 138, 53, 0);
   }
 }
 
-.brass-beacon {
-  animation: brass-ping 2.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
+.kasi-beacon {
+  animation: beacon-ping 2.2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes drop-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(0.98); }
+}
+
+.pulse-drop {
+  animation: drop-pulse 1.8s infinite ease-in-out;
 }

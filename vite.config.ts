@@ -7,7 +7,11 @@ import path from "node:path"
 export default defineConfig({
   base:
     process.env.BASE_PATH ||
-    (process.env.GITHUB_ACTIONS ? "/LeBenkeleng/" : "/"),
+    (process.env.GITHUB_REPOSITORY
+      ? `/${process.env.GITHUB_REPOSITORY.split("/")[1]}/`
+      : process.env.GITHUB_ACTIONS
+        ? "/ROOTED/"
+        : "./"),
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

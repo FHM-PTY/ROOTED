@@ -63,57 +63,67 @@ export default function BrandLandingPage({
   }, [allVendors, vendor])
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] text-[#111827]">
+    <div className="min-h-screen bg-[#efeee3] text-[#15140f] font-sans selection:bg-[#d6a34c]/20">
       {/* 1. BREADCRUMBS & TOP BAR */}
-      <div className="bg-white border-b border-[#E5E7EB] px-4 sm:px-8 py-3">
+      <div className="bg-[#fffdf8] border-b border-[rgba(21,20,15,0.12)] px-4 sm:px-8 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2 text-[#6B7280]">
+          <div className="flex items-center gap-2 text-[rgba(21,20,15,0.6)] font-mono">
             <button
               onClick={onNavigateHome}
-              className="hover:text-[#111827] font-medium"
+              className="hover:text-[#15140f] font-medium transition-colors"
             >
               Home
             </button>
-            <span>/</span>
-            <a href="#/brands" className="hover:text-[#111827] font-medium">
+            <span className="opacity-40">/</span>
+            <a
+              href="#/brands"
+              className="hover:text-[#15140f] font-medium transition-colors"
+            >
               Brands
             </a>
-            <span>/</span>
-            <span className="text-[#111827] font-bold">{vendor.name}</span>
+            <span className="opacity-40">/</span>
+            <span className="text-[#15140f] font-bold">{vendor.name}</span>
           </div>
 
           <button
             onClick={onNavigateHome}
-            className="text-xs font-bold text-[#111827] hover:underline flex items-center gap-1.5"
+            className="text-xs font-mono font-bold text-[#15140f] hover:text-[#a64b34] flex items-center gap-1.5 transition-colors group"
           >
-            <span>←</span> Back to Marketplace
+            <span className="group-hover:-translate-x-0.5 transition-transform">
+              ←
+            </span>
+            <span>Back to Marketplace</span>
           </button>
         </div>
       </div>
 
       {/* 2. BRAND COVER HERO BANNER */}
-      <section className="relative bg-[#111827] text-white">
+      <section className="relative bg-[#15140f] text-[#fffdf8] overflow-hidden">
+        {/* ROOTED Cross-Line Grid Background */}
+        <div className="hero-grid absolute inset-0 opacity-40 pointer-events-none" />
+
         {/* Cover Background Image */}
-        <div className="absolute inset-0 overflow-hidden opacity-35">
+        <div className="absolute inset-0 overflow-hidden opacity-30">
           <img
             src={vendor.coverImage}
             alt={vendor.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover scale-105 filter saturate-80"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-[#111827]/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#15140f] via-[#15140f]/75 to-transparent" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-8 py-12 sm:py-16">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-8 py-12 sm:py-16 z-10">
           <div className="max-w-3xl space-y-4">
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="bg-white/10 text-white backdrop-blur-xs text-[11px] font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
-                <span>✓</span> Verified Founding Label
+              <span className="bg-[rgba(255,253,248,0.1)] text-[#fffdf8] border border-[rgba(255,253,248,0.2)] backdrop-blur-xs text-[11px] font-mono px-3 py-1 rounded-full flex items-center gap-1.5">
+                <span className="text-[#d6a34c]">✓</span> Verified Founding
+                Label
               </span>
-              <span className="bg-white/15 text-white text-[10px] font-mono px-2.5 py-0.5 rounded-full uppercase">
+              <span className="bg-[#a64b34] text-white text-[10px] font-mono px-2.5 py-0.5 rounded-full uppercase tracking-wider font-semibold">
                 {vendor.origin}
               </span>
-              <span className="bg-white/10 text-[#9CA3AF] text-[10px] font-mono px-2 py-0.5 rounded-full">
+              <span className="bg-[rgba(255,253,248,0.08)] text-[rgba(255,253,248,0.7)] text-[10px] font-mono px-2.5 py-0.5 rounded-full border border-[rgba(255,253,248,0.12)]">
                 Est. {vendor.establishedYear}
               </span>
             </div>
@@ -121,24 +131,24 @@ export default function BrandLandingPage({
             {/* Brand Title */}
             <div className="flex items-center gap-4">
               <div
-                className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-black font-display shrink-0 shadow-lg"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold font-serif shrink-0 shadow-lg border border-[rgba(255,253,248,0.2)]"
                 style={{ backgroundColor: vendor.color }}
               >
                 {vendor.letter}
               </div>
               <div>
-                <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight font-display">
+                <h1 className="text-3xl sm:text-5xl font-normal tracking-tight font-serif text-[#fffdf8]">
                   {vendor.name}
                 </h1>
-                <span className="text-xs sm:text-sm text-[#D1D5DB] font-mono">
+                <span className="text-xs sm:text-sm text-[#d6a34c] font-mono block mt-0.5">
                   Coordinates: {vendor.coordinates}
                 </span>
               </div>
             </div>
 
             {/* Tagline */}
-            <p className="text-base sm:text-lg text-[#F3F4F6] font-light leading-relaxed">
-              {vendor.tagline}
+            <p className="text-base sm:text-lg text-[rgba(255,253,248,0.88)] font-serif italic leading-relaxed">
+              &ldquo;{vendor.tagline}&rdquo;
             </p>
 
             {/* Contact & Share */}
@@ -146,11 +156,11 @@ export default function BrandLandingPage({
               <button
                 onClick={() => {
                   const text = encodeURIComponent(
-                    `Hello ${vendor.name}, I am browsing your collection on Le Benkeleng: ${window.location.href}`,
+                    `Hello ${vendor.name}, I am browsing your collection on ROOTED: ${window.location.href}`,
                   )
                   window.open(`https://wa.me/?text=${text}`, "_blank")
                 }}
-                className="bg-[#25D366] text-black text-xs font-bold px-5 py-2.5 rounded-full hover:bg-[#20ba5a] transition-colors flex items-center gap-2"
+                className="bg-[#454e3d] hover:bg-[#5c6851] text-[#fffdf8] text-xs font-mono font-bold px-5 py-2.5 rounded-full border border-[rgba(255,253,248,0.2)] transition-all flex items-center gap-2 cursor-pointer shadow-sm"
               >
                 <span>💬</span> Message Atelier on WhatsApp
               </button>
@@ -159,7 +169,7 @@ export default function BrandLandingPage({
                   navigator.clipboard.writeText(window.location.href)
                   alert(`Copied link to ${vendor.name} store!`)
                 }}
-                className="bg-white/10 hover:bg-white/15 text-white text-xs font-bold px-5 py-2.5 rounded-full backdrop-blur-xs transition-all"
+                className="bg-[rgba(255,253,248,0.1)] hover:bg-[rgba(255,253,248,0.18)] text-[#fffdf8] text-xs font-mono font-medium px-5 py-2.5 rounded-full backdrop-blur-xs border border-[rgba(255,253,248,0.18)] transition-all cursor-pointer"
               >
                 Share Brand Store
               </button>
@@ -169,50 +179,50 @@ export default function BrandLandingPage({
       </section>
 
       {/* 3. BRAND TRUST STATS STRIP */}
-      <section className="bg-white border-b border-[#E5E7EB] py-4 px-4 sm:px-8">
+      <section className="bg-[#fffdf8] border-b border-[rgba(21,20,15,0.12)] py-4 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono">
-          <div className="p-3 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB]">
-            <span className="text-[#6B7280] text-[10px] uppercase block">
+          <div className="p-3.5 bg-[#e6e3d3]/30 rounded-xl border border-[rgba(21,20,15,0.08)] hover:border-[#d6a34c]/40 transition-colors">
+            <span className="text-[rgba(21,20,15,0.6)] text-[10px] uppercase tracking-wider block">
               Dispatch SLA:
             </span>
-            <span className="font-bold text-[#111827] text-sm">48 Hours</span>
-            <span className="text-[10px] text-[#059669] block">
+            <span className="font-bold text-[#15140f] text-sm">48 Hours</span>
+            <span className="text-[10px] text-[#454e3d] font-semibold block">
               ✓ Handed over to Bob Go
             </span>
           </div>
 
-          <div className="p-3 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB]">
-            <span className="text-[#6B7280] text-[10px] uppercase block">
+          <div className="p-3.5 bg-[#e6e3d3]/30 rounded-xl border border-[rgba(21,20,15,0.08)] hover:border-[#d6a34c]/40 transition-colors">
+            <span className="text-[rgba(21,20,15,0.6)] text-[10px] uppercase tracking-wider block">
               Fulfillment Hub:
             </span>
-            <span className="font-bold text-[#111827] text-xs truncate block">
+            <span className="font-bold text-[#15140f] text-xs truncate block">
               {vendor.dispatchHub}
             </span>
-            <span className="text-[10px] text-[#6B7280] block">
+            <span className="text-[10px] text-[rgba(21,20,15,0.6)] block">
               Smart Locker Dispatched
             </span>
           </div>
 
-          <div className="p-3 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB]">
-            <span className="text-[#6B7280] text-[10px] uppercase block">
+          <div className="p-3.5 bg-[#e6e3d3]/30 rounded-xl border border-[rgba(21,20,15,0.08)] hover:border-[#d6a34c]/40 transition-colors">
+            <span className="text-[rgba(21,20,15,0.6)] text-[10px] uppercase tracking-wider block">
               Price Range:
             </span>
-            <span className="font-bold text-[#111827] text-sm">
+            <span className="font-bold text-[#15140f] text-sm">
               {vendor.priceRange}
             </span>
-            <span className="text-[10px] text-[#6B7280] block">
+            <span className="text-[10px] text-[rgba(21,20,15,0.6)] block">
               Payflex 4x Available
             </span>
           </div>
 
-          <div className="p-3 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB]">
-            <span className="text-[#6B7280] text-[10px] uppercase block">
+          <div className="p-3.5 bg-[#e6e3d3]/30 rounded-xl border border-[rgba(21,20,15,0.08)] hover:border-[#d6a34c]/40 transition-colors">
+            <span className="text-[rgba(21,20,15,0.6)] text-[10px] uppercase tracking-wider block">
               Curation Quality:
             </span>
-            <span className="font-bold text-gray-900 text-sm">
+            <span className="font-bold text-[#15140f] text-sm">
               4.9 / 5.0 ★
             </span>
-            <span className="text-[10px] text-[#059669] block">
+            <span className="text-[10px] text-[#454e3d] font-semibold block">
               100% Verified Craft
             </span>
           </div>
@@ -221,19 +231,18 @@ export default function BrandLandingPage({
 
       {/* 4. ATELIER STORY & PHILOSOPHY */}
       <section className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 sm:p-8 space-y-3">
-          <span className="inline-flex items-center gap-1.5 bg-neutral-100 text-neutral-700 px-3 py-1 rounded-full text-xs font-semibold mb-1">
-            <span>✦</span> About the Atelier
-          </span>
-          <h2 className="text-xl font-bold text-[#111827]">
+        <div className="bg-[#fffdf8] border border-[rgba(21,20,15,0.12)] rounded-2xl p-6 sm:p-8 space-y-3 shadow-xs">
+          <div className="eyebrow">ABOUT THE ATELIER</div>
+          <h2 className="text-2xl sm:text-3xl font-normal font-serif text-[#15140f] tracking-tight">
             Craftsmanship, Silhouette & South African Heritage
           </h2>
-          <p className="text-xs sm:text-sm text-[#4B5563] leading-relaxed max-w-4xl font-light">
+          <p className="text-sm sm:text-base text-[rgba(21,20,15,0.75)] leading-relaxed max-w-4xl font-light">
             {vendor.aboutStory}
           </p>
           {vendor.specialty && (
-            <div className="mt-3 inline-block bg-[#F3F4F6] text-[#111827] px-3.5 py-1.5 rounded-md text-xs font-mono font-semibold">
-              Signature Specialty: {vendor.specialty}
+            <div className="mt-3 inline-flex items-center gap-2 bg-[#e6e3d3] text-[#15140f] border border-[rgba(21,20,15,0.12)] px-3.5 py-1.5 rounded-full text-xs font-mono font-medium">
+              <span className="text-[#a64b34]">✦</span>
+              <span>Signature Specialty: {vendor.specialty}</span>
             </div>
           )}
         </div>
@@ -242,22 +251,22 @@ export default function BrandLandingPage({
       {/* 5. BRAND CATALOG SECTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-6">
         {/* Subcategory & Sort Bar */}
-        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-[#fffdf8] border border-[rgba(21,20,15,0.12)] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
           <div>
-            <h3 className="text-lg font-bold text-[#111827]">
-              {vendor.name} Collection ({brandProducts.length} Items)
+            <h3 className="text-xl font-normal font-serif text-[#15140f]">
+              {vendor.name} Collection ({brandProducts.length} Pieces)
             </h3>
-            <span className="text-xs text-[#6B7280]">
-              Exclusive drops and official catalogue pieces
+            <span className="text-xs font-mono text-[rgba(21,20,15,0.6)]">
+              Official catalogue pieces & limited atelier drops
             </span>
           </div>
 
           <div className="flex items-center gap-3 text-xs">
-            <span className="text-[#6B7280]">Sort:</span>
+            <span className="text-[rgba(21,20,15,0.6)] font-mono">Sort:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-[#F3F4F6] border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 font-medium text-[#111827] focus:outline-none"
+              className="bg-[#efeee3] border border-[rgba(21,20,15,0.12)] rounded-full px-3 py-1.5 font-mono font-medium text-[#15140f] focus:outline-none focus:border-[#a64b34]"
             >
               <option value="featured">Featured</option>
               <option value="price-low">Price: Low to High</option>
@@ -268,14 +277,14 @@ export default function BrandLandingPage({
 
         {/* Brand Products Grid */}
         {brandProducts.length === 0 ? (
-          <div className="bg-white border border-[#E5E7EB] rounded-xl py-16 text-center space-y-3">
+          <div className="bg-[#fffdf8] border border-[rgba(21,20,15,0.12)] rounded-2xl py-16 text-center space-y-3">
             <span className="text-3xl">📦</span>
-            <h4 className="font-bold text-[#111827]">
+            <h4 className="font-serif text-lg font-normal text-[#15140f]">
               No active pieces found in this category
             </h4>
             <button
               onClick={() => setSelectedSubCategory("all")}
-              className="bg-[#111827] text-white px-4 py-2 rounded-full text-xs font-bold"
+              className="bg-[#15140f] hover:bg-[#1e1c15] text-[#fffdf8] px-5 py-2 rounded-full text-xs font-mono font-bold transition-colors cursor-pointer"
             >
               View All {vendor.name} Pieces
             </button>
@@ -295,11 +304,11 @@ export default function BrandLandingPage({
               return (
                 <div
                   key={product.id}
-                  className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all"
+                  className="bg-[#fffdf8] border border-[rgba(21,20,15,0.12)] rounded-2xl overflow-hidden flex flex-col justify-between group hover:border-[#a64b34] hover:shadow-lg transition-all duration-300"
                 >
                   {/* Image Container */}
                   <div
-                    className="relative aspect-3/4 bg-[#F3F4F6] overflow-hidden cursor-pointer"
+                    className="relative aspect-3/4 bg-[#e6e3d3]/40 overflow-hidden cursor-pointer"
                     onClick={() => onSelectProduct(product)}
                   >
                     <img
@@ -314,12 +323,12 @@ export default function BrandLandingPage({
                     />
 
                     {/* Top Badges */}
-                    <div className="absolute top-2.5 left-2.5 flex flex-col gap-1">
-                      <span className="bg-[#111827] text-white text-[9px] font-bold px-2 py-0.5 rounded font-mono">
+                    <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
+                      <span className="bg-[#15140f] text-[#fffdf8] text-[9px] font-bold px-2 py-0.5 rounded-full font-mono">
                         {product.badge}
                       </span>
                       {discountPercent && (
-                        <span className="bg-[#DC2626] text-white text-[9px] font-bold px-2 py-0.5 rounded font-mono">
+                        <span className="bg-[#a64b34] text-white text-[9px] font-bold px-2 py-0.5 rounded-full font-mono">
                           -{discountPercent}%
                         </span>
                       )}
@@ -334,14 +343,14 @@ export default function BrandLandingPage({
                             : 0)
                         if (totalStock === 0 || product.status === "sold_out") {
                           return (
-                            <span className="bg-red-600 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">
+                            <span className="bg-[#a64b34] text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded-full">
                               SOLD OUT
                             </span>
                           )
                         }
                         if (totalStock <= 4) {
                           return (
-                            <span className="bg-amber-500 text-black text-[9px] font-mono font-bold px-2 py-0.5 rounded">
+                            <span className="bg-[#d6a34c] text-[#15140f] text-[9px] font-mono font-bold px-2 py-0.5 rounded-full">
                               LOW STOCK ({totalStock})
                             </span>
                           )
@@ -356,13 +365,13 @@ export default function BrandLandingPage({
                         e.stopPropagation()
                         onToggleWishlist(product.id)
                       }}
-                      className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-[#111827] hover:bg-white shadow-xs transition-transform active:scale-90"
+                      className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-[#fffdf8]/90 backdrop-blur-xs flex items-center justify-center text-[#15140f] hover:bg-[#fffdf8] border border-[rgba(21,20,15,0.12)] shadow-xs transition-transform active:scale-90 z-10"
                       aria-label="Save to Wishlist"
                     >
                       <svg
                         className="w-4 h-4"
-                        fill={isSaved ? "#EF4444" : "none"}
-                        stroke={isSaved ? "#EF4444" : "currentColor"}
+                        fill={isSaved ? "#a64b34" : "none"}
+                        stroke={isSaved ? "#a64b34" : "currentColor"}
                         viewBox="0 0 24 24"
                       >
                         <path
@@ -375,7 +384,7 @@ export default function BrandLandingPage({
                     </button>
 
                     {/* Size Selector on Hover */}
-                    <div className="absolute inset-x-0 bottom-0 bg-white/95 backdrop-blur-xs p-2.5 translate-y-full group-hover:translate-y-0 transition-transform duration-200 border-t border-[#E5E7EB]">
+                    <div className="absolute inset-x-0 bottom-0 bg-[#fffdf8]/95 backdrop-blur-xs p-2.5 translate-y-full group-hover:translate-y-0 transition-transform duration-200 border-t border-[rgba(21,20,15,0.12)] z-10">
                       {(() => {
                         const totalStock =
                           product.stock ??
@@ -387,14 +396,14 @@ export default function BrandLandingPage({
                             : 0)
                         if (totalStock === 0 || product.status === "sold_out") {
                           return (
-                            <div className="text-center text-[10px] font-mono font-bold text-red-600 py-1">
+                            <div className="text-center text-[10px] font-mono font-bold text-[#a64b34] py-1">
                               OUT OF STOCK
                             </div>
                           )
                         }
                         return (
                           <>
-                            <span className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider block text-center mb-1">
+                            <span className="text-[9px] font-mono font-bold text-[rgba(21,20,15,0.6)] uppercase tracking-wider block text-center mb-1">
                               Select Size to Bag:
                             </span>
                             <div className="flex items-center justify-center gap-1 flex-wrap">
@@ -411,10 +420,10 @@ export default function BrandLandingPage({
                                       e.stopPropagation()
                                       if (!isSizeOut) onAddToCart(product, sz)
                                     }}
-                                    className={`px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition-all ${
+                                    className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold transition-all ${
                                       isSizeOut
-                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed line-through"
-                                        : "bg-gray-100 text-gray-800 hover:bg-black hover:text-white"
+                                        ? "bg-[#efeee3] text-[rgba(21,20,15,0.3)] cursor-not-allowed line-through"
+                                        : "bg-[#efeee3] text-[#15140f] hover:bg-[#15140f] hover:text-[#fffdf8]"
                                     }`}
                                   >
                                     {sz}
@@ -431,32 +440,32 @@ export default function BrandLandingPage({
                   {/* Details */}
                   <div className="p-3.5 space-y-1.5 flex-1 flex flex-col justify-between">
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#C88A35] block truncate">
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#a64b34] block truncate">
                         {product.origin}
                       </span>
                       <h3
-                        className="text-xs font-semibold text-[#111827] hover:underline cursor-pointer line-clamp-2 leading-snug mt-0.5"
+                        className="text-xs font-serif font-semibold text-[#15140f] group-hover:text-[#a64b34] cursor-pointer line-clamp-2 leading-snug mt-0.5 transition-colors"
                         onClick={() => onSelectProduct(product)}
                       >
                         {product.title}
                       </h3>
-                      <p className="text-[11px] text-[#6B6964] line-clamp-1 mt-0.5 font-light">
+                      <p className="text-[11px] text-[rgba(21,20,15,0.6)] line-clamp-1 mt-0.5 font-light">
                         {product.fabric}
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-[#F3F4F6] space-y-1">
+                    <div className="pt-2 border-t border-[rgba(21,20,15,0.08)] space-y-1">
                       <div className="flex items-baseline gap-2">
-                        <span className="text-sm font-bold text-[#111827]">
+                        <span className="text-sm font-serif font-bold text-[#15140f]">
                           {formatPrice(product.price)}
                         </span>
                         {product.originalPrice && (
-                          <span className="text-xs text-[#9CA3AF] line-through">
+                          <span className="text-xs text-[rgba(21,20,15,0.4)] line-through font-mono">
                             {formatPrice(product.originalPrice)}
                           </span>
                         )}
                       </div>
-                      <div className="text-[10px] text-[#6B6964] font-mono">
+                      <div className="text-[10px] text-[rgba(21,20,15,0.6)] font-mono">
                         Pay 4x {formatPrice(Math.round(product.price / 4))} with
                         Payflex
                       </div>
@@ -470,20 +479,18 @@ export default function BrandLandingPage({
       </section>
 
       {/* 6. MORE INDEPENDENT LABELS CROSS-NAVIGATION */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-8 py-12 border-t border-[#E5E7EB]">
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 py-12 border-t border-[rgba(21,20,15,0.12)]">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <span className="inline-flex items-center gap-1.5 bg-neutral-100 text-neutral-700 px-3 py-1 rounded-full text-xs font-semibold mb-2">
-                <span>✦</span> Discover More
-              </span>
-              <h3 className="text-lg font-bold text-[#111827]">
+              <div className="eyebrow">DISCOVER MORE</div>
+              <h3 className="text-xl sm:text-2xl font-normal font-serif text-[#15140f]">
                 Other Independent Streetwear Labels
               </h3>
             </div>
             <a
               href="#/brands"
-              className="text-xs font-bold text-[#111827] hover:underline"
+              className="text-xs font-mono font-bold text-[#15140f] hover:text-[#a64b34] transition-colors"
             >
               View All Brands A–Z →
             </a>
@@ -497,22 +504,22 @@ export default function BrandLandingPage({
                   onNavigateBrand(rel.slug)
                   window.scrollTo({ top: 0, behavior: "smooth" })
                 }}
-                className="bg-white border border-[#E5E7EB] rounded-2xl p-4 cursor-pointer hover:border-[#111827] transition-all flex items-center gap-3.5 shadow-xs"
+                className="bg-[#fffdf8] border border-[rgba(21,20,15,0.12)] rounded-2xl p-4 cursor-pointer hover:border-[#a64b34] hover:shadow-md transition-all flex items-center gap-3.5 shadow-xs group"
               >
                 <div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold font-display text-base shrink-0"
+                  className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-serif font-bold text-base shrink-0 shadow-xs"
                   style={{ backgroundColor: rel.color }}
                 >
                   {rel.letter}
                 </div>
                 <div className="overflow-hidden">
-                  <h4 className="text-xs font-bold text-[#111827] truncate">
+                  <h4 className="text-xs font-serif font-bold text-[#15140f] group-hover:text-[#a64b34] truncate transition-colors">
                     {rel.name}
                   </h4>
-                  <span className="text-xs text-gray-500 font-medium block">
+                  <span className="text-xs text-[rgba(21,20,15,0.6)] font-mono block">
                     {rel.origin}
                   </span>
-                  <span className="text-[10px] text-[#6B6964] block">
+                  <span className="text-[10px] text-[#d6a34c] font-mono block">
                     {rel.productCount} active styles
                   </span>
                 </div>

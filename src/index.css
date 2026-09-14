@@ -1,31 +1,167 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&family=Syne:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400..600&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 @import 'tailwindcss';
 
+:root {
+  --ink: #15140f;
+  --ink-2: #1e1c15;
+  --paper: #efeee3;
+  --paper-2: #e6e3d3;
+  --white: #fffdf8;
+  --gold: #d6a34c;
+  --gold-2: #e9c079;
+  --clay: #a64b34;
+  --moss: #454e3d;
+  --moss-2: #5c6851;
+  --line: rgba(21, 20, 15, 0.12);
+  --line-light: rgba(255, 253, 248, 0.16);
+  --ink-soft: rgba(21, 20, 15, 0.62);
+  --white-soft: rgba(255, 253, 248, 0.66);
+  --serif: 'Fraunces', serif;
+  --sans: 'Space Grotesk', sans-serif;
+  --radius: 4px;
+}
+
 @theme {
-  --font-display: 'Syne', sans-serif;
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Fraunces', serif;
+  --font-serif: 'Fraunces', serif;
+  --font-sans: 'Space Grotesk', sans-serif;
   --font-mono: 'Space Mono', monospace;
 
-  --color-bash-black: #111827;
-  --color-bash-dark: #1F2937;
-  --color-bash-gray: #F3F4F6;
-  --color-bash-light: #F9FAFB;
-  --color-bash-border: #E5E7EB;
-  --color-bash-gold: #C88A35;
-  --color-bash-amber: #D97706;
-  --color-bash-green: #059669;
+  --color-ink: #15140f;
+  --color-ink-2: #1e1c15;
+  --color-ink-soft: rgba(21, 20, 15, 0.62);
+  --color-paper: #efeee3;
+  --color-paper-2: #e6e3d3;
+  --color-ivory: #fffdf8;
+  --color-white: #fffdf8;
+  --color-gold: #d6a34c;
+  --color-gold-2: #e9c079;
+  --color-clay: #a64b34;
+  --color-moss: #454e3d;
+  --color-moss-2: #5c6851;
+  --color-line: rgba(21, 20, 15, 0.12);
+  --color-line-light: rgba(255, 253, 248, 0.16);
 
-  --color-background: #F9FAFB;
-  --color-foreground: #111827;
-  --color-card: #FFFFFF;
-  --color-card-foreground: #111827;
-  --color-border: #E5E7EB;
+  /* backwards compatibility tokens */
+  --color-bash-black: #15140f;
+  --color-bash-dark: #1e1c15;
+  --color-bash-gray: #e6e3d3;
+  --color-bash-light: #efeee3;
+  --color-bash-border: rgba(21, 20, 15, 0.12);
+  --color-bash-gold: #d6a34c;
+  --color-bash-amber: #e9c079;
+  --color-bash-green: #454e3d;
+
+  --color-background: #efeee3;
+  --color-foreground: #15140f;
+  --color-card: #fffdf8;
+  --color-card-foreground: #15140f;
+  --color-border: rgba(21, 20, 15, 0.12);
 }
 
 ::selection {
-  background-color: #111827;
-  color: #FFFFFF;
+  background-color: var(--gold);
+  color: var(--ink);
 }
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Eyebrow rule */
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--clay);
+  font-weight: 600;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: currentColor;
+  display: inline-block;
+}
+
+/* Subtle Hero / Section Grid Overlay */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 253, 248, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 253, 248, 0.06) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at 70% 30%, black 0%, transparent 75%);
+  pointer-events: none;
+}
+
+/* Top Progress Fill */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--line);
+  z-index: 50;
+}
+.topbar-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--clay);
+  transition: width 0.1s linear;
+}
+
+/* Fabric Swatches */
+.swatch {
+  min-width: 160px;
+  height: 210px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 14px;
+  border: 1px solid rgba(255, 253, 248, 0.14);
+}
+.sw1{background:repeating-linear-gradient(115deg,#a64b34,#a64b34 10px,#8f3e2b 10px,#8f3e2b 20px);}
+.sw2{background:repeating-linear-gradient(20deg,#454e3d,#454e3d 14px,#38402f 14px,#38402f 28px);}
+.sw3{background:radial-gradient(circle at 30% 30%, #e9c079, #d6a34c 70%);}
+.sw4{background:repeating-linear-gradient(0deg,#efeee3,#efeee3 6px,#d8d5c4 6px,#d8d5c4 12px);}
+.sw5{background:linear-gradient(160deg,#1e1c15,#454e3d);}
+.sw6{background:repeating-linear-gradient(70deg,#5c6851,#5c6851 8px,#454e3d 8px,#454e3d 16px);}
+.sw7{background:linear-gradient(200deg,#a64b34,#e9c079);}
+.sw8{background:repeating-linear-gradient(135deg,#efeee3,#efeee3 3px,#c7c3ac 3px,#c7c3ac 6px);}
+
+/* Photo placeholders with subtle gradient & caption */
+.ph {
+  position: relative;
+  overflow: hidden;
+  background: var(--moss);
+  display: flex;
+  align-items: flex-end;
+}
+.ph-1{background:repeating-linear-gradient(125deg,#454e3d,#454e3d 9px,#3a4232 9px,#3a4232 18px);}
+.ph-2{background:repeating-linear-gradient(35deg,#a64b34,#a64b34 9px,#8f3e2b 9px,#8f3e2b 18px);}
+.ph-3{background:radial-gradient(circle at 65% 25%,#e9c079,#d6a34c 65%);}
+.ph-4{background:linear-gradient(155deg,#1e1c15,#5c6851);}
+.ph-5{background:repeating-linear-gradient(90deg,#d6a34c,#d6a34c 7px,#c79038 7px,#c79038 14px);}
+.ph-6{background:repeating-linear-gradient(60deg,#efeee3,#efeee3 4px,#cfccb9 4px,#cfccb9 8px);}
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -36,7 +172,7 @@
 }
 
 .product-image-container {
-  background-color: #F3F4F6;
+  background-color: var(--paper-2);
   position: relative;
   overflow: hidden;
 }
@@ -50,27 +186,18 @@
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F3F4F6;
+  background: var(--paper-2);
 }
 ::-webkit-scrollbar-thumb {
-  background: #9CA3AF;
+  background: rgba(21, 20, 15, 0.25);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #6B7280;
-}
-
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-.marquee-track {
-  animation: marquee 26s linear infinite;
+  background: var(--clay);
 }
 
 @keyframes drop-pulse {

@@ -1731,6 +1731,14 @@ export default function CustomerApp() {
                     Careers & Designer Submissions
                   </button>
                 </li>
+                <li>
+                  <a
+                    href="#/vendor"
+                    className="hover:text-[#a64b34] hover:underline text-left cursor-pointer flex items-center gap-1.5 font-bold text-[#15140f] pt-1"
+                  >
+                    <span>🏛️</span> Vendor Atelier Studio
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -2111,7 +2119,20 @@ export default function CustomerApp() {
                     <span>⚡</span> Lockers
                   </button>
                 </div>
-                <div className="text-[10px] text-gray-400 pt-2 border-t border-gray-200">
+                <div className="pt-2 border-t border-gray-200">
+                  <a
+                    href="#/vendor"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-between px-3 py-2 rounded-lg bg-[#15140f] text-[#fffdf8] font-mono text-xs font-bold hover:bg-[#26231a] transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>🏛️</span>
+                      <span>Vendor Atelier Studio</span>
+                    </span>
+                    <span className="text-[#e9c079]">Portal →</span>
+                  </a>
+                </div>
+                <div className="text-[10px] text-gray-400 pt-1">
                   "ROOTED™ · FICA & POPIA Compliant"
                 </div>
               </div>

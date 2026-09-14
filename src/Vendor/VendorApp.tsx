@@ -245,20 +245,52 @@ export default function VendorApp() {
 
   // Active brand strictly tied to authenticated tenant (Strict Tenant Isolation)
   // ============ DUMMY ACCOUNT & SANDBOX STATE ============
+  // Initial state is null by default so the Atelier Landing Page is GUARANTEED to be the FIRST page seen
   const [currentUser, setCurrentUser] = useState<DummyAccount | null>(() => {
-    if (typeof window === "undefined") return DEFAULT_DUMMY_ACCOUNT
-    const saved =
-      sessionStorage.getItem("rooted_vendor_dummy_account") ||
-      sessionStorage.getItem("lebenkeleng_vendor_dummy_account")
-    if (saved) {
-      try {
-        return JSON.parse(saved)
-      } catch (e) {
-        return DEFAULT_DUMMY_ACCOUNT
+    if (typeof window === "undefined") return null
+    const hash = window.location.hash.toLowerCase()
+    // Only restore session if user explicitly navigated to a dashboard subroute
+    if (hash.includes("dashboard")) {
+      const saved =
+        sessionStorage.getItem("rooted_vendor_dummy_account") ||
+        sessionStorage.getItem("lebenkeleng_vendor_dummy_account")
+      if (saved) {
+        try {
+          return JSON.parse(saved)
+        } catch (e) {}
       }
     }
-    return DEFAULT_DUMMY_ACCOUNT
+    return null
   })
+
+  // Synchronize hash routing with landing page / dashboard view
+  useEffect(() => {
+    const handleHashSync = () => {
+      const hash = window.location.hash.toLowerCase()
+      if (
+        hash === "#/vendor" ||
+        hash === "#/vendor/" ||
+        hash === "#vendor" ||
+        hash === "#/vendor-portal" ||
+        !hash.includes("dashboard")
+      ) {
+        // Navigating to vendor entry point -> show landing page
+        setCurrentUser(null)
+      } else if (hash.includes("dashboard")) {
+        const saved =
+          sessionStorage.getItem("rooted_vendor_dummy_account") ||
+          sessionStorage.getItem("lebenkeleng_vendor_dummy_account")
+        if (saved) {
+          try {
+            setCurrentUser(JSON.parse(saved))
+          } catch (e) {}
+        }
+      }
+    }
+
+    window.addEventListener("hashchange", handleHashSync)
+    return () => window.removeEventListener("hashchange", handleHashSync)
+  }, [])
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState<string>("tester@urbansoul.co.za")
@@ -282,6 +314,7 @@ export default function VendorApp() {
     const acc = { ...DEFAULT_DUMMY_ACCOUNT, ...customAccount }
     setCurrentUser(acc)
     sessionStorage.setItem("rooted_vendor_dummy_account", JSON.stringify(acc))
+    window.location.hash = "#/vendor/dashboard"
     setLoginError(null)
     showToast(`Signed in as ${acc.founderName} (${acc.brandName} Test Account)`)
   }
@@ -317,6 +350,7 @@ export default function VendorApp() {
     sessionStorage.removeItem("rooted_vendor_dummy_account")
     sessionStorage.removeItem("lebenkeleng_vendor_dummy_account")
     setCurrentUser(null)
+    window.location.hash = "#/vendor"
     showToast("Signed out of Atelier Studio.")
   }
 
@@ -861,6 +895,21 @@ export default function VendorApp() {
           </button>
         </nav>
 
+        {/* Quick Link back to Atelier Landing Page */}
+        <div className="pt-3">
+          <button
+            onClick={() => {
+              setCurrentUser(null)
+              window.location.hash = "#/vendor"
+            }}
+            className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-mono text-[#e9c079] bg-[#211f18] hover:bg-[#2b291f] border border-[#d6a34c]/30 transition-colors cursor-pointer"
+            title="Return to Atelier Landing Page"
+          >
+            <span>←</span>
+            <span>Atelier Landing Page</span>
+          </button>
+        </div>
+
         {/* Sidebar Footer: Dummy Account Info & Quick Actions */}
         <div className="mt-auto border-t border-[#2b291f] pt-4 mt-6 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 overflow-hidden">
@@ -918,6 +967,17 @@ export default function VendorApp() {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                setCurrentUser(null)
+                window.location.hash = "#/vendor"
+              }}
+              className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 border border-[#e4e1d6] hover:border-[#15140f] hover:text-[#15140f] rounded-full text-xs font-mono text-[#6b6960] transition-colors cursor-pointer bg-white shadow-2xs"
+              title="Return to public Atelier landing page"
+            >
+              <span>← Landing Page</span>
+            </button>
+
             <button
               onClick={handleSignOut}
               className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 border border-[#e4e1d6] hover:border-[#a64b34] hover:text-[#a64b34] rounded-full text-xs font-mono text-[#6b6960] transition-colors cursor-pointer bg-white shadow-2xs"

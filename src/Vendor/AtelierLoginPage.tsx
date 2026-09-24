@@ -1,5 +1,6 @@
 import React from "react"
 import { vendors as defaultVendors } from "../data/marketplaceData"
+import BackendStatusBadge from "../components/BackendStatusBadge"
 
 interface AtelierLoginPageProps {
   onSignInWithDummy: (customAccount?: any) => void
@@ -21,13 +22,26 @@ export default function AtelierLoginPage({
   loginError,
 }: AtelierLoginPageProps) {
   return (
-    <div className="min-h-screen bg-[#f7f6f1] text-[#15140f] font-sans selection:bg-[#d6a34c]/25 flex flex-col">
+    <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)] font-sans selection:bg-[#d6a34c]/25 flex flex-col">
+      {/* ROOTED REVISED TOP PROGRESS BAR */}
+      <div className="top-progress">
+        <span style={{ width: "100%" }}></span>
+      </div>
+
       {/* ---------------- STICKY TOPBAR ---------------- */}
       <header className="sticky top-0 z-40 bg-[#fffdf8]/90 backdrop-blur-md border-b border-[#e4e1d6] px-6 sm:px-10 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#15140f] text-[#e9c079] flex items-center justify-center font-serif font-bold text-base shadow-sm">
-            RT
-          </div>
+          <span className="root-symbol">
+            <svg
+              viewBox="0 0 100 100"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="9"
+            >
+              <circle cx="50" cy="50" r="43" />
+              <path d="M50 8v84M50 50 25 75M50 65 32 83M50 50l25 25M50 65l18 18" />
+            </svg>
+          </span>
           <div>
             <span className="font-serif text-base sm:text-lg font-bold tracking-tight text-[#15140f] block leading-none">
               ROOTED <span className="text-[#d6a34c] font-normal">Atelier</span>
@@ -39,6 +53,7 @@ export default function AtelierLoginPage({
         </div>
 
         <div className="flex items-center gap-3 sm:gap-4">
+          <BackendStatusBadge />
           <a
             href="#/"
             className="px-4 py-2 rounded-full bg-[#15140f] hover:bg-[#26231a] text-[#fffdf8] text-xs font-mono font-medium transition-all shadow-xs flex items-center gap-2"

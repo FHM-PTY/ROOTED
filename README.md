@@ -65,6 +65,8 @@ A dedicated, decoupled multi-tenant merchant portal designed specifically for in
 ## 🛠️ Technology Stack
 
 - **Framework**: [React 19](https://react.dev/) + [TypeScript 5.7](https://www.typescriptlang.org/)
+- **Backend & Database**: [PostgreSQL 16](https://www.postgresql.org/) via [Supabase](https://supabase.com/) with Row-Level Security (RLS) & Atomic Mutex RPCs
+- **Client ORM/SDK**: `@supabase/supabase-js` v2 with resilient offline sandbox caching
 - **Build Tool**: [Vite 8](https://vitejs.dev/) with `@vitejs/plugin-react`
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) via `@tailwindcss/vite`
 - **Design Tokens**: Custom CSS variables for earth & ink palette (`--ink`, `--paper`, `--gold`, `--clay`, `--moss`)
@@ -80,32 +82,103 @@ A dedicated, decoupled multi-tenant merchant portal designed specifically for in
 ROOTED/
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml           # GitHub Pages multi-site deployment workflow
+│       └── deploy.yml              # GitHub Pages multi-site deployment workflow
 ├── public/
-│   └── favicon.svg              # SVG brand favicon
+│   └── favicon.svg                 # SVG brand favicon
+├── supabase/
+│   ├── migrations/
+│   │   └── 20260924_initial_schema.sql # PostgreSQL 16 schema, RLS policies & atomic mutex
+│   └── seed.sql                    # Full master dataset seed (lockers, labels, products, orders)
 ├── src/
 │   ├── Customer/
-│   │   ├── CustomerApp.tsx      # Customer storefront shell & shopping flows
-│   │   └── BrandLandingPage.tsx # Dedicated standalone brand storefront
+│   │   ├── CustomerApp.tsx         # Customer storefront shell & shopping flows
+│   │   └── BrandLandingPage.tsx    # Dedicated standalone brand storefront
 │   ├── Vendor/
-│   │   ├── VendorApp.tsx        # Decoupled Atelier Studio merchant portal
-│   │   └── AtelierLoginPage.tsx # High-fashion editorial vendor login gateway
+│   │   ├── VendorApp.tsx           # Decoupled Atelier Studio merchant portal
+│   │   └── AtelierLoginPage.tsx    # High-fashion editorial vendor login gateway
+│   ├── components/
+│   │   ├── BackendStatusBadge.tsx  # In-app connection status indicator
+│   │   └── BackendConnectionModal.tsx # Runtime Supabase config, ping & 1-click seeder
+│   ├── services/
+│   │   └── marketplaceService.ts   # Universal data provider (Supabase DB + offline sandbox)
+│   ├── lib/
+│   │   └── supabase.ts             # Supabase client, diagnostic ping & seeder engine
 │   ├── data/
-│   │   └── marketplaceData.ts   # Centralized brands, products, orders & lockers data
-│   ├── types.ts                 # TypeScript models (Vendor, Product, Locker, Order)
-│   ├── App.tsx                  # Root router & environment detector
-│   ├── index.css                # Global CSS & Tailwind CSS v4 design tokens
-│   └── main.tsx                 # React DOM entrypoint
-├── index.html                   # HTML shell with Google Fonts & SEO metadata
-├── vite.config.ts               # Vite configuration with dynamic repository base URL
-├── package.json                 # Project dependencies and npm scripts
-├── LICENSE                      # Strict proprietary license (Not Open Source)
-└── README.md                    # Comprehensive documentation
+│   │   └── marketplaceData.ts      # Master dataset models & static fallback
+│   ├── types.ts                    # TypeScript models (Vendor, Product, Locker, Order)
+│   ├── App.tsx                     # Root router & environment detector
+│   ├── index.css                   # Global CSS & Tailwind CSS v4 design tokens
+│   └── main.tsx                    # React DOM entrypoint
+├── scripts/
+│   ├── hub.cjs                     # Cross-platform Launch Automation Hub engine
+│   └── build_seed_sql.cjs          # Master seed SQL compiler
+├── hub / Hub                       # macOS & Linux terminal executable launcher
+├── hub.cmd / Hub.cmd               # Windows CMD & PowerShell executable launcher
+├── .env.example                    # Environment variable template
+├── index.html                      # HTML shell with Google Fonts & SEO metadata
+├── vite.config.ts                  # Vite configuration with dynamic repository base URL
+├── package.json                    # Project dependencies and npm scripts
+├── LICENSE                         # Strict proprietary license (Not Open Source)
+└── README.md                       # Comprehensive documentation
 ```
 
 ---
 
-## 🚀 Getting Started
+## ⚡ Launch Automation Hub (`Hub`)
+
+ROOTED features a unified, cross-platform Launch Hub automation script that runs whenever you or your team types `Hub` (or `hub`) in terminal or cmd.
+
+```text
+  ____   ____   ____ _______ ______ _____  
+ |  _ \ / __ \ / __ \__   __|  ____|  __ \ 
+ | |_) | |  | | |  | | | |  | |__  | |  | |
+ |  _ <| |  | | |  | | | |  |  __| | |  | |
+ | |_) | |__| | |__| | | |  | |____| |__| |
+ |____/ \____/ \____/  |_|  |______|_____/ 
+   ROOTED™ (Le Benkeleng) — Launch Automation Hub
+   Pretoria (012) & Gauteng Independent Streetwear Platform 🇿🇦
+```
+
+### 📋 1-Step Team Copy & Paste Setup
+
+Share this single line with your co-founders or engineering team to clone, install, and launch everything automatically:
+
+#### 🪟 Windows CMD / PowerShell / VS Code Terminal:
+```cmd
+git clone https://github.com/FHM-PTY/ROOTED.git && cd ROOTED && npm install && Hub
+```
+
+#### 🍎 macOS / 🐧 Linux / VS Code Bash Terminal:
+```bash
+git clone https://github.com/FHM-PTY/ROOTED.git && cd ROOTED && pnpm install && ./Hub
+```
+
+> [!TIP]
+> **Enable typing `Hub` directly on Mac/Linux:**
+> Run this once in your terminal:
+> ```bash
+> echo 'alias Hub="[ -f ./Hub ] && ./Hub || pnpm hub"' >> ~/.bashrc && source ~/.bashrc
+> ```
+> *(On macOS with zsh, replace `~/.bashrc` with `~/.zshrc`).*
+
+---
+
+### 🕹️ Daily Hub Commands
+
+Whenever you are working in the repository, simply type:
+
+| Command | Action |
+| :--- | :--- |
+| **`Hub`** | Launches interactive menu (Dev server, diagnostics, seeder, build) |
+| **`Hub dev`** | Directly starts the local dev server on port `5174` |
+| **`Hub check`** | Runs live PostgreSQL & Supabase connection, table, and RLS checks |
+| **`Hub seed`** | Verifies / seeds remote Supabase database with master catalog |
+| **`Hub build`** | Builds production-optimized static distribution bundle |
+| **`Hub studio`** | Directly displays Atelier Studio login & dev server links |
+
+---
+
+## 🚀 Manual Getting Started
 
 ### Prerequisites
 - Node.js 22+
@@ -147,6 +220,31 @@ ROOTED/
    # or
    npm run preview
    ```
+
+### PostgreSQL & Supabase Database Setup (Phase 1 Migration)
+
+The platform supports both live **PostgreSQL 16 on Supabase** and a zero-friction **Local Sandbox Engine (Offline Cache)**:
+
+1. **Configure Environment Variables:**
+   Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   Add your Supabase Project URL and Anon Public Key:
+   ```env
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   ```
+   *(Note: You can also configure credentials directly inside the app at runtime using the floating **Backend: Sandbox / PostgreSQL** badge).*
+
+2. **Execute Database Migration & RLS:**
+   Open your [Supabase Dashboard](https://supabase.com/dashboard) -> **SQL Editor**, and run:
+   - [`supabase/migrations/20260924_initial_schema.sql`](supabase/migrations/20260924_initial_schema.sql)
+   This creates all 5 tables (`locker_stations`, `vendors`, `products`, `orders`, `order_items`), sets up POPIA Row-Level Security policies, and deploys the `create_order_atomic` stored procedure with 1-of-1 Thrift Vault mutex locking.
+
+3. **Seed Database with Master Catalog:**
+   - **Option A (In-App)**: Open the **Backend Status Modal** inside the browser and click **⚡ 1-Click Seed Remote Database**.
+   - **Option B (SQL Editor / CLI)**: Run [`supabase/seed.sql`](supabase/seed.sql) in your Supabase SQL editor or via psql.
 
 ---
 

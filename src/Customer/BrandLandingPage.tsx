@@ -63,7 +63,7 @@ export default function BrandLandingPage({
   }, [allVendors, vendor])
 
   return (
-    <div className="min-h-screen bg-[#efeee3] text-[#15140f] font-sans selection:bg-[#d6a34c]/20">
+    <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)] font-sans selection:bg-[var(--gold)]/20 pt-24 sm:pt-28">
       {/* 1. BREADCRUMBS & TOP BAR */}
       <div className="bg-[#fffdf8] border-b border-[rgba(21,20,15,0.12)] px-4 sm:px-8 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs">

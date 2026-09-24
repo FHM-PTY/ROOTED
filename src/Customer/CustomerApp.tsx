@@ -7,6 +7,7 @@ import {
   LockerStation,
   CartItem,
   VendorOrder,
+  OrderItem,
 } from "../types"
 import {
   vendors as defaultVendors,
@@ -15,6 +16,8 @@ import {
   initialVendorOrders,
 } from "../data/marketplaceData"
 import BrandLandingPage from "./BrandLandingPage"
+import { marketplaceService } from "../services/marketplaceService"
+import BackendStatusBadge from "../components/BackendStatusBadge"
 
 export type RouteState = { type: "home" } | { type: "brand" slug: string } | {
   type: "brands"
@@ -51,57 +54,43 @@ export default function CustomerApp() {
     window.location.hash = path
   }
 
-  // Persistent Products, Vendors & Orders state
-  const [products, setProducts] = useState<Product[]>(() => {
-    const saved =
-      localStorage.getItem("rooted_products") ||
-      localStorage.getItem("le_benkeleng_products")
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed
-      } catch (e) {}
-    }
-    return defaultProducts
-  })
-
-  const [vendors, setVendors] = useState<Vendor[]>(() => {
-    const saved =
-      localStorage.getItem("rooted_vendors") ||
-      localStorage.getItem("le_benkeleng_vendors")
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed
-      } catch (e) {}
-    }
-    return defaultVendors
-  })
-
-  const [orders, setOrders] = useState<VendorOrder[]>(() => {
-    const saved =
-      localStorage.getItem("rooted_orders") ||
-      localStorage.getItem("le_benkeleng_orders")
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed
-      } catch (e) {}
-    }
-    return initialVendorOrders
-  })
+  // Reactive Products, Vendors & Orders state (PostgreSQL / Supabase + Offline Fallback)
+  const [products, setProducts] = useState<Product[]>(defaultProducts)
+  const [vendors, setVendors] = useState<Vendor[]>(defaultVendors)
+  const [orders, setOrders] = useState<VendorOrder[]>(initialVendorOrders)
 
   useEffect(() => {
-    localStorage.setItem("rooted_products", JSON.stringify(products))
-  }, [products])
+    let isMounted = true
 
-  useEffect(() => {
-    localStorage.setItem("rooted_vendors", JSON.stringify(vendors))
-  }, [vendors])
+    const loadMarketplaceData = async () => {
+      try {
+        const [fetchedProds, fetchedVendors, fetchedOrders] = await Promise.all([
+          marketplaceService.getProducts(),
+          marketplaceService.getVendors(),
+          marketplaceService.getOrders(),
+        ])
+        if (isMounted) {
+          setProducts(fetchedProds)
+          setVendors(fetchedVendors)
+          setOrders(fetchedOrders)
+        }
+      } catch (err) {
+        console.warn("Marketplace data load fallback:", err)
+      }
+    }
 
-  useEffect(() => {
-    localStorage.setItem("rooted_orders", JSON.stringify(orders))
-  }, [orders])
+    loadMarketplaceData()
+
+    // Subscribe to live database updates and cross-tab changes
+    const unsubscribe = marketplaceService.subscribe(() => {
+      loadMarketplaceData()
+    })
+
+    return () => {
+      isMounted = false
+      unsubscribe()
+    }
+  }, [])
 
   // Filtering & Commerce state
   const [selectedDepartment, setSelectedDepartment] =
@@ -136,8 +125,9 @@ export default function CustomerApp() {
   const [voucherMessage, setVoucherMessage] = useState<string>("")
   const [trackingInput, setTrackingInput] = useState("")
   const [trackingResult, setTrackingResult] = useState<any | null>(null)
-  const [whatsappUpdates, setWhatsappUpdates] = useState(true)
-  const [buyerPhone, setBuyerPhone] = useState("+27 ")
+  const [buyerPhone, setBuyerPhone] = useState("+27 82 555 4321")
+  const [buyerName, setBuyerName] = useState("Lerato Khumalo")
+  const [isCheckingOut, setIsCheckingOut] = useState(false)
 
   // Brand directory jump filter
   const [brandLetterFilter, setBrandLetterFilter] = useState<string>("ALL")
@@ -194,12 +184,27 @@ export default function CustomerApp() {
     return `${currencySymbols[currency]}${converted.toFixed(0)}`
   }
 
+  // Rooted Revised Toast Notification State
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const showToast = (msg: string) => {
+    setToastMessage(msg)
+    if ((window as any).__toastTimer) clearTimeout((window as any).__toastTimer)
+    ;(window as any).__toastTimer = setTimeout(() => {
+      setToastMessage(null)
+    }, 2400)
+  }
+
   const toggleWishlist = (productId: number) => {
-    setWishlist((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId],
-    )
+    setWishlist((prev) => {
+      const isAlready = prev.includes(productId)
+      if (isAlready) {
+        showToast("Removed from saved collection.")
+        return prev.filter((id) => id !== productId)
+      } else {
+        showToast("Saved to your ROOTED collection.")
+        return [...prev, productId]
+      }
+    })
   }
 
   // Filtered products logic
@@ -284,9 +289,7 @@ export default function CustomerApp() {
       )
       if (existing) {
         if (product.isThrift) {
-          alert(
-            "Notice: This is a 1-of-1 vintage piece. Only one unit is available in South Africa.",
-          )
+          showToast("Notice: 1-of-1 vintage piece. Only one unit is available.")
           return prev
         }
         return prev.map((item) =>
@@ -297,6 +300,7 @@ export default function CustomerApp() {
       }
       return [...prev, { product, size, quantity: 1 }]
     })
+    showToast(`${product.title} added to your ROOTED bag.`)
     setIsCartOpen(true)
   }
 
@@ -357,13 +361,52 @@ export default function CustomerApp() {
 
   const handleTrackOrder = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!trackingInput.trim()) return
+    const query = trackingInput.trim()
+    if (!query) return
+
+    const matchedOrder = orders.find(
+      (o) =>
+        o.orderNumber.toLowerCase() === query.toLowerCase() ||
+        o.waybillNumber.toLowerCase() === query.toLowerCase() ||
+        o.id === query
+    )
+
+    if (matchedOrder) {
+      let step = 1
+      let statusText = "Order Received & Packing at Atelier"
+      if (matchedOrder.status === "dispatched_to_locker") {
+        step = 2
+        statusText = "Dispatched with Bob Go Courier Guy"
+      } else if (matchedOrder.status === "in_transit") {
+        step = 3
+        statusText = "In Transit to Pickup Locker"
+      } else if (matchedOrder.status === "ready_for_pickup") {
+        step = 4
+        statusText = "Ready for Collection in Locker"
+      } else if (matchedOrder.status === "collected") {
+        step = 5
+        statusText = "Parcel Collected by Customer"
+      }
+
+      setTrackingResult({
+        waybill: matchedOrder.waybillNumber,
+        destination: matchedOrder.lockerStation,
+        status: statusText,
+        step,
+        eta: "48h SLA Guaranteed",
+        pin: "Verified PIN via SMS/WhatsApp",
+        orderNumber: matchedOrder.orderNumber,
+        customer: matchedOrder.customerName,
+      })
+      return
+    }
+
     setTrackingResult({
-      waybill: trackingInput.startsWith("BOB")
-        ? trackingInput
-        : `BOB-GO-${Math.floor(100000 + Math.random() * 900000)}`,
+      waybill: query.startsWith("BOB") || query.startsWith("BG")
+        ? query
+        : `BG-${Math.floor(100000 + Math.random() * 900000)}-PTA`,
       destination: selectedStation.name,
-      status: "In Transit with The Courier Guy",
+      status: "In Transit with The Courier Guy (Bob Go)",
       step: 3,
       eta: "Tomorrow by 14:00",
       pin: "849 201",
@@ -371,404 +414,196 @@ export default function CustomerApp() {
   }
 
   return (
-    <div className="min-h-screen bg-[#efeee3] text-[#15140f] font-sans antialiased pb-16 md:pb-0 selection:bg-[#d6a34c] selection:text-[#15140f]">
-      {/* ROOTED-INSPIRED TOP PROGRESS LINE */}
-      <div className="topbar">
-        <div className="topbar-fill" style={{ width: "100%" }}></div>
+    <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)] font-sans antialiased pb-20 md:pb-0 selection:bg-[var(--gold)] selection:text-[var(--ink)]">
+      {/* ROOTED REVISED TOP PROGRESS BAR */}
+      <div className="top-progress">
+        <span style={{ width: "100%" }}></span>
       </div>
 
-      {/* 1. TOP LOGISTICS & ANNOUNCEMENT BAR */}
-      <aside
-        aria-label="Utility bar"
-        className="bg-[#15140f] text-[#fffdf8]/75 text-[11px] font-medium border-b border-[rgba(255,253,248,0.1)] px-4 sm:px-8 py-2 hidden md:block"
-      >
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div
-            onClick={() => setIsLockerPickerOpen(true)}
-            className="flex items-center gap-1.5 cursor-pointer hover:text-[#e9c079] transition-colors group"
+      {/* ROOTED REVISED UNIFIED FLOATING PILL NAVIGATION DOCK */}
+      <nav className="rooted-nav">
+        {/* Brand Logo with Root Symbol */}
+        <div
+          className="nav-brand cursor-pointer select-none"
+          onClick={() => {
+            setSelectedCategory("all")
+            setSelectedBrand(null)
+            setSelectedDepartment("ALL")
+            setSearchQuery("")
+            navigateTo("#/")
+          }}
+        >
+          <span className="root-symbol">
+            <svg
+              viewBox="0 0 100 100"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="9"
+            >
+              <circle cx="50" cy="50" r="43" />
+              <path d="M50 8v84M50 50 25 75M50 65 32 83M50 50l25 25M50 65l18 18" />
+            </svg>
+          </span>
+          <span className="font-bold tracking-[0.16em] text-sm font-syncopate">
+            ROOTED
+          </span>
+        </div>
+
+        {/* Center Navigation Links */}
+        <div className="nav-links">
+          <button
+            onClick={() => {
+              setSelectedCategory("all")
+              setSelectedBrand(null)
+              setSelectedDepartment("ALL")
+              setSearchQuery("")
+              navigateTo("#/")
+            }}
+            className={`nav-link cursor-pointer ${
+              currentRoute.type === "home" ? "active" : ""
+            }`}
           >
-            <span>📍</span>
-            <span className="text-[#fffdf8]/60">Deliver to:</span>
-            <span className="font-semibold text-[#fffdf8] underline decoration-dotted underline-offset-4 group-hover:text-[#e9c079]">
-              {selectedStation.name}
-            </span>
-            <span className="text-[9px] text-[#fffdf8]/50">(Change)</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-center text-[#fffdf8]/80">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#d6a34c] animate-pulse"></span>
-            <span>
-              Free Smart Locker & Pick-Up Hub Delivery on Orders Over R 650
-            </span>
-            <span className="text-[#fffdf8]/20">|</span>
-            <span className="text-[#e9c079] font-medium">
-              48h Vendor Dispatch SLA
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4 text-[#fffdf8]/80">
-            <button
-              onClick={() => setIsTrackingModalOpen(true)}
-              className="hover:text-[#e9c079] transition-colors flex items-center gap-1 cursor-pointer"
-            >
-              <span>📦</span> Track Order
-            </button>
-            <div className="flex items-center gap-1 bg-[#1e1c15] border border-[rgba(255,253,248,0.15)] px-2 py-0.5 rounded-full text-[10px] font-mono">
-              {(["ZAR", "USD", "EUR"] as const).map((curr) => (
-                <button
-                  key={curr}
-                  onClick={() => setCurrency(curr)}
-                  className={`px-1.5 py-0.5 rounded-full cursor-pointer transition-colors ${
-                    currency === curr
-                      ? "bg-[#d6a34c] text-[#15140f] font-bold"
-                      : "text-[#fffdf8]/70 hover:text-white"
-                  }`}
-                >
-                  {curr}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* 2. MAIN EDITORIAL STICKY NAVIGATION BAR */}
-      <header className="sticky top-0 z-40 bg-[#15140f] text-[#fffdf8] border-b border-[rgba(255,253,248,0.1)] shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between gap-3 sm:gap-6">
-          {/* Left: Hamburger & Logo */}
-          <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="p-1 -ml-1 text-[#fffdf8] hover:text-[#e9c079] transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
-              aria-label="Open Navigation Menu"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
-
-            {/* Brand Logo (Fraunces serif with luxury editorial character) */}
-            <div
-              className="cursor-pointer select-none shrink-0"
-              onClick={() => {
-                setSelectedCategory("all")
-                setSelectedBrand(null)
-                setSelectedDepartment("ALL")
-                setSearchQuery("")
-                navigateTo("#/")
-              }}
-            >
-              <span className="text-2xl sm:text-3xl font-medium tracking-tight lowercase text-[#fffdf8] font-serif">
-                rooted
-              </span>
-            </div>
-          </div>
-
-          {/* Middle: Rounded Warm Charcoal Pill Search Bar */}
-          <div className="flex-1 max-w-2xl mx-1 sm:mx-4">
-            <div className="relative flex items-center">
-              <span className="absolute left-3.5 sm:left-4 text-[#fffdf8]/40 pointer-events-none flex items-center">
-                <svg
-                  className="w-4 h-4 sm:w-4.5 sm:h-4.5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </span>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value)
-                  if (currentRoute.type !== "home") navigateTo("#/")
-                }}
-                placeholder="Search streetwear labels, grails, hoodies or lock-up..."
-                className="w-full bg-[#1e1c15] focus:bg-[#15140f] border border-[rgba(255,253,248,0.15)] focus:border-[#d6a34c] text-[#fffdf8] placeholder-[#fffdf8]/40 text-xs sm:text-sm rounded-full py-2 sm:py-2.5 pl-10 sm:pl-11 pr-8 focus:outline-none transition-all"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 text-xs text-[#fffdf8]/60 hover:text-white cursor-pointer"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Right: 3 White Icons (Location Pin, User Account, Shopping Cart) */}
-          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
-            {/* 1. Location Pin (Locker Stations & Pickup Hubs) */}
-            <button
-              onClick={() => setIsLockerPickerOpen(true)}
-              className="p-2 text-[#fffdf8] hover:text-[#e9c079] transition-colors relative cursor-pointer"
-              title={`Deliver to: ${selectedStation.name}`}
-              aria-label="Smart Locker & Pickup Locations"
-            >
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </button>
-
-            {/* 2. User Profile (Order Tracking & Account) */}
-            <button
-              onClick={() => setIsTrackingModalOpen(true)}
-              className="p-2 text-[#fffdf8] hover:text-[#e9c079] transition-colors relative cursor-pointer"
-              title="Track Orders & Account"
-              aria-label="Account and Order Tracking"
-            >
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-            </button>
-
-            {/* 3. Shopping Cart (Bag) */}
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="p-2 text-[#fffdf8] hover:text-[#e9c079] transition-colors relative cursor-pointer"
-              title="Shopping Cart"
-              aria-label="Shopping Cart"
-            >
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              {cart.reduce((acc, item) => acc + item.quantity, 0) > 0 && (
-                <span className="absolute top-0.5 right-0.5 bg-[#d6a34c] text-[#15140f] text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
-                  {cart.reduce((acc, item) => acc + item.quantity, 0)}
-                </span>
-              )}
-            </button>
-          </div>
+            Home
+          </button>
+          <button
+            onClick={() => {
+              if (currentRoute.type !== "home") navigateTo("#/")
+              setTimeout(() => {
+                const el = document.getElementById("catalog")
+                if (el) el.scrollIntoView({ behavior: "smooth" })
+              }, 50)
+            }}
+            className="nav-link cursor-pointer"
+          >
+            Discover
+          </button>
+          <a
+            href="#/brands"
+            className={`nav-link ${
+              currentRoute.type === "brands" ? "active" : ""
+            }`}
+          >
+            Brands
+          </a>
+          <a
+            href="#/vault"
+            className={`nav-link ${
+              currentRoute.type === "vault" ? "active" : ""
+            }`}
+          >
+            Thrift Zone
+          </a>
+          <a
+            href="#/vendor"
+            className="nav-link text-[#e9c079] hover:text-white"
+            title="Merchant Atelier Studio"
+          >
+            Atelier
+          </a>
         </div>
 
-        {/* 3. CATEGORY SUB-NAV STRIP: Warm Ivory Surface with Pill Chips */}
-        <nav className="border-t border-[rgba(255,253,248,0.08)] bg-[#fffdf8] px-4 sm:px-8 py-2.5 shadow-2xs">
-          <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar whitespace-nowrap text-xs sm:text-sm font-medium">
-            {/* All */}
-            <button
-              onClick={() => {
-                setSelectedCategory("all")
-                setSelectedDepartment("ALL")
-                setSelectedBrand(null)
-                setSearchQuery("")
-                navigateTo("#/")
-              }}
-              className={`rounded-full transition-all shrink-0 cursor-pointer ${
-                selectedCategory === "all" &&
-                selectedDepartment === "ALL" &&
-                currentRoute.type === "home"
-                  ? "bg-[#15140f] text-[#fffdf8] px-4 py-1.5 font-semibold shadow-xs"
-                  : "text-[rgba(21,20,15,0.7)] hover:text-[#15140f] hover:bg-[rgba(21,20,15,0.05)] px-3 py-1.5"
-              }`}
-            >
-              All
-            </button>
-
-            {/* Women */}
-            <button
-              onClick={() => {
-                setSelectedDepartment("WOMEN")
-                setSelectedCategory("all")
-                setSelectedBrand(null)
-                navigateTo("#/")
-              }}
-              className={`rounded-full transition-all shrink-0 cursor-pointer ${
-                selectedDepartment === "WOMEN" &&
-                selectedCategory === "all" &&
-                currentRoute.type === "home"
-                  ? "bg-[#15140f] text-[#fffdf8] px-4 py-1.5 font-semibold shadow-xs"
-                  : "text-[rgba(21,20,15,0.7)] hover:text-[#15140f] hover:bg-[rgba(21,20,15,0.05)] px-3 py-1.5"
-              }`}
-            >
-              Women
-            </button>
-
-            {/* Men */}
-            <button
-              onClick={() => {
-                setSelectedDepartment("MEN")
-                setSelectedCategory("all")
-                setSelectedBrand(null)
-                navigateTo("#/")
-              }}
-              className={`rounded-full transition-all shrink-0 cursor-pointer ${
-                selectedDepartment === "MEN" &&
-                selectedCategory === "all" &&
-                currentRoute.type === "home"
-                  ? "bg-[#15140f] text-[#fffdf8] px-4 py-1.5 font-semibold shadow-xs"
-                  : "text-[rgba(21,20,15,0.7)] hover:text-[#15140f] hover:bg-[rgba(21,20,15,0.05)] px-3 py-1.5"
-              }`}
-            >
-              Men
-            </button>
-
-            {/* Hoodies & Sweats */}
-            <button
-              onClick={() => {
-                setSelectedCategory("outerwear")
-                setSelectedBrand(null)
-                navigateTo("#/")
-              }}
-              className={`rounded-full transition-all shrink-0 cursor-pointer ${
-                selectedCategory === "outerwear" && currentRoute.type === "home"
-                  ? "bg-[#15140f] text-[#fffdf8] px-4 py-1.5 font-semibold shadow-xs"
-                  : "text-[rgba(21,20,15,0.7)] hover:text-[#15140f] hover:bg-[rgba(21,20,15,0.05)] px-3 py-1.5"
-              }`}
-            >
-              Hoodies & Sweats
-            </button>
-
-            {/* Denim & Workwear */}
-            <button
-              onClick={() => {
-                setSelectedCategory("workwear")
-                setSelectedBrand(null)
-                navigateTo("#/")
-              }}
-              className={`rounded-full transition-all shrink-0 cursor-pointer ${
-                selectedCategory === "workwear" && currentRoute.type === "home"
-                  ? "bg-[#15140f] text-[#fffdf8] px-4 py-1.5 font-semibold shadow-xs"
-                  : "text-[rgba(21,20,15,0.7)] hover:text-[#15140f] hover:bg-[rgba(21,20,15,0.05)] px-3 py-1.5"
-              }`}
-            >
-              Denim & Workwear
-            </button>
-
-            {/* Footwear & Sneakers */}
-            <button
-              onClick={() => {
-                setSelectedCategory("kicks")
-                setSelectedBrand(null)
-                navigateTo("#/")
-              }}
-              className={`rounded-full transition-all shrink-0 cursor-pointer ${
-                selectedCategory === "kicks" && currentRoute.type === "home"
-                  ? "bg-[#15140f] text-[#fffdf8] px-4 py-1.5 font-semibold shadow-xs"
-                  : "text-[rgba(21,20,15,0.7)] hover:text-[#15140f] hover:bg-[rgba(21,20,15,0.05)] px-3 py-1.5"
-              }`}
-            >
-              Sneakers
-            </button>
-
-            {/* Accessories */}
-            <button
-              onClick={() => {
-                setSelectedCategory("accessories")
-                setSelectedBrand(null)
-                navigateTo("#/")
-              }}
-              className={`rounded-full transition-all shrink-0 cursor-pointer ${
-                selectedCategory === "accessories" &&
-                currentRoute.type === "home"
-                  ? "bg-[#15140f] text-[#fffdf8] px-4 py-1.5 font-semibold shadow-xs"
-                  : "text-[rgba(21,20,15,0.7)] hover:text-[#15140f] hover:bg-[rgba(21,20,15,0.05)] px-3 py-1.5"
-              }`}
-            >
-              Accessories
-            </button>
-
-            {/* Pretoria (012) */}
-            <button
-              onClick={() => {
-                setSelectedCategory("pretoria")
-                setSelectedBrand(null)
-                navigateTo("#/")
-              }}
-              className={`rounded-full transition-all shrink-0 cursor-pointer ${
-                selectedCategory === "pretoria" && currentRoute.type === "home"
-                  ? "bg-[#a64b34] text-[#fffdf8] px-4 py-1.5 font-semibold shadow-xs"
-                  : "text-[#a64b34] hover:bg-[#a64b34]/10 font-semibold px-3 py-1.5"
-              }`}
-            >
-              Pretoria (012)
-            </button>
-
-            {/* Brands A–Z */}
-            <a
-              href="#/brands"
-              className={`rounded-full transition-all shrink-0 ${
-                currentRoute.type === "brands"
-                  ? "bg-[#15140f] text-[#fffdf8] px-4 py-1.5 font-semibold shadow-xs"
-                  : "text-[rgba(21,20,15,0.7)] hover:text-[#15140f] hover:bg-[rgba(21,20,15,0.05)] font-medium px-3 py-1.5"
-              }`}
-            >
-              Brands
-            </a>
-
-            {/* Thrift Zone */}
-            <a
-              href="#/vault"
-              className={`rounded-full transition-all shrink-0 ${
-                currentRoute.type === "vault"
-                  ? "bg-[#15140f] text-[#fffdf8] px-4 py-1.5 font-semibold shadow-xs"
-                  : "text-[rgba(21,20,15,0.7)] hover:text-[#15140f] hover:bg-[rgba(21,20,15,0.05)] font-medium px-3 py-1.5"
-              }`}
-            >
-              Thrift Zone
-            </a>
-
-            {/* Locker Stations */}
-            <button
-              onClick={() => setIsLockerPickerOpen(true)}
-              className="text-[rgba(21,20,15,0.7)] hover:text-[#15140f] hover:bg-[rgba(21,20,15,0.05)] font-medium px-3 py-1.5 rounded-full transition-all shrink-0 cursor-pointer"
-            >
-              Locker Stations
-            </button>
+        {/* Action Controls */}
+        <div className="nav-actions">
+          {/* Cloud Database / Supabase Backend Badge */}
+          <div className="hidden sm:flex items-center">
+            <BackendStatusBadge compact />
           </div>
-        </nav>
-      </header>
+
+          {/* Smart Locker Location */}
+          <button
+            onClick={() => setIsLockerPickerOpen(true)}
+            className="nav-action"
+            title={`Deliver to: ${selectedStation.name} (Click to change)`}
+            aria-label="Smart Locker Locations"
+          >
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </button>
+
+          {/* Bob Go Parcel Tracking */}
+          <button
+            onClick={() => setIsTrackingModalOpen(true)}
+            className="nav-action"
+            title="Track Bob Go Shipment"
+            aria-label="Track Shipment"
+          >
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m7.5 4.27 9 5.15" />
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+              <path d="m3.3 7 8.7 5 8.7-5" />
+              <path d="M12 22V12" />
+            </svg>
+          </button>
+
+          {/* Wishlist */}
+          <button
+            onClick={() => setIsWishlistOpen(true)}
+            className="nav-action"
+            title="Saved Collection"
+            aria-label="Wishlist"
+          >
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+            </svg>
+            {wishlist.length > 0 && (
+              <span className="nav-badge">{wishlist.length}</span>
+            )}
+          </button>
+
+          {/* Shopping Bag */}
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="nav-action"
+            title="Shopping Bag"
+            aria-label="Shopping Bag"
+          >
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+              <path d="M3 6h18" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+            {cart.reduce((acc, item) => acc + item.quantity, 0) > 0 && (
+              <span className="nav-badge">
+                {cart.reduce((acc, item) => acc + item.quantity, 0)}
+              </span>
+            )}
+          </button>
+        </div>
+      </nav>
 
       {/* 4. MULTI-PAGE ROUTE SWITCHER */}
       {currentRoute.type === "brand" && activeVendorForRoute ? (
@@ -788,7 +623,7 @@ export default function CustomerApp() {
         />
       ) : currentRoute.type === "brands" ? (
         /* DEDICATED BRANDS A-Z DIRECTORY PAGE VIEW */
-        <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
+        <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6 pt-28 sm:pt-32">
           <div className="bg-[#fffdf8] border border-[rgba(21,20,15,0.12)] rounded-2xl p-6 sm:p-8 space-y-4 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[rgba(21,20,15,0.08)] pb-5">
               <div>
@@ -805,12 +640,12 @@ export default function CustomerApp() {
               </div>
 
               {/* Letter Filter Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs font-mono font-medium">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs font-sans font-medium">
                 {["ALL", "B", "D", "G", "K", "L", "M", "S"].map((letter) => (
                   <button
                     key={letter}
                     onClick={() => setBrandLetterFilter(letter)}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer font-sans ${
                       brandLetterFilter === letter
                         ? "bg-[#15140f] text-[#fffdf8] shadow-xs font-bold"
                         : "bg-[#efeee3] text-[rgba(21,20,15,0.7)] hover:bg-[#e6e3d3]"
@@ -827,54 +662,51 @@ export default function CustomerApp() {
               {filteredBrandDirectory.map((b) => (
                 <div
                   key={b.id}
-                  className="border border-[rgba(21,20,15,0.12)] rounded-2xl p-5 hover:border-[#15140f] transition-all flex flex-col justify-between space-y-4 bg-[#fffdf8] hover:shadow-md hover:-translate-y-0.5"
+                  className="border border-[rgba(21,20,15,0.12)] rounded-2xl p-6 hover:border-[#15140f] transition-all flex flex-col justify-between space-y-4 bg-[#fffdf8] hover:shadow-lg hover:-translate-y-1"
                 >
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono font-semibold text-[#a64b34] uppercase tracking-wider">
+                      <span className="text-[11px] font-sans font-bold text-[#a64b34] uppercase tracking-wider">
                         {b.origin}
                       </span>
-                      <span className="text-[10px] font-mono text-[rgba(21,20,15,0.5)]">
+                      <span className="text-[10px] font-mono text-[rgba(21,20,15,0.45)]">
                         {b.coordinates}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-3 mt-3">
+                    <div className="flex items-center gap-3.5 mt-3.5">
                       <div
-                        className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold text-base shrink-0 shadow-xs"
+                        className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-xs"
                         style={{ backgroundColor: b.color }}
                       >
                         {b.letter}
                       </div>
                       <div>
-                        <h3 className="text-base font-normal font-serif text-[#15140f]">
+                        <h3 className="text-xl font-normal font-serif text-[#15140f] tracking-tight leading-tight">
                           {b.name}
                         </h3>
-                        <span className="text-[11px] text-[rgba(21,20,15,0.6)] block font-mono">
+                        <span className="text-xs text-[rgba(21,20,15,0.55)] block font-sans mt-0.5">
                           Est. {b.establishedYear}
                         </span>
                       </div>
                     </div>
 
-                    <p className="text-xs text-[rgba(21,20,15,0.7)] mt-3 line-clamp-2 leading-relaxed">
+                    <p className="text-[13px] font-sans text-[rgba(21,20,15,0.7)] mt-3 line-clamp-2 leading-relaxed">
                       {b.tagline}
                     </p>
 
                     {b.specialty && (
-                      <div className="mt-3 text-[10px] font-mono text-[#15140f] bg-[#efeee3] p-2 rounded-lg border border-[rgba(21,20,15,0.08)]">
+                      <div className="mt-3 text-[11px] font-sans text-[#15140f] bg-[#efeee3] px-3 py-1.5 rounded-lg border border-[rgba(21,20,15,0.08)] leading-snug">
                         {b.specialty}
                       </div>
                     )}
                   </div>
 
-                  <div className="pt-3 border-t border-[rgba(21,20,15,0.08)] flex items-center justify-between">
-                    <span className="text-[11px] font-mono text-[rgba(21,20,15,0.6)]">
+                  <div className="pt-3.5 border-t border-[rgba(21,20,15,0.08)] flex items-center justify-between">
+                    <span className="text-xs font-sans text-[rgba(21,20,15,0.6)]">
                       {b.productCount} active styles
                     </span>
-                    <a
-                      href={`#/brand/${b.slug}`}
-                      className="bg-[#15140f] text-[#fffdf8] text-xs font-medium px-4 py-2 rounded-full hover:bg-[#1e1c15] transition-all hover:-translate-y-0.5"
-                    >
+                    <a href={`#/brand/${b.slug}`} className="btn small">
                       Visit Brand Store →
                     </a>
                   </div>
@@ -885,7 +717,7 @@ export default function CustomerApp() {
         </main>
       ) : currentRoute.type === "vault" ? (
         /* DEDICATED 1-OF-1 THRIFT ZONE VIEW */
-        <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
+        <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6 pt-28 sm:pt-32">
           <div className="relative bg-[#15140f] text-[#fffdf8] rounded-2xl p-8 sm:p-12 space-y-4 overflow-hidden border border-[rgba(255,253,248,0.1)] shadow-sm">
             <div className="hero-grid"></div>
             <div className="relative z-10 space-y-3">
@@ -977,104 +809,296 @@ export default function CustomerApp() {
           </div>
         </main>
       ) : (
-        /* MARKETPLACE HOME PAGE VIEW */
+        /* MARKETPLACE HOME PAGE VIEW (Rooted Revised Dev Style) */
         <main>
-          {/* Hero Promo Banner */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-8 py-6">
-            <div className="relative bg-[#15140f] text-[#fffdf8] rounded-2xl overflow-hidden shadow-sm p-8 sm:p-12 border border-[rgba(255,253,248,0.1)]">
-              <div className="hero-grid"></div>
-              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                <div className="lg:col-span-7 space-y-4">
+          {/* 1. EDITORIAL HERO (Rooted Revised) */}
+          <header className="hero">
+            <div className="container hero-grid">
+              <div>
+                <div className="eyebrow" style={{ color: "var(--gold-2)" }}>
+                  SOUTH AFRICAN FASHION, ROOTED HERE
+                </div>
+                <h1>
+                  Discover the people behind what you <em>wear.</em>
+                </h1>
+                <p className="hero-copy">
+                  ROOTED brings independent South African clothing brands into
+                  one place — their garments, stories, regional provenance and
+                  growth. One basket, consolidated dispatch, and nationwide
+                  smart locker pickup.
+                </p>
+                <div className="hero-actions">
+                  <a className="btn light" href="#catalog">
+                    Explore the collective →
+                  </a>
+                  <a
+                    className="btn"
+                    href="#how"
+                    style={{
+                      background: "transparent",
+                      borderColor: "rgba(255,255,255,0.3)",
+                      color: "#fff",
+                    }}
+                  >
+                    Why ROOTED?
+                  </a>
+                  <a className="btn clay" href="#/vendor">
+                    Merchant Atelier Studio →
+                  </a>
+                </div>
+              </div>
+
+              {/* Rotated Staggered Editorial Art Collage */}
+              <div className="hero-art">
+                <a
+                  href="#/brand/lesupa-atelier"
+                  className="art-card group block"
+                >
+                  <img
+                    src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=700&q=80"
+                    alt="Lesupa Atelier"
+                  />
+                  <span className="art-label">
+                    Lesupa Atelier · Pretoria West
+                  </span>
+                </a>
+                <a
+                  href="#/brand/soweto-threads"
+                  className="art-card group block"
+                >
+                  <img
+                    src="https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=700&q=80"
+                    alt="Soweto Threads"
+                  />
+                  <span className="art-label">
+                    Soweto Threads · Johannesburg
+                  </span>
+                </a>
+                <a href="#/brand/mokasi" className="art-card group block">
+                  <img
+                    src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=700&q=80"
+                    alt="Mokasi"
+                  />
+                  <span className="art-label">Mokasi · Pretoria (012)</span>
+                </a>
+                <a href="#/brand/galxboy" className="art-card group block">
+                  <img
+                    src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=700&q=80"
+                    alt="Galxboy"
+                  />
+                  <span className="art-label">
+                    Galxboy · Gauteng Streetwear
+                  </span>
+                </a>
+              </div>
+            </div>
+          </header>
+
+          {/* 2. UNIVERSAL SEARCH SHELL & QUICK FILTER CHIPS (Rooted Revised) */}
+          <section className="container" style={{ paddingTop: "35px" }}>
+            <div className="search-shell">
+              <div className="search-box">
+                <span className="text-base text-[var(--muted)]">⌕</span>
+                <input
+                  id="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Try “hoodie”, “Pretoria”, “Lesupa”, “cargo”, “vintage”..."
+                  autoComplete="off"
+                />
+              </div>
+              {searchQuery && (
+                <button className="btn" onClick={() => setSearchQuery("")}>
+                  Clear
+                </button>
+              )}
+            </div>
+
+            <div className="filters">
+              {[
+                { label: "All", cat: "all", dept: "ALL" },
+                { label: "Outerwear & Jackets", cat: "outerwear", dept: "ALL" },
+                { label: "Hoodies & Sweats", cat: "hoodies", dept: "ALL" },
+                { label: "Denim & Workwear", cat: "workwear", dept: "ALL" },
+                { label: "Sneakers", cat: "kicks", dept: "ALL" },
+                { label: "Accessories", cat: "accessories", dept: "ALL" },
+                { label: "Pretoria (012)", cat: "pretoria", dept: "ALL" },
+                { label: "Men", cat: "all", dept: "MEN" },
+                { label: "Women", cat: "all", dept: "WOMEN" },
+              ].map((f) => (
+                <button
+                  key={f.label}
+                  onClick={() => {
+                    setSelectedCategory(f.cat as any)
+                    setSelectedDepartment(f.dept as any)
+                    setSelectedBrand(null)
+                  }}
+                  className={`filter cursor-pointer ${
+                    selectedCategory === f.cat && selectedDepartment === f.dept
+                      ? "active"
+                      : ""
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* 3. PLATFORM ECOSYSTEM PILLARS (Rooted Revised) */}
+          <section id="how" className="feature-band">
+            <div className="container section">
+              <div className="section-head">
+                <div>
                   <div className="eyebrow" style={{ color: "var(--gold-2)" }}>
-                    Curated South African Clothing Brands & Vintage Grails
+                    MORE THAN A MARKETPLACE
                   </div>
-
-                  <h1 className="text-3xl sm:text-5xl lg:text-6xl font-normal tracking-tight leading-[1.04] font-serif">
-                    Discover local.
-                    <br />
-                    <em className="italic text-[#e9c079] font-normal">
-                      Wear local.
-                    </em>
-                  </h1>
-
-                  <p className="text-sm sm:text-base text-[#fffdf8]/75 max-w-xl leading-relaxed">
-                    Featuring dedicated designer storefronts for{" "}
-                    <a
-                      href="#/brand/lesupa-atelier"
-                      className="text-[#e9c079] font-medium underline underline-offset-4"
-                    >
-                      Lesupa Atelier
-                    </a>
-                    ,{" "}
-                    <a
-                      href="#/brand/mokasi"
-                      className="text-[#e9c079] font-medium underline underline-offset-4"
-                    >
-                      Mokasi
-                    </a>
-                    , and{" "}
-                    <a
-                      href="#/brand/galxboy"
-                      className="text-[#e9c079] font-medium underline underline-offset-4"
-                    >
-                      Galxboy
-                    </a>{" "}
-                    alongside Soweto raw denim and 1-of-1 vintage grails. One
-                    basket, one checkout, and nationwide smart locker pickup.
+                  <h2>We connect the whole journey.</h2>
+                </div>
+              </div>
+              <div className="feature-grid">
+                <div className="feature">
+                  <div className="feature-number">01</div>
+                  <h3>Discover</h3>
+                  <p>
+                    Find independent labels by city hub, category, craft
+                    discipline and story instead of wading through generic
+                    mass-retail listings.
                   </p>
+                </div>
+                <div className="feature">
+                  <div className="feature-number">02</div>
+                  <h3>Buy Together</h3>
+                  <p>
+                    Shop across Pretoria, Joburg, Soweto and Durban
+                    simultaneously. ROOTED consolidates your items into one box
+                    with smart locker pickup.
+                  </p>
+                </div>
+                <div className="feature">
+                  <div className="feature-number">03</div>
+                  <h3>Help Brands Grow</h3>
+                  <p>
+                    Every checkout transmits live sizing curves, demand
+                    telemetry and inventory velocity back to the maker's
+                    workshop.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
 
-                  <div className="flex flex-wrap items-center gap-3 pt-3">
-                    <a
-                      href="#/brand/lesupa-atelier"
-                      className="bg-[#fffdf8] text-[#15140f] font-medium px-6 py-3 rounded-full text-xs hover:bg-[#efeee3] transition-all shadow-xs hover:-translate-y-0.5 inline-flex items-center gap-2"
-                    >
-                      Visit Lesupa Atelier Store →
-                    </a>
-                    <a
-                      href="#/brand/mokasi"
-                      className="bg-transparent hover:bg-[#fffdf8]/10 text-[#fffdf8] border border-[rgba(255,253,248,0.25)] font-medium px-6 py-3 rounded-full text-xs transition-all hover:-translate-y-0.5"
-                    >
-                      Visit Mokasi Store
-                    </a>
+          {/* 4. FOUR CREATIVE HUBS (Rooted Revised) */}
+          <section className="section">
+            <div className="container">
+              <div className="section-head">
+                <div>
+                  <div className="eyebrow">LOCAL, NOT GENERIC</div>
+                  <h2>Four creative hubs. One collective.</h2>
+                </div>
+              </div>
+              <div className="hub-grid">
+                <div
+                  className="hub pta cursor-pointer"
+                  onClick={() => {
+                    setSelectedCity("Pretoria")
+                    const el = document.getElementById("catalog")
+                    if (el) el.scrollIntoView({ behavior: "smooth" })
+                  }}
+                >
+                  <small>Gauteng · 012</small>
+                  <h3>Pretoria</h3>
+                  <p>
+                    Structured tailoring · heavy fleece · Lesupa &amp; Mokasi
+                  </p>
+                </div>
+                <div
+                  className="hub jhb cursor-pointer"
+                  onClick={() => {
+                    setSelectedCity("Johannesburg")
+                    const el = document.getElementById("catalog")
+                    if (el) el.scrollIntoView({ behavior: "smooth" })
+                  }}
+                >
+                  <small>Gauteng</small>
+                  <h3>Johannesburg</h3>
+                  <p>Architectural streetwear · Maboneng &amp; Braam</p>
+                </div>
+                <div
+                  className="hub ct cursor-pointer"
+                  onClick={() => {
+                    setSelectedCity("Cape Town")
+                    const el = document.getElementById("catalog")
+                    if (el) el.scrollIntoView({ behavior: "smooth" })
+                  }}
+                >
+                  <small>Western Cape</small>
+                  <h3>Cape Town</h3>
+                  <p>Heavy duck canvas · utility · coastal craft</p>
+                </div>
+                <div
+                  className="hub dbn cursor-pointer"
+                  onClick={() => {
+                    setSelectedCity("Durban")
+                    const el = document.getElementById("catalog")
+                    if (el) el.scrollIntoView({ behavior: "smooth" })
+                  }}
+                >
+                  <small>KwaZulu-Natal</small>
+                  <h3>Durban</h3>
+                  <p>Linen · relaxed silhouettes · subtropical life</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 5. MEET THE MAKERS (Rooted Revised) */}
+          <section className="section" style={{ background: "var(--paper-2)" }}>
+            <div className="container">
+              <div className="section-head">
+                <div>
+                  <div className="eyebrow">MEET THE MAKERS</div>
+                  <h2>The story is part of the product.</h2>
+                </div>
+                <a className="btn ghost" href="#/brands">
+                  Meet every brand →
+                </a>
+              </div>
+              <div className="story-grid">
+                <article className="story">
+                  <img
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=80"
+                    alt="Lesupa Atelier Founder"
+                  />
+                  <div className="story-copy">
+                    <div className="brand-location">
+                      Lesupa Atelier · Pretoria West
+                    </div>
+                    <h3>Built for a longer life.</h3>
+                    <p>
+                      From a small workspace in Pretoria, Lesupa treats
+                      heavyweight fleece, chore jackets and tailored workwear as
+                      an investment that improves with age.
+                    </p>
                   </div>
-                </div>
-
-                <div className="lg:col-span-5 grid grid-cols-2 gap-3">
-                  <a
-                    href="#/brand/lesupa-atelier"
-                    className="rounded-xl overflow-hidden aspect-4/5 relative group bg-black/40 block border border-[rgba(255,253,248,0.15)] shadow-md"
-                  >
-                    <img
-                      src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80"
-                      alt="Lesupa Tee"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute bottom-2 left-2 right-2 bg-[#15140f]/90 backdrop-blur-xs p-2 rounded text-white text-[10px] font-mono border border-[rgba(255,253,248,0.12)]">
-                      <span className="font-bold block text-[#fffdf8]">
-                        Lesupa Atelier
-                      </span>
-                      <span className="text-[#e9c079]">
-                        Pretoria Streetwear →
-                      </span>
+                </article>
+                <article className="story">
+                  <img
+                    src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=80"
+                    alt="Sipho Nkosi"
+                  />
+                  <div className="story-copy">
+                    <div className="brand-location">
+                      Nkosi Studio · Maboneng
                     </div>
-                  </a>
-                  <a
-                    href="#/brand/soweto-threads"
-                    className="rounded-xl overflow-hidden aspect-4/5 relative group bg-black/40 mt-6 block border border-[rgba(255,253,248,0.15)] shadow-md"
-                  >
-                    <img
-                      src="https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=600&q=80"
-                      alt="Soweto Raw Denim"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute bottom-2 left-2 right-2 bg-[#15140f]/90 backdrop-blur-xs p-2 rounded text-white text-[10px] font-mono border border-[rgba(255,253,248,0.12)]">
-                      <span className="font-bold block text-[#fffdf8]">
-                        Soweto Threads
-                      </span>
-                      <span className="text-[#e9c079]">Selvedge Denim →</span>
-                    </div>
-                  </a>
-                </div>
+                    <h3>Joburg in the silhouette.</h3>
+                    <p>
+                      Heavyweight 500gsm loopback fleece, oversized cuts and the
+                      visual tempo of the city translate into a modern South
+                      African uniform.
+                    </p>
+                  </div>
+                </article>
               </div>
             </div>
           </section>
@@ -2872,9 +2896,9 @@ export default function CustomerApp() {
               <button
                 type="button"
                 onClick={() => {
-                  alert(
-                    "Autofilled with Dummy Account: Lerato Khumalo (082 555 4321, Menlyn Maine PUDO Locker). Ready to complete payment.",
-                  )
+                  setBuyerName("Lerato Khumalo")
+                  setBuyerPhone("+27 82 555 4321")
+                  showToast("Autofilled customer details for quick test.")
                 }}
                 className="px-2.5 py-1 bg-[#15140f] hover:bg-[#2b291f] text-white rounded-lg text-[10px] font-bold cursor-pointer transition-colors"
               >
@@ -2882,8 +2906,36 @@ export default function CustomerApp() {
               </button>
             </div>
 
-            <div className="mt-5 space-y-2.5 text-xs">
-              <div className="p-4 border border-[#15140f] rounded-2xl flex items-center justify-between cursor-pointer bg-[#efeee3]">
+            <div className="mt-4 space-y-3">
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-[rgba(21,20,15,0.6)] mb-1">
+                  Recipient Name
+                </label>
+                <input
+                  type="text"
+                  value={buyerName}
+                  onChange={(e) => setBuyerName(e.target.value)}
+                  placeholder="e.g. Lerato Khumalo"
+                  className="w-full bg-[#efeee3] border border-[rgba(21,20,15,0.15)] rounded-xl p-2.5 text-xs font-medium text-[#15140f] focus:outline-none focus:border-[#15140f]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-[rgba(21,20,15,0.6)] mb-1">
+                  Mobile Number (For Bob Go Locker PIN)
+                </label>
+                <input
+                  type="tel"
+                  value={buyerPhone}
+                  onChange={(e) => setBuyerPhone(e.target.value)}
+                  placeholder="+27 82 123 4567"
+                  className="w-full bg-[#efeee3] border border-[rgba(21,20,15,0.15)] rounded-xl p-2.5 text-xs font-mono text-[#15140f] focus:outline-none focus:border-[#15140f]"
+                />
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-2.5 text-xs">
+              <div className="p-3.5 border border-[#15140f] rounded-2xl flex items-center justify-between cursor-pointer bg-[#efeee3]">
                 <div className="flex items-center gap-3">
                   <span className="w-3.5 h-3.5 rounded-full border-2 border-[#15140f] bg-[#15140f]"></span>
                   <div>
@@ -2900,7 +2952,7 @@ export default function CustomerApp() {
                 </span>
               </div>
 
-              <div className="p-4 border border-[rgba(21,20,15,0.12)] hover:border-[#15140f] rounded-2xl flex items-center justify-between cursor-pointer bg-[#fffdf8] transition-colors">
+              <div className="p-3.5 border border-[rgba(21,20,15,0.12)] hover:border-[#15140f] rounded-2xl flex items-center justify-between cursor-pointer bg-[#fffdf8] transition-colors">
                 <div className="flex items-center gap-3">
                   <span className="w-3.5 h-3.5 rounded-full border-2 border-[rgba(21,20,15,0.3)]"></span>
                   <div>
@@ -2908,17 +2960,16 @@ export default function CustomerApp() {
                       Payflex (Pay in 4)
                     </span>
                     <span className="text-[10px] text-[rgba(21,20,15,0.6)]">
-                      4 equal interest-free installments of{" "}
-                      {formatPrice(Math.round(total / 4))}
+                      4 interest-free installments of {formatPrice(Math.round(total / 4))}
                     </span>
                   </div>
                 </div>
                 <span className="text-[10px] font-mono font-semibold bg-[#d6a34c] text-[#15140f] px-2.5 py-0.5 rounded-full">
-                  0% INTEREST
+                  0% INT
                 </span>
               </div>
 
-              <div className="p-4 border border-[rgba(21,20,15,0.12)] hover:border-[#15140f] rounded-2xl flex items-center justify-between cursor-pointer bg-[#fffdf8] transition-colors">
+              <div className="p-3.5 border border-[rgba(21,20,15,0.12)] hover:border-[#15140f] rounded-2xl flex items-center justify-between cursor-pointer bg-[#fffdf8] transition-colors">
                 <div className="flex items-center gap-3">
                   <span className="w-3.5 h-3.5 rounded-full border-2 border-[rgba(21,20,15,0.3)]"></span>
                   <div>
@@ -2926,7 +2977,7 @@ export default function CustomerApp() {
                       Ozow Instant EFT
                     </span>
                     <span className="text-[10px] text-[rgba(21,20,15,0.6)]">
-                      All major South African banks
+                      Capitec, FNB, Standard Bank, Nedbank
                     </span>
                   </div>
                 </div>
@@ -2935,46 +2986,62 @@ export default function CustomerApp() {
                 </span>
               </div>
 
-              <div className="pt-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={whatsappUpdates}
-                    onChange={(e) => setWhatsappUpdates(e.target.checked)}
-                    className="accent-[#15140f]"
-                  />
-                  <span className="text-xs text-[#15140f]">
-                    Send dispatch updates & collection PIN to WhatsApp
-                  </span>
-                </label>
-                {whatsappUpdates && (
-                  <input
-                    type="tel"
-                    value={buyerPhone}
-                    onChange={(e) => setBuyerPhone(e.target.value)}
-                    placeholder="+27 82 123 4567"
-                    className="mt-2 w-full bg-[#efeee3] border border-[rgba(21,20,15,0.15)] rounded-xl p-2.5 text-xs font-mono focus:outline-none"
-                  />
-                )}
-              </div>
-
               <button
-                onClick={() => {
-                  const pin = Math.floor(100000 + Math.random() * 900000)
-                  alert(
-                    `Order Confirmed!\n\nWaybill: BOB-GO-${Math.floor(100000 + Math.random() * 900000)}\nDestination: ${selectedStation.name}\nLocker PIN: ${pin}\n\nThank you for supporting independent South African streetwear labels.`,
-                  )
-                  setCart([])
-                  setIsCheckoutModalOpen(false)
+                disabled={isCheckingOut}
+                onClick={async () => {
+                  if (cart.length === 0) return
+                  setIsCheckingOut(true)
+                  try {
+                    const orderItems: OrderItem[] = cart.map((c) => ({
+                      productId: c.product.id,
+                      productTitle: c.product.title,
+                      size: c.size,
+                      quantity: c.quantity,
+                      price: c.product.price,
+                      image: c.product.image,
+                    }))
+
+                    const primaryBrand = cart[0]?.product.brandSlug || "lesupa-atelier"
+                    const res = await marketplaceService.createOrder({
+                      customerName: buyerName.trim() || "Customer",
+                      customerCity: selectedStation.city,
+                      customerPhone: buyerPhone.trim(),
+                      lockerStation: selectedStation.name,
+                      items: orderItems,
+                      totalAmount: total,
+                      brandSlug: primaryBrand,
+                    })
+
+                    if (res.success) {
+                      const pin = Math.floor(100000 + Math.random() * 900000)
+                      alert(
+                        `Order Confirmed & Synced to Cloud DB!\n\nOrder Number: ${res.orderNumber}\nWaybill: ${res.waybillNumber}\nPickup Destination: ${selectedStation.name}\nSmart Locker PIN: ${pin}\n\nThank you for supporting independent South African streetwear labels.`
+                      )
+                      setCart([])
+                      setIsCheckoutModalOpen(false)
+                      showToast(`Order ${res.orderNumber} successfully processed!`)
+                    } else {
+                      alert(`Order error: ${res.error || "Please try again."}`)
+                    }
+                  } catch (err: any) {
+                    alert(`Checkout error: ${err.message}`)
+                  } finally {
+                    setIsCheckingOut(false)
+                  }
                 }}
-                className="w-full bg-[#15140f] hover:bg-[#1e1c15] text-[#fffdf8] py-3.5 rounded-full font-medium transition-all hover:-translate-y-0.5 mt-3 cursor-pointer shadow-xs"
+                className="w-full bg-[#15140f] hover:bg-[#1e1c15] text-[#fffdf8] py-3.5 rounded-full font-medium transition-all hover:-translate-y-0.5 mt-3 cursor-pointer shadow-xs disabled:opacity-50"
               >
-                Confirm & Pay {formatPrice(total)} →
+                {isCheckingOut ? "Processing Transaction..." : `Confirm & Pay ${formatPrice(total)} →`}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* ROOTED REVISED FLOATING TOAST NOTIFICATION */}
+      <div className={`toast ${toastMessage ? "show" : ""}`}>
+        {toastMessage}
+      </div>
     </div>
   )
 }

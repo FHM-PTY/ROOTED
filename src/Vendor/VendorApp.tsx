@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { Vendor, Product, VendorOrder } from "../types"
 import {
   vendors as defaultVendors,
@@ -6,6 +6,9 @@ import {
   initialVendorOrders,
 } from "../data/marketplaceData"
 import AtelierLoginPage from "./AtelierLoginPage"
+import { marketplaceService } from "../services/marketplaceService"
+import { getSupabaseClient } from "../lib/supabase"
+import BackendStatusBadge from "../components/BackendStatusBadge"
 
 interface DummyAccount {
   id: string
@@ -304,6 +307,72 @@ export default function VendorApp() {
     INITIAL_TEST_PRODUCTS,
   )
 
+  // Sync with marketplaceService (Supabase / Cloud DB)
+  useEffect(() => {
+    if (!currentUser) return
+    let isMounted = true
+
+    const syncWithBackend = async () => {
+      try {
+        const brandSlug = currentUser.brandSlug
+        const [backendProducts, backendOrders] = await Promise.all([
+          marketplaceService.getProducts({ brandSlug }),
+          marketplaceService.getOrders(brandSlug),
+        ])
+
+        if (isMounted) {
+          if (backendProducts && backendProducts.length > 0) {
+            setProductsList(
+              backendProducts.map((p) => ({
+                id: String(p.id),
+                name: p.title,
+                price: p.price,
+                sold: Math.floor(Math.random() * 40) + 14,
+                stock: p.stock ?? 15,
+                maxStock: Math.max(p.stock ?? 15, 30),
+                pattern: "repeating-linear-gradient(125deg,#454e3d,#454e3d 9px,#3a4232 9px,#3a4232 18px)",
+                category: p.category,
+                isBest: Boolean(p.badge?.includes("BEST") || p.badge?.includes("HOT")),
+                isLow: (p.stock ?? 15) <= 5,
+              }))
+            )
+          }
+
+          if (backendOrders && backendOrders.length > 0) {
+            setOrdersList(
+              backendOrders.map((o) => ({
+                id: o.orderNumber,
+                customer: o.customerName,
+                item: o.items[0]?.productTitle || "Atelier Apparel Garment",
+                amount: `R${o.totalAmount}`,
+                date: o.createdAt || "Recent",
+                status:
+                  o.status === "pending_pack"
+                    ? "processing"
+                    : o.status === "dispatched_to_locker" || o.status === "in_transit"
+                    ? "shipped"
+                    : "delivered",
+                tracking: o.waybillNumber,
+              }))
+            )
+          }
+        }
+      } catch (err) {
+        console.warn("Backend sync fallback in vendor app:", err)
+      }
+    }
+
+    syncWithBackend()
+    const unsubscribe = marketplaceService.subscribe(() => {
+      syncWithBackend()
+    })
+
+    return () => {
+      isMounted = false
+      unsubscribe()
+    }
+  }, [currentUser?.brandSlug])
+
   // New product form inputs
   const [newProdName, setNewProdName] = useState<string>("")
   const [newProdPrice, setNewProdPrice] = useState<string>("")
@@ -319,12 +388,40 @@ export default function VendorApp() {
     showToast(`Signed in as ${acc.founderName} (${acc.brandName} Test Account)`)
   }
 
-  const handleManualLogin = (e: React.FormEvent) => {
+  const handleManualLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!loginEmail.trim()) {
       setLoginError("Please enter your brand email or passkey.")
       return
     }
+
+    const client = getSupabaseClient()
+    if (client && loginPasskey) {
+      try {
+        const { data, error } = await client.auth.signInWithPassword({
+          email: loginEmail.trim(),
+          password: loginPasskey.trim(),
+        })
+        if (!error && data?.user) {
+          const brandSlug = data.user.user_metadata?.brand_slug || "lesupa-atelier"
+          const matchedVendor = defaultVendors.find((v) => v.slug === brandSlug) || defaultVendors[0]
+          handleSignInWithDummy({
+            id: data.user.id,
+            email: data.user.email || loginEmail.trim(),
+            brandSlug: matchedVendor.slug,
+            brandName: matchedVendor.name,
+            founderName: data.user.user_metadata?.full_name || `${matchedVendor.name} Director`,
+            tier: "Verified Supabase Partner (RLS Enabled)",
+            isTestMode: false,
+          })
+          showToast(`Authenticated via Supabase Auth (${data.user.email})`)
+          return
+        }
+      } catch (authErr) {
+        console.warn("Supabase Auth check failed, testing local sandbox:", authErr)
+      }
+    }
+
     const matchedVendor = defaultVendors.find(
       (v) =>
         v.slug.toLowerCase() === loginEmail.toLowerCase().trim() ||
@@ -384,12 +481,14 @@ export default function VendorApp() {
             showToast(
               `Order ${o.id} dispatched! Waybill ${newWaybill} generated for Bob Go pickup.`,
             )
+            marketplaceService.advanceOrderStatus(o.id, "dispatched_to_locker")
             return { ...o, status: "shipped", tracking: newWaybill }
           }
           if (o.status === "shipped") {
             showToast(
               `Order ${o.id} confirmed delivered to customer smart locker!`,
             )
+            marketplaceService.advanceOrderStatus(o.id, "ready_for_pickup")
             return { ...o, status: "delivered" }
           }
         }
@@ -442,6 +541,10 @@ export default function VendorApp() {
           const nextStock = Math.max(0, p.stock + delta)
           const isLow = nextStock <= 5
           showToast(`Updated ${p.name} stock: ${nextStock} units`)
+          const numId = Number(productId.replace(/^p/, ""))
+          if (!isNaN(numId)) {
+            marketplaceService.updateProductStock(numId, nextStock)
+          }
           return { ...p, stock: nextStock, isLow }
         }
         return p
@@ -476,6 +579,15 @@ export default function VendorApp() {
     setNewProdPrice("")
     setNewProdStock("")
     setNewProdFab("")
+
+    marketplaceService.createProduct({
+      title: newProduct.name,
+      price: newProduct.price,
+      stock: newProduct.stock,
+      brandSlug: currentUser?.brandSlug || "urban-soul",
+      category: "outerwear",
+    })
+
     showToast(
       `"${newProduct.name}" added to your test catalog with ${newStock} units!`,
     )
@@ -711,7 +823,12 @@ export default function VendorApp() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f6f1] text-[#15140f] font-sans flex flex-col md:grid md:grid-cols-[230px_1fr] selection:bg-[#d6a34c]/20">
+    <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)] font-sans flex flex-col md:grid md:grid-cols-[230px_1fr] selection:bg-[#d6a34c]/20">
+      {/* ROOTED REVISED TOP PROGRESS BAR */}
+      <div className="top-progress">
+        <span style={{ width: "100%" }}></span>
+      </div>
+
       {/* ---------------- SIDEBAR ---------------- */}
       <aside className="bg-[#15140f] text-white p-6 flex flex-col md:sticky md:top-0 md:h-screen md:overflow-y-auto shrink-0 border-r border-[#2b291f]">
         {/* Brand Block */}
@@ -985,6 +1102,9 @@ export default function VendorApp() {
             >
               <span>Sign Out</span>
             </button>
+
+            {/* Cloud Backend / Supabase Connection Status */}
+            <BackendStatusBadge />
 
             {/* Discreet Shield Mode (Hide Financial Figures from Shoulder Surfers) */}
             <button

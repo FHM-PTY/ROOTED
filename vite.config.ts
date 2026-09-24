@@ -13,6 +13,7 @@ export default defineConfig({
         ? "/ROOTED/"
         : "./"),
   plugins: [react(), tailwindcss()],
+  envPrefix: ["VITE_", "SUPABASE_"],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

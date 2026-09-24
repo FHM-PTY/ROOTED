@@ -17,7 +17,6 @@ import {
 } from "../data/marketplaceData"
 import BrandLandingPage from "./BrandLandingPage"
 import { marketplaceService } from "../services/marketplaceService"
-import BackendStatusBadge from "../components/BackendStatusBadge"
 
 export type RouteState = { type: "home" } | { type: "brand" slug: string } | {
   type: "brands"
@@ -504,10 +503,6 @@ export default function CustomerApp() {
 
         {/* Action Controls */}
         <div className="nav-actions">
-          {/* Cloud Database / Supabase Backend Badge */}
-          <div className="hidden sm:flex items-center">
-            <BackendStatusBadge compact />
-          </div>
 
           {/* Smart Locker Location */}
           <button
